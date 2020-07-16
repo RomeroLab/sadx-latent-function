@@ -1,0 +1,12 @@
+bin ,  activity                      ,count, barcode       , filename                      , simple activity, response
+Bin1,  (beta hidroxylation > parent) ,  20 , bc1036--bc1036, bc1036-no-indel.fa.gz         , beta,  3
+Bin2,  (beta hidroxylation ~ parent) ,  54 , bc1037--bc1037, bc1037-no-indel.fa.gz         , beta,  2
+Bin3,  (beta hidroxylation < parent) ,  85 , bc1038--bc1038, bc1038-no-indel.fa.gz         , beta,  1
+Bin4,  (no beta hidroxylation)       , 694 , bc1039--bc1039, bc1039-no-indel.fa.gz         , beta,  0
+Bin5,  (gamma hidroxylation > parent), 240 , bc1040--bc1040, bc1040-no-indel.fa.gz         , gamma, 2
+Bin6,  (gamma hidroxylation ~ parent),  78 , bc1030--bc1030, bc1030-no-indel.fa.gz         , gamma, 1
+Bin7,  (no gamma hidroxylation)      , 642 , bc1031--bc1031, bc1031-no-indel.fa.gz         , gamma, 0
+Bin8,  (azidation > parent)          ,  23 , bc1032--bc1032, bc1032--bc1032-no-indel.fa.gz , azid,  3
+Bin9,  (azidation ~ parent)          ,  54 , bc1033--bc1033, bc1033--bc1033-no-indel.fa.gz , azid,  2
+Bin10, (azidation < parent)          , 177 , bc1034--bc1034, bc1034--bc1034-no-indel.fa.gz , azid,  1
+Bin11, (no azidation)                , 706 , bc1035--bc1035, bc1035--bc1035-no-indel.fa.gz , azid,  0
