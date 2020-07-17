@@ -1,7 +1,7 @@
 bin ,  activity                      ,count, barcode       , filename                      , simple activity, response
 Bin1,  (beta hidroxylation > parent) ,  20 , bc1036--bc1036, bc1036-no-indel.fa.gz         , beta,  3
 Bin2,  (beta hidroxylation ~ parent) ,  54 , bc1037--bc1037, bc1037-no-indel.fa.gz         , beta,  2
-Bin3,  (beta hidroxylation < parent) ,  85 , bc1038--bc1038, bc1038-no-indel.fa.gz         , beta,  1
+Bin3,  (beta hidroxylation < parent) , 192 , bc1038--bc1038, bc1038-no-indel.fa.gz         , beta,  1
 Bin4,  (no beta hidroxylation)       , 694 , bc1039--bc1039, bc1039-no-indel.fa.gz         , beta,  0
 Bin5,  (gamma hidroxylation > parent), 240 , bc1040--bc1040, bc1040-no-indel.fa.gz         , gamma, 2
 Bin6,  (gamma hidroxylation ~ parent),  78 , bc1030--bc1030, bc1030-no-indel.fa.gz         , gamma, 1
