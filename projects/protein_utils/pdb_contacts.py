@@ -7,6 +7,11 @@ import Bio
 import Bio.PDB
 
 
+# definition from 
+# https://github.com/sanderlab/3Dseq/blob/master/AAC6%20scripts/pdbdists3.m
+backbone_atoms = {'C','N','O','OXT'};  # not side-chain atoms
+backbone_atoms_non_gly = {*backbone_atoms, "CA"}  
+
 def extract_chain(filename, model_num, chain_id):
     """Gets a chain from a pdb filename """
     parser = Bio.PDB.PDBParser()
@@ -23,42 +28,85 @@ def extract_chain(filename, model_num, chain_id):
 
     return chain
 
+def extract_cb_atoms(residue):
+    """ Take a residue and return a list of atoms that we need to compute
+        distances. In this case it is all CB atoms. For Gly we pick the CA atom
+    """ 
+    residue_id = residue.get_id()
+    ret = None
+    if residue_id[0] == " ": # it isn't a hetero-residue or water
+        atom_type = "CB"
+        if residue.get_resname() == "GLY":
+            atom_type = "CA"
+        ret = [residue[atom_type]]  # single atom is picked, list returned
+    return ret
 
-def get_cb_coordinates(chain):
-    """Get the CB coordinates for each residue in a chain
-        For GLY we use the CA coordinate instead"""
+def extract_sidechain_atoms(residue):
+    """ Take a residue and return a list of atoms that we need to compute
+        distances. In this case it is all the side chain atoms. For Gly we 
+        include the CA atom. For all other Amino acids we elimiate it.
+    """ 
+    ret = None
+    residue_id = residue.get_id()
+    if residue_id[0] == " ": # it isn't a hetero-residue or water
+        ba = backbone_atoms_non_gly
+        if residue.get_resname() == "GLY": # add back CA atom
+            ba = backbone_atoms
+        ret = [a for a in residue if (a.get_id() not in ba)]
+    return ret
 
-    residue_coords = [] # list of residue coordinates 
+def compute_mean_coordinate(atom_list):
+    return np.vstack([a.get_coord() for a in atom_list]).mean(axis=0)
 
+
+def coord_dist_calc(loc1, loc2):
+    diff = loc1 - loc2
+    return np.sqrt(np.dot(diff, diff))
+
+
+def sidechain_dist_calc(atom_list1, atom_list2):
+    mean1 = compute_mean_coordinate(atom_list1)
+    mean2 = compute_mean_coordinate(atom_list2)
+    return coord_dist_calc(mean1, mean2)
+
+
+def compute_distance_mat(chain, extract_atoms_func, compute_distance_func):
+    """ Take a chain and extract atoms and then compute distances using
+        extracted atoms """
+    resatoms = [] # list of residues containing list of atoms 
     for residue in chain:
-        residue_id = residue.get_id()
-        if residue_id[0] == " ": # it isn't a hetero-residue or water
-            if residue.get_resname() == "GLY":
-                target_atom = residue['CA']
-            else:
-                target_atom = residue['CB']
-            residue_coords.append(target_atom)
+        atoms = extract_atoms_func(residue)
+        if atoms is not None:
+            resatoms.append(atoms)
+    L = len(resatoms)
+    logging.info("Number of residues picked: %d", L)
 
-    logging.info("Number of residue coordinates picked: %s", 
-                    len(residue_coords))
-
-    return residue_coords
-
-def get_dist_mat_from_coords(residue_coords):
-    """ Convert a single coordinate for each residue into a distance map """
-    
-    L = len(residue_coords)
     dist_mat = np.zeros((L,L), dtype=np.float)
 
-    for seq_id1, c1 in enumerate(residue_coords):
-        for seq_id2, c2 in enumerate(residue_coords):
-            if seq_id2 > seq_id1:
+    for res_seq_id1, al1 in enumerate(resatoms):
+        for res_seq_id2, al2 in enumerate(resatoms):
+            if res_seq_id2 > res_seq_id1:
                 continue
             else:
-                dist_mat[seq_id1, seq_id2] = c2 - c1
-                dist_mat[seq_id2, seq_id1] = dist_mat[seq_id1, seq_id2]
+                dist_mat[res_seq_id1, res_seq_id2] = \
+                        compute_distance_func(al1, al2)
+                dist_mat[res_seq_id2, res_seq_id1] = \
+                        dist_mat[res_seq_id1, res_seq_id2]
 
     return dist_mat
+
+def cb_distance(chain):
+    """ Compute the distance between CB atoms """
+    return compute_distance_mat(chain, 
+            extract_atoms_func=extract_cb_atoms,
+            compute_distance_func=lambda x,y : x[0] - y[0])
+
+def sidechain_distance(chain):
+    """ Compute distance between centers of sidechain atoms """
+    return compute_distance_mat(chain,
+            extract_atoms_func=extract_sidechain_atoms,
+            compute_distance_func=sidechain_dist_calc)
+
 
 def get_5_8_contact_format(dist_mat, min_residue_sep):
     """ Mark "contacts" on a matrix of distances
@@ -76,6 +124,9 @@ def get_5_8_contact_format(dist_mat, min_residue_sep):
     contact_map[close_residues_mask] = 0
 
     return contact_map
+
+def count_contacts_in_contact_map(contact_map):
+    return (contact_map > 0).sum() // 2
 
 
 if __name__ == "__main__":
@@ -96,6 +147,10 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--distance_matrix_filename",
                         help="Output filename for distance matrix in npy fmt",
                         default=None, required=False)
+    parser.add_argument("--dist_calc",
+                        help="Function to use to extract atoms "
+                             "and compute distances",
+                        default="cb_distance", required=False)
     parser.add_argument("--contact_5_8_filename",
                         help="Contact map in distance 5 and distance 8 format",
                         default=None, required=False)
@@ -110,9 +165,10 @@ if __name__ == "__main__":
     chain = extract_chain(filename = p, model_num = args.model_num,
                             chain_id = args.chain_id)
 
-    residue_coords = get_cb_coordinates(chain)
+    distance_calculator = locals()[args.dist_calc]
+    logging.info("Setting distance calculator to : %s", args.dist_calc)
 
-    dist_mat = get_dist_mat_from_coords(residue_coords)
+    dist_mat = distance_calculator(chain)
 
     dist_mat_filename = args.distance_matrix_filename
     if dist_mat_filename is None:
