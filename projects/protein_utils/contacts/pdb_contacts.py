@@ -180,5 +180,7 @@ if __name__ == "__main__":
         contact_5_8_filename = p.parent / (p.stem + "_5_8_contacts.npy")
     contact_5_8 = get_5_8_contact_format(dist_mat, 
                         min_residue_sep = args.contact_min_sep)
+    logging.info("Number of contacts in contact_mat : %d", 
+                    count_contacts_in_contact_map(contact_5_8))
     np.save(contact_5_8_filename, contact_5_8)
 
