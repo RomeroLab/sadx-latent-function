@@ -11,7 +11,9 @@ import gzip
 import numpy as np
 
 import Bio
-from Bio.Data import IUPACData
+import Bio.Seq
+import Bio.SeqIO
+from Bio.Data import IUPACData, CodonTable
 
 
 class NumAlphabetEncoder:
@@ -84,10 +86,22 @@ class NumAlphabetEncoder:
 DEFAULT_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters + "-")
 DEFAULT_DNA_ENCODER = NumAlphabetEncoder(IUPACData.unambiguous_dna_letters)
 
+DEFAULT_ENCODER_DICT = DEFAULT_ENCODER.alpha_to_int_dict
+
 # Only codons that map to amino acids are included. Excludes the 3 stop codons
 # There are 61 mappings from codons to Amino acids in the dict below
-CODON_MAP_AA = {c:i for i, c in enumerate(
-    sorted(Bio.Data.CodonTable.standard_dna_table.forward_table.keys()))}
+# {'AAA':0, ..., 'TTT': 60}
+CODON_NUM_MAP = {c:i for i, c in enumerate(
+    sorted(CodonTable.standard_dna_table.forward_table.keys()))}
+
+# MAP codon numerical code in CODON_NUM_MAP to AA letter
+# {0:'K', ..., 60:'F'}
+CODON_NUM_AA_MAP = {v:str(Bio.Seq.Seq(k).translate()) for k,v in 
+                                                    CODON_NUM_MAP.items()}
+# Same as above but mapping CODON_NUM_MAP numerical code to DEFAULT_ENCODER's
+# numerical code {0:8, ..., 60:4}
+CODON_NUM_AA_NUM_MAP = {k:DEFAULT_ENCODER_DICT[v] for k,v in 
+                                                    CODON_NUM_AA_MAP.items()}
 
 def file_handle_opener(filename):
     """ Figure out what opener to use based on filename.
@@ -281,7 +295,8 @@ def translate_np(arr, trans_dict=None, trans_table=None):
     arr.shape = arr_shape
     return arr
 
-def get_codon_msa_as_int_array(filename, codon_map=CODON_MAP_AA, *args, **kwargs):
+def get_codon_msa_as_int_array(filename, codon_map=CODON_NUM_MAP, *args, 
+                                                            **kwargs):
     """
         Returns an CODON msa MSA as a two dimension numpy array
         (N, L) where N = Number of sequences in the MSA
@@ -302,11 +317,11 @@ def get_codon_msa_as_int_array(filename, codon_map=CODON_MAP_AA, *args, **kwargs
     codon_base4 = np.array([16,4,1], dtype=np.uint8)
     arrc = np.einsum("nic,c->ni", arr3, codon_base4, dtype=np.uint8)
 
-    # the values of CODON_MAP_AA are 0-60
-    # this mapping maps the codon index 0-63 to a value of CODON_MAP_AA 0-60
+    # the values of CODON_NUM_MAP are 0-60
+    # this mapping maps the codon index 0-63 to a value of CODON_NUM_MAP 0-60
     # the three stop codons are not in this mapping
     # codon_str_to_int does the same thing as np.einsum above
-    packed_codon_map = {codon_str_to_int(k):v for k,v in CODON_MAP_AA.items()}
+    packed_codon_map = {codon_str_to_int(k):v for k,v in CODON_NUM_MAP.items()}
 
     return translate_np(arrc, packed_codon_map)
  
