@@ -5,6 +5,7 @@ THIS_DIR = Path(__file__).parent
 
 import numpy as np
 import tempfile # for file writing
+import gzip
 import protein_utils.io.msa as io_msa
 
 class TestFastaRead(unittest.TestCase):
@@ -32,6 +33,8 @@ class TestDHFRAARead(unittest.TestCase):
     def setUp(self):
         self.arr = io_msa.get_msa_from_filename(
                             THIS_DIR / "io/DHFR_Gen15_head.txt")
+        with open(THIS_DIR / "io/DHFR_Gen15_head.txt", "rt") as fh_comp:
+            self.arr_text = fh_comp.read()
 
     def test_dhfr_read(self):
         self.assertIsNotNone(self.arr)
@@ -45,20 +48,24 @@ class TestDHFRAARead(unittest.TestCase):
                             THIS_DIR / "io/DHFR_Gen15_head.txt.gz")
         self.assertTrue((self.arr == arr_gz).all())
 
+    def test_file_save_txt(self):
+        with tempfile.NamedTemporaryFile(suffix=".txt") as fh:
+            filename = fh.name
+            io_msa.save_numpy_int_arr_to_txt(self.arr, filename)
+            fh.seek(0)
+            with open(filename, "rt") as fh_read:
+                written_text = fh_read.read()
+        self.assertEqual(written_text, self.arr_text)
+                
     def test_file_save_gz(self):
-        arr_gz = io_msa.get_msa_from_filename(
-                            THIS_DIR / "io/DHFR_Gen15_head.txt.gz")
-        #with tempfile.NamedTemporaryFile(suffix=".aln.gz") as fh:
-        #    filename = fh.name
-        #    io_msa.save_numpy_int_arr_to_txt(self.arr, filename)
-        #    fh.seek(0)
-        #    with open(filename, "rt") as fh_read:
-        #        s = fh_read.read()
-        #        print(s)
-        self.assertTrue(False)
-        #FIXME
-
-
+        with tempfile.NamedTemporaryFile(suffix=".aln.gz") as fh:
+            filename = fh.name
+            io_msa.save_numpy_int_arr_to_txt(self.arr, filename)
+            fh.seek(0)
+            with gzip.open(filename, "rt") as fh_read:
+                written_text = fh_read.read()
+        self.assertEqual(written_text, self.arr_text)
+ 
 
 class TestDHFRNTSRead(unittest.TestCase):
 
