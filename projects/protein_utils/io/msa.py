@@ -1,16 +1,16 @@
-import pathlib
-import logging
+"""Read MSA files and return numerically encoded numpy arrays"""
 
-# to save sequences (in bytes) to a buffer in memory 
-import io
-
-import numpy as np
 import itertools 
 import functools
+
+import io
+import pathlib
 import gzip
+#import logging
+
+import numpy as np
 
 import Bio
-from Bio import Seq, SeqIO
 from Bio.Data import IUPACData
 
 
@@ -62,7 +62,7 @@ class NumAlphabetEncoder:
                                                     self._numbers_b)
         self._int_to_alpha_bytes_table = bytes.maketrans(self._numbers_b, 
                                             self._alphabet_b)
-    
+
     @property
     def alpha_to_int_bytes_table(self):
         return self._alpha_to_int_bytes_table
@@ -82,12 +82,12 @@ class NumAlphabetEncoder:
 
 # We can change the DEFAULT_ENCODER by using its init_vars method
 DEFAULT_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters + "-")
+DEFAULT_DNA_ENCODER = NumAlphabetEncoder(IUPACData.unambiguous_dna_letters)
 
-## create a mapping for non-degenerate codons
-## This will be used for one-hot encoding the sequences
-#codon_table = Bio.Data.CodonTable.standard_dna_table
-#codon_map = {c:i for i, c in enumerate(
-#                    sorted(codon_table.forward_table.keys()))}
+# Only codons that map to amino acids are included. Excludes the 3 stop codons
+# There are 61 mappings from codons to Amino acids in the dict below
+CODON_MAP_AA = {c:i for i, c in enumerate(
+    sorted(Bio.Data.CodonTable.standard_dna_table.forward_table.keys()))}
 
 def file_handle_opener(filename):
     """ Figure out what opener to use based on filename.
@@ -124,9 +124,12 @@ def Bio_SeqIO_gen(filename, filetype="fasta"):
     Return: an iteratory over the sequences in bytes 
     """
     opener = file_handle_opener(filename)
-    with opener(filename, "rb") as fh: # open in bytes
-        for seq in SeqIO.parse(fh, filetype):
-            yield bytes(seq)
+    with opener(filename, "rt") as fh: # open in text
+        for seq_record in Bio.SeqIO.parse(fh, filetype):
+            # Biopython is now storing all seqs in bytes from version 1.9
+            # so conversion should be backwards and forwards compatible
+            yield bytes(seq_record.seq) # convert to bytes 
+
 
 def guess_msa_filetype_from_filename(filename):
     """ Take in a filename and return fasta or txt depending on extensions.
@@ -232,14 +235,53 @@ def save_numpy_int_arr_to_txt(arr, filename, num_encoder=DEFAULT_ENCODER):
     for row in arr:
         tmp_w_fh.write(row.tobytes().translate(rev_trans_table))
         tmp_w_fh.write(b'\n')
-
-    tmp_w_fh.seek(0)
-
+    tmp_w_fh.seek(0) # rewind to start
     opener = file_handle_opener(filename)
     with opener(filename, "wb") as fh:
-        fh.write(tmp_w_fh.read()) 
+        fh.write(tmp_w_fh.read())  # why can't we use getbuffer() here?
 
-def get_codon_msa_as_int_array(filename, codon_map):
+def codon_str_to_int(c, enc_d=DEFAULT_DNA_ENCODER.alpha_to_int_dict):
+    """ Convert codon to a number according to the DNA encoding
+
+    >>> codon_str_to_int("GCT")
+    14
+    """
+    if len(c) != 3:
+        raise ValueError("Codon length must be 3")
+    return enc_d[c[0]]*16 + enc_d[c[1]]*4 + enc_d[c[2]]*1
+
+def bytes_trans_table_from_dict(d):
+    """ convert a dictionary mapping integers to other integers (0 <= i < 255)
+        into a translate table """
+    return bytes.maketrans(bytearray(d.keys()), bytearray(d.values()))
+
+def translate_np(arr, trans_dict=None, trans_table=None):
+    """ Convert a numpy array of uint8s with one integer encoding to another.
+
+    An slower altnerative to using this function is to use
+    np.vectorize(trans_dict.get)(arr) 
+
+    >>> translate_np(np.array([[0,2],[1,3]], dtype=np.uint8), {0:3, 1:5, 3:1})
+    array([[3, 2],
+           [5, 1]], dtype=uint8)
+
+    Params: 
+        arr         : numpy array dtpye np.uint8
+        trans_dict  : a dict of integers mapping to other integers 
+                        (ignored if trans_table is provided)
+        trans_table : a byte translate table (will be created from
+                        trans_dict if not provided)
+    """
+    if arr.dtype != np.uint8:
+        raise ValueError("Numpy array must have dtpye uint8")
+    if trans_table is None:
+        trans_table = bytes_trans_table_from_dict(trans_dict)
+    arr_shape = arr.shape
+    arr = np.frombuffer(arr.tobytes().translate(trans_table), dtype=np.uint8)
+    arr.shape = arr_shape
+    return arr
+
+def get_codon_msa_as_int_array(filename, codon_map=CODON_MAP_AA, *args, **kwargs):
     """
         Returns an CODON msa MSA as a two dimension numpy array
         (N, L) where N = Number of sequences in the MSA
@@ -249,25 +291,49 @@ def get_codon_msa_as_int_array(filename, codon_map):
         `codon_map`: a dictionary mapping codons (as strings of length 3)
                      to integer values
     """
-    seq_iter = get_msa_from_file(filename, as_iter=True)
+    arr = get_msa_from_filename(filename, num_encoder=DEFAULT_DNA_ENCODER,
+                                *args, **kwargs)
+    N, L = arr.shape
+    if L%3: # L needs to be perfectly divisible by 3
+        raise ValueError(f"Length %{L} is not divisible by 3")
+    arr3 = arr.reshape(N, int(L/3), 3)
 
-    def codon_seq_to_int_list(seq): 
-        return [codon_map[seq[3*i:(3*i+3)]] for i in range(len(seq)//3)]
-    
-    return np.array([codon_seq_to_int_list(seq) for seq in seq_iter], 
-                        dtype=np.uint8) 
+    # convert each set of 3 codons to a codon index
+    codon_base4 = np.array([16,4,1], dtype=np.uint8)
+    arrc = np.einsum("nic,c->ni", arr3, codon_base4, dtype=np.uint8)
+
+    # the values of CODON_MAP_AA are 0-60
+    # this mapping maps the codon index 0-63 to a value of CODON_MAP_AA 0-60
+    # the three stop codons are not in this mapping
+    # codon_str_to_int does the same thing as np.einsum above
+    packed_codon_map = {codon_str_to_int(k):v for k,v in CODON_MAP_AA.items()}
+
+    return translate_np(arrc, packed_codon_map)
+ 
+
 
 
 if __name__ == "__main__":
-
     import doctest
     doctest.testmod()
 
-    #stop
 
+    # Read DHFR datasets AAs and Codons as numpy arrays encoded as integers
+
+    # FIXME: These below should go into unit tests section
+
+    # MSA with AA's
     dhfr_fn = "../../../../VAEs/sequence_sets/DHFR.aln.gz"
     arr = get_msa_from_filename(dhfr_fn)
     save_numpy_int_arr_to_txt(arr, "/tmp/testing.txt.gz")
 
-    # FIXME: Add functionality to encode CODON arrays
-   
+    # MSA in codons
+    codon_fn = "../../../../neutral_evolution_data/DHFR/Gen15/Gen15_nts.aln.gz"
+    arr = get_codon_msa_as_int_array(codon_fn)
+
+    # MSA in fasta format
+    test_fn = "../../../../VAEs/sequence_sets/test.fasta"
+    arr = get_msa_from_filename(test_fn)
+    
+ 
+
