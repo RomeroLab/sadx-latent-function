@@ -1,4 +1,4 @@
-"""Read MSA files and return numerically encoded numpy arrays"""
+"""Read/Write MSA files and return numerically encoded numpy arrays"""
 
 import itertools 
 import functools
@@ -332,22 +332,23 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
 
+    import tempfile
+
 
     # Read DHFR datasets AAs and Codons as numpy arrays encoded as integers
 
-    # FIXME: These below should go into unit tests section
-
     # MSA with AA's
-    dhfr_fn = "../../../../VAEs/sequence_sets/DHFR.aln.gz"
+    dhfr_fn = "../tests/io/DHFR_Gen15_head.txt.gz"
     arr = get_msa_from_filename(dhfr_fn)
-    save_numpy_int_arr_to_txt(arr, "/tmp/testing.txt.gz")
+    with tempfile.NamedTemporaryFile(suffix=".txt.gz") as fout:
+        save_numpy_int_arr_to_txt(arr, fout.name)
 
     # MSA in codons
-    codon_fn = "../../../../neutral_evolution_data/DHFR/Gen15/Gen15_nts.aln.gz"
+    codon_fn = "../tests/io/DHFR_Gen15_nts_head.txt.gz"
     arr = get_codon_msa_as_int_array(codon_fn)
 
     # MSA in fasta format
-    test_fn = "../../../../VAEs/sequence_sets/test.fasta"
+    test_fn = "../tests/io/test_AV.fasta"
     arr = get_msa_from_filename(test_fn)
     
  
