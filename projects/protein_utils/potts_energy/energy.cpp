@@ -154,9 +154,9 @@ py::tuple energy_calc_single_mutants(
             for (size_t j = 0; j < L; j++) {
                 if (j == i) continue;
                 if (j < i) {
-                    energy_mut_i += buf_e(j, a, i, wt_i);
+                    energy_mut_i += buf_e(j, buf_w(j), i, a);
                 } else {
-                    energy_mut_i += buf_e(i, wt_i, j, a);
+                    energy_mut_i += buf_e(i, a, j, buf_w(j));
                 }
             }
             if (mutant_counter >= num_mutants) {

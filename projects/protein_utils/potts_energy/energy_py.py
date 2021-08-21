@@ -1,5 +1,6 @@
 import numpy as np
-import energy
+from ..potts_energy import energy
+
 
 class EnergyFunctionCalculator:
     """ Calculate Energy for integer index arrays via __call__
@@ -43,7 +44,9 @@ class EnergyFunctionCalculator:
 
  
 def energy_calc_single(prot_np, h_i_a, e_i_a_j_b):
-    """prot_np  : A numpy integer array of length L 
+    """Calculate energy of protein using c++ 
+
+       prot_np  : A numpy integer array of length L 
                   (with the correct Amino acid index in each position)
                   Maximum value prot_np should be 20
        h_i_a    : field values (shape = (L, q))
@@ -90,6 +93,41 @@ def create_single_mutant(i, a, wt):
     mut = wt.copy()
     mut[i] = a
     return (mut)
+
+
+def energy_calc_single_einsum(prot_np, h_i_a, e_i_a_j_b):
+    """ Calculate energy of single mutant using einsum 
+        An implementaton of energy_calc_single using np.einsum"""
+    L, q= h_i_a.shape
+    prot_one_hot = np.eye(q)[prot_np]
+    e = e_i_a_j_b.copy() 
+
+    # set the lower triangular part to zero (includes the diagonal)
+    lower_i, lower_j = np.tril_indices(L)
+    upper_i, upper_j = np.triu_indices(L)
+    e[lower_i, :, lower_j, :] = 0
+
+    # set the lower triangular part to zero
+    prob = np.einsum("ia,ia", prot_one_hot,h_i_a, dtype=np.float64) +  \
+            np.einsum("ia,iajb,jb",prot_one_hot,e,prot_one_hot, dtype=np.float64)
+    return -prob
+
+def energy_calc_single_python(prot_np, h_i_a, e_i_a_j_b):
+    """ Calculate energy of single mutant using python loops 
+        An implementaton of energy_calc_single using only python (slowest)"""
+    L, q= h_i_a.shape
+
+    main_h = main_e = 0
+    for i in range(L):
+        main_h += h_i_a[i, prot_np[i]]
+    for i in range(L):
+        for j in range(L):
+            if i < j:
+                main_e += e_i_a_j_b[i, prot_np[i], j, prot_np[j]]
+
+    prob = main_h + main_e
+    return -prob
+
 
 
 if __name__ == "__main__":
