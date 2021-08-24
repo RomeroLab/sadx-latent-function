@@ -20,6 +20,7 @@ class NumAlphabetEncoder:
     """A class that contains tables that can encode strings into integers
     according to some alphabet. All conversions are done with bytes and
     np.uint8 so that they remain fast. None of the numbers can be above 256.
+    This works for any alphabet DNA, RNA, Amino Acids etc
 
     >>> na = NumAlphabetEncoder(alphabet="ACTG", numbers=[0,1,2,3])
     >>> na.alpha_to_int_bytes_table[:10] 
@@ -36,6 +37,9 @@ class NumAlphabetEncoder:
         self._numbers_b = None # encoding in bytes
         self._alpha_to_int_table = None # convert letters to numbers (bytes)
         self._int_to_alpha_table = None # convert numbers to letters (bytes)
+
+        self._alpha_to_int_dict = None 
+        self._int_to_alpha_dict = None
 
         self.init_vars(alphabet, numbers)
 
@@ -64,6 +68,11 @@ class NumAlphabetEncoder:
                                                     self._numbers_b)
         self._int_to_alpha_bytes_table = bytes.maketrans(self._numbers_b, 
                                             self._alphabet_b)
+        self._alpha_to_int_dict = dict(zip(self._alphabet, self._numbers))
+        self._int_to_alpha_dict = dict(zip(self._numbers, self._alphabet))
+
+    def string_to_np(self, s):
+        return np.array([self.alpha_to_int_dict[a] for a in s], dtype=np.uint8)
 
     @property
     def alpha_to_int_bytes_table(self):
@@ -75,11 +84,11 @@ class NumAlphabetEncoder:
 
     @property
     def alpha_to_int_dict(self):
-        return dict(zip(self._alphabet, self._numbers))
+        return self._alpha_to_int_dict
 
     @property
     def int_to_alpha_dict(self):
-        return dict(zip(self._numbers, self._alphabet))
+        return self._int_to_alpha_dict
 
 
 # We can change the DEFAULT_ENCODER by using its init_vars method
