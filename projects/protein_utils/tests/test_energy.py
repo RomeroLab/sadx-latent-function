@@ -49,7 +49,7 @@ class TestEnergyCalc(unittest.TestCase):
 
         # make the first mutant manually    
         mut = self.wt.copy()
-        mut[muts[0][0]] = muts[0][1] 
+        mut[muts.i[1]] = muts.a[0] 
         # check energy of first mutant
         e_mut = energy_py.energy_calc_single(mut, self.h_i_a, self.e_i_a_j_b)
         self.assertAlmostEqual(e_mut, energy[0])

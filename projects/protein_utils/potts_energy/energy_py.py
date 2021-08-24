@@ -77,7 +77,7 @@ def energy_calc_msa(msa, h_i_a, e_i_a_j_b):
     return energy.energy_calc_msa(msa, h_i_a, e_i_a_j_b)
 
 
-def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b):
+def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, recarray=True):
     """seq      : A numpy integer array of shape (L,) 
                   (with the correct Amino acid index in each position)
                   Maximum value prot_np should be 20 (or q)
@@ -87,10 +87,17 @@ def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b):
     """
     if seq.max() >= h_i_a.shape[1]: # bounds checking
         raise ValueError("Max value in seq should be less than alphabet size")
-    return energy.energy_calc_single_mutants(seq.squeeze(), h_i_a, e_i_a_j_b)
+    L, q = h_i_a.shape
+    muts, mut_energies = energy.energy_calc_single_mutants(seq.squeeze(), 
+                                    h_i_a, e_i_a_j_b)
+    if recarray: # convert muts to recarray
+        assert(muts.shape == (L * (q-1), 2) )
+        muts = np.core.records.fromrecords(muts, names="i,a")
+    return (muts, mut_energies)
+    
 
-def create_single_mutant(i, a, wt):
-    mut = wt.copy()
+def create_single_mutant(i, a, from_prot):
+    mut = from_prot.copy()
     mut[i] = a
     return (mut)
 
@@ -131,7 +138,7 @@ def energy_calc_single_python(prot_np, h_i_a, e_i_a_j_b):
 
 
 if __name__ == "__main__":
-    ## FIXME: Add unit tests
+    ## FIXME: Add doctests if unit tests don't cover everything
     pass
 
 
