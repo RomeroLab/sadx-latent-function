@@ -99,7 +99,7 @@ def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, recarray=True):
 def create_single_mutant(i, a, from_prot):
     mut = from_prot.copy()
     mut[i] = a
-    return (mut)
+    return mut
 
 
 def energy_calc_single_einsum(prot_np, h_i_a, e_i_a_j_b):
