@@ -13,7 +13,7 @@ import numpy as np
 import Bio
 import Bio.SeqIO
  
-from ..sequences import encoding as enc
+from . import encoding as enc
 
 def file_handle_opener(filename):
     """ Figure out what opener to use based on filename.

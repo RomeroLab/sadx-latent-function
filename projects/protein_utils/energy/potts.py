@@ -1,5 +1,5 @@
 import numpy as np
-from ..energy import _potts
+from . import _potts
 
 
 class EnergyFunctionCalculator:
