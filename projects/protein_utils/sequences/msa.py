@@ -11,106 +11,9 @@ import gzip
 import numpy as np
 
 import Bio
-import Bio.Seq
 import Bio.SeqIO
-from Bio.Data import IUPACData, CodonTable
-
-
-class NumAlphabetEncoder:
-    """A class that contains tables that can encode strings into integers
-    according to some alphabet. All conversions are done with bytes and
-    np.uint8 so that they remain fast. None of the numbers can be above 256.
-    This works for any alphabet DNA, RNA, Amino Acids etc
-
-    >>> na = NumAlphabetEncoder(alphabet="ACTG", numbers=[0,1,2,3])
-    >>> na.alpha_to_int_bytes_table[:10] 
-    b'\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\t'
-    >>> na.alpha_to_int_dict
-    {'A': 0, 'C': 1, 'T': 2, 'G': 3}
-    """
-
-    def __init__(self, alphabet, numbers=None):
-        """ alphabet is a string """
-        self._alphabet = None # alphabet in strings
-        self._numbers = None
-        self._alphabet_b = None # alphabet in bytes
-        self._numbers_b = None # encoding in bytes
-        self._alpha_to_int_table = None # convert letters to numbers (bytes)
-        self._int_to_alpha_table = None # convert numbers to letters (bytes)
-
-        self._alpha_to_int_dict = None 
-        self._int_to_alpha_dict = None
-
-        self.init_vars(alphabet, numbers)
-
-
-    def init_vars(self, alphabet, numbers=None):
-        self._alphabet = alphabet
-        if numbers is None:
-            numbers = range(len(self._alphabet))
-        self._numbers = list(numbers)
-
-        # check that alphabet and numbers have the same length
-        if len(self._alphabet) != len(self._numbers):
-            raise ValueError("Alphabet and numbers must have the same "
-                    "length. Pass in numbers=None to encode with consecutive "
-                    "numbers") 
-
-        # check that numbers are between 0 and 255 so that we can encode
-        # into bytes
-        if ((np.array(self._numbers) > 255).any() or 
-            (np.array(self._numbers) < 0).any()):
-            raise ValueError("All numbers have to be between 0 and 255")
-
-        self._alphabet_b = self._alphabet.encode("ASCII")
-        self._numbers_b = np.array(self._numbers, dtype=np.uint8).tobytes()
-        self._alpha_to_int_bytes_table = bytes.maketrans(self._alphabet_b, 
-                                                    self._numbers_b)
-        self._int_to_alpha_bytes_table = bytes.maketrans(self._numbers_b, 
-                                            self._alphabet_b)
-        self._alpha_to_int_dict = dict(zip(self._alphabet, self._numbers))
-        self._int_to_alpha_dict = dict(zip(self._numbers, self._alphabet))
-
-    def string_to_np(self, s):
-        return np.array([self.alpha_to_int_dict[a] for a in s], dtype=np.uint8)
-
-    @property
-    def alpha_to_int_bytes_table(self):
-        return self._alpha_to_int_bytes_table
-
-    @property
-    def int_to_alpha_bytes_table(self):
-        return self._int_to_alpha_bytes_table
-
-    @property
-    def alpha_to_int_dict(self):
-        return self._alpha_to_int_dict
-
-    @property
-    def int_to_alpha_dict(self):
-        return self._int_to_alpha_dict
-
-
-# We can change the DEFAULT_ENCODER by using its init_vars method
-DEFAULT_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters + "-")
-DEFAULT_DNA_ENCODER = NumAlphabetEncoder(IUPACData.unambiguous_dna_letters)
-
-DEFAULT_ENCODER_DICT = DEFAULT_ENCODER.alpha_to_int_dict
-
-# Only codons that map to amino acids are included. Excludes the 3 stop codons
-# There are 61 mappings from codons to Amino acids in the dict below
-# {'AAA':0, ..., 'TTT': 60}
-CODON_NUM_MAP = {c:i for i, c in enumerate(
-    sorted(CodonTable.standard_dna_table.forward_table.keys()))}
-
-# MAP codon numerical code in CODON_NUM_MAP to AA letter
-# {0:'K', ..., 60:'F'}
-CODON_NUM_AA_MAP = {v:str(Bio.Seq.Seq(k).translate()) for k,v in 
-                                                    CODON_NUM_MAP.items()}
-# Same as above but mapping CODON_NUM_MAP numerical code to DEFAULT_ENCODER's
-# numerical code {0:8, ..., 60:4}
-CODON_NUM_AA_NUM_MAP = {k:DEFAULT_ENCODER_DICT[v] for k,v in 
-                                                    CODON_NUM_AA_MAP.items()}
+ 
+from ..sequences import encoding as enc
 
 def file_handle_opener(filename):
     """ Figure out what opener to use based on filename.
@@ -208,7 +111,7 @@ def get_msa_from_filename_iter(filename, seq_io_gen=None, start=None,
   
 
 def get_msa_from_filename(filename, upper_case=True, 
-                        num_encoder=DEFAULT_ENCODER, *args, **kwargs):
+                        num_encoder=enc.DEFAULT_ENCODER, *args, **kwargs):
     """Reads a (plain text) fasta/aln file (can be gzipped also) and returns an
         MSA
 
@@ -242,7 +145,7 @@ def get_msa_from_filename(filename, upper_case=True,
     return arr
 
 
-def save_numpy_int_arr_to_txt(arr, filename, num_encoder=DEFAULT_ENCODER):
+def save_numpy_int_arr_to_txt(arr, filename, num_encoder=enc.DEFAULT_ENCODER):
     """ save a numpy 2D array of integer coded sequences (np.uint8) to a text
         file.
 
@@ -263,7 +166,7 @@ def save_numpy_int_arr_to_txt(arr, filename, num_encoder=DEFAULT_ENCODER):
     with opener(filename, "wb") as fh:
         fh.write(tmp_w_fh.read())  # why can't we use getbuffer() here?
 
-def codon_str_to_int(c, enc_d=DEFAULT_DNA_ENCODER.alpha_to_int_dict):
+def codon_str_to_int(c, enc_d=enc.DEFAULT_DNA_ENCODER.alpha_to_int_dict):
     """ Convert codon to a number according to the DNA encoding
 
     >>> codon_str_to_int("GCT")
@@ -304,7 +207,7 @@ def translate_np(arr, trans_dict=None, trans_table=None):
     arr.shape = arr_shape
     return arr
 
-def get_codon_msa_as_int_array(filename, codon_map=CODON_NUM_MAP, *args, 
+def get_codon_msa_as_int_array(filename, codon_map=enc.CODON_NUM_MAP, *args, 
                                                             **kwargs):
     """
         Returns an CODON msa MSA as a two dimension numpy array
@@ -315,7 +218,7 @@ def get_codon_msa_as_int_array(filename, codon_map=CODON_NUM_MAP, *args,
         `codon_map`: a dictionary mapping codons (as strings of length 3)
                      to integer values
     """
-    arr = get_msa_from_filename(filename, num_encoder=DEFAULT_DNA_ENCODER,
+    arr = get_msa_from_filename(filename, num_encoder=enc.DEFAULT_DNA_ENCODER,
                                 *args, **kwargs)
     N, L = arr.shape
     if L%3: # L needs to be perfectly divisible by 3
@@ -330,7 +233,8 @@ def get_codon_msa_as_int_array(filename, codon_map=CODON_NUM_MAP, *args,
     # this mapping maps the codon index 0-63 to a value of CODON_NUM_MAP 0-60
     # the three stop codons are not in this mapping
     # codon_str_to_int does the same thing as np.einsum above
-    packed_codon_map = {codon_str_to_int(k):v for k,v in CODON_NUM_MAP.items()}
+    packed_codon_map = {codon_str_to_int(k):v for k,v in 
+                                enc.CODON_NUM_MAP.items()}
 
     return translate_np(arrc, packed_codon_map)
  
@@ -347,17 +251,17 @@ if __name__ == "__main__":
     # Read DHFR datasets AAs and Codons as numpy arrays encoded as integers
 
     # MSA with AA's
-    dhfr_fn = "../tests/io/DHFR_Gen15_head.txt.gz"
+    dhfr_fn = "../tests/sequences/DHFR_Gen15_head.txt.gz"
     arr = get_msa_from_filename(dhfr_fn)
     with tempfile.NamedTemporaryFile(suffix=".txt.gz") as fout:
         save_numpy_int_arr_to_txt(arr, fout.name)
 
     # MSA in codons
-    codon_fn = "../tests/io/DHFR_Gen15_nts_head.txt.gz"
+    codon_fn = "../tests/sequences/DHFR_Gen15_nts_head.txt.gz"
     arr = get_codon_msa_as_int_array(codon_fn)
 
     # MSA in fasta format
-    test_fn = "../tests/io/test_AV.fasta"
+    test_fn = "../tests/sequences/test_AV.fasta"
     arr = get_msa_from_filename(test_fn)
     
  

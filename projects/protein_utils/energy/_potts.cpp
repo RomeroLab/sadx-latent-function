@@ -175,7 +175,7 @@ py::tuple energy_calc_single_mutants(
     return py::make_tuple(mutants, energies);
 }
 
-PYBIND11_MODULE(energy, m) {
+PYBIND11_MODULE(_potts, m) {
     m.doc() = "pybind11 Energy calculator"; // optional module docstring
 
     m.def("energy_calc_msa", &energy_calc_msa, 

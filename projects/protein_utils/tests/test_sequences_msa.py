@@ -6,13 +6,14 @@ THIS_DIR = Path(__file__).parent
 import numpy as np
 import tempfile # for file writing
 import gzip
-import protein_utils.io.msa as io_msa
+import protein_utils.sequences.msa as seqmsa
+import protein_utils.sequences.encoding as enc
 
 class TestFastaRead(unittest.TestCase):
 
     def setUp(self):
-        self.arr = io_msa.get_msa_from_filename(
-                            THIS_DIR / "io/test_AV.fasta")
+        self.arr = seqmsa.get_msa_from_filename(
+                            THIS_DIR / "sequences/test_AV.fasta")
 
     def test_fasta_read(self):
         self.assertIsNotNone(self.arr)
@@ -23,17 +24,17 @@ class TestFastaRead(unittest.TestCase):
         self.assertEqual(self.arr[9,1], 17) # V
         
     def test_gz_fasta_read(self):
-        arr_gz = io_msa.get_msa_from_filename(
-                        THIS_DIR / "io/test_AV.fasta.gz")
+        arr_gz = seqmsa.get_msa_from_filename(
+                        THIS_DIR / "sequences/test_AV.fasta.gz")
         self.assertTrue((self.arr == arr_gz).all())
 
 
 class TestDHFRAARead(unittest.TestCase):
 
     def setUp(self):
-        self.arr = io_msa.get_msa_from_filename(
-                            THIS_DIR / "io/DHFR_Gen15_head.txt")
-        with open(THIS_DIR / "io/DHFR_Gen15_head.txt", "rt") as fh_comp:
+        self.arr = seqmsa.get_msa_from_filename(
+                            THIS_DIR / "sequences/DHFR_Gen15_head.txt")
+        with open(THIS_DIR / "sequences/DHFR_Gen15_head.txt", "rt") as fh_comp:
             self.arr_text = fh_comp.read()
 
     def test_dhfr_read(self):
@@ -44,14 +45,14 @@ class TestDHFRAARead(unittest.TestCase):
         self.assertEqual(self.arr[9,186-1], 2) #D
         
     def test_gz_dhfr_read(self):
-        arr_gz = io_msa.get_msa_from_filename(
-                            THIS_DIR / "io/DHFR_Gen15_head.txt.gz")
+        arr_gz = seqmsa.get_msa_from_filename(
+                            THIS_DIR / "sequences/DHFR_Gen15_head.txt.gz")
         self.assertTrue((self.arr == arr_gz).all())
 
     def test_file_save_txt(self):
         with tempfile.NamedTemporaryFile(suffix=".txt") as fh:
             filename = fh.name
-            io_msa.save_numpy_int_arr_to_txt(self.arr, filename)
+            seqmsa.save_numpy_int_arr_to_txt(self.arr, filename)
             fh.seek(0)
             with open(filename, "rt") as fh_read:
                 written_text = fh_read.read()
@@ -60,7 +61,7 @@ class TestDHFRAARead(unittest.TestCase):
     def test_file_save_gz(self):
         with tempfile.NamedTemporaryFile(suffix=".aln.gz") as fh:
             filename = fh.name
-            io_msa.save_numpy_int_arr_to_txt(self.arr, filename)
+            seqmsa.save_numpy_int_arr_to_txt(self.arr, filename)
             fh.seek(0)
             with gzip.open(filename, "rt") as fh_read:
                 written_text = fh_read.read()
@@ -70,9 +71,9 @@ class TestDHFRAARead(unittest.TestCase):
 class TestDHFRNTSRead(unittest.TestCase):
 
     def setUp(self):
-        self.arr = io_msa.get_msa_from_filename(
-                THIS_DIR / "io/DHFR_Gen15_nts_head.txt", 
-                num_encoder = io_msa.DEFAULT_DNA_ENCODER )
+        self.arr = seqmsa.get_msa_from_filename(
+                THIS_DIR / "sequences/DHFR_Gen15_nts_head.txt", 
+                num_encoder = enc.DEFAULT_DNA_ENCODER )
 
     def test_dhfr_read(self):
         self.assertIsNotNone(self.arr)
@@ -82,9 +83,9 @@ class TestDHFRNTSRead(unittest.TestCase):
         self.assertEqual(self.arr[9,186*3-1], 2) #T
         
     def test_gz_dhfr_read(self):
-        arr_gz = io_msa.get_msa_from_filename(
-                THIS_DIR / "io/DHFR_Gen15_nts_head.txt.gz", 
-                num_encoder = io_msa.DEFAULT_DNA_ENCODER )
+        arr_gz = seqmsa.get_msa_from_filename(
+                THIS_DIR / "sequences/DHFR_Gen15_nts_head.txt.gz", 
+                num_encoder = enc.DEFAULT_DNA_ENCODER )
         self.assertEqual(arr_gz.dtype, np.uint8)
         self.assertEqual(arr_gz.shape, self.arr.shape)
         self.assertTrue((self.arr == arr_gz).all())
@@ -93,8 +94,8 @@ class TestDHFRNTSRead(unittest.TestCase):
 class TestDHFRCodonRead(unittest.TestCase):
 
     def setUp(self):
-        self.arr = io_msa.get_codon_msa_as_int_array(
-                THIS_DIR / "io/DHFR_Gen15_nts_head.txt") 
+        self.arr = seqmsa.get_codon_msa_as_int_array(
+                THIS_DIR / "sequences/DHFR_Gen15_nts_head.txt") 
 
     def test_dhfr_codon_read(self):
         self.assertIsNotNone(self.arr)
@@ -106,10 +107,10 @@ class TestDHFRCodonRead(unittest.TestCase):
 
     def test_codon_to_aa(self):
         # load the aa file from the disk
-        arr_aa = io_msa.get_msa_from_filename(
-                THIS_DIR / "io/DHFR_Gen15_head.txt") 
+        arr_aa = seqmsa.get_msa_from_filename(
+                THIS_DIR / "sequences/DHFR_Gen15_head.txt") 
         # convert the nts file to the aa file
-        arr_nts_aa = io_msa.translate_np(self.arr, io_msa.CODON_NUM_AA_NUM_MAP)
+        arr_nts_aa = seqmsa.translate_np(self.arr, enc.CODON_NUM_AA_NUM_MAP)
         self.assertTrue((arr_aa == arr_nts_aa).all())
 
 

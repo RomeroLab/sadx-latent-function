@@ -1,5 +1,5 @@
 import numpy as np
-from ..potts_energy import energy
+from ..energy import _potts
 
 
 class EnergyFunctionCalculator:
@@ -74,7 +74,7 @@ def energy_calc_msa(msa, h_i_a, e_i_a_j_b):
 
     if msa.max() >= h_i_a.shape[1]: # bounds checking
         raise ValueError("Max value in msa should be less than alphabet size")
-    return energy.energy_calc_msa(msa, h_i_a, e_i_a_j_b)
+    return _potts.energy_calc_msa(msa, h_i_a, e_i_a_j_b)
 
 
 def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, recarray=True):
@@ -88,7 +88,7 @@ def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, recarray=True):
     if seq.max() >= h_i_a.shape[1]: # bounds checking
         raise ValueError("Max value in seq should be less than alphabet size")
     L, q = h_i_a.shape
-    muts, mut_energies = energy.energy_calc_single_mutants(seq.squeeze(), 
+    muts, mut_energies = _potts.energy_calc_single_mutants(seq.squeeze(), 
                                     h_i_a, e_i_a_j_b)
     if recarray: # convert muts to recarray
         assert(muts.shape == (L * (q-1), 2) )

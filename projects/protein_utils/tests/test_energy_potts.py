@@ -4,7 +4,7 @@ from pathlib import Path
 THIS_DIR = Path(__file__).parent
 
 import numpy as np
-import protein_utils.potts_energy.energy_py as energy_py
+import protein_utils.energy.potts as energy_py
 
 np.random.seed(100)
 
