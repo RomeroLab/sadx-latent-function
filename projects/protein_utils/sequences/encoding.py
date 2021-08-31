@@ -28,10 +28,10 @@ class NumAlphabetEncoder:
         self._alpha_to_int_dict = None 
         self._int_to_alpha_dict = None
 
-        self.init_vars(alphabet, numbers)
+        self.init_vars_inplace(alphabet, numbers)
 
 
-    def init_vars(self, alphabet, numbers=None):
+    def init_vars_inplace(self, alphabet, numbers=None):
         self._alphabet = alphabet
         if numbers is None:
             numbers = range(len(self._alphabet))
@@ -59,8 +59,57 @@ class NumAlphabetEncoder:
         self._int_to_alpha_dict = dict(zip(self._numbers, self._alphabet))
 
     def string_to_np(self, s):
+        """ Convert string to numpy array using encoder
+            >>> na = NumAlphabetEncoder(alphabet="ACTG")
+            >>> na.string_to_np("GGCGACTCA")
+            array([3, 3, 1, 3, 0, 1, 2, 1, 0], dtype=uint8)
+        """
         return np.array([self.alpha_to_int_dict[a] for a in s], dtype=np.uint8)
 
+    def is_contiguous(self):
+        """ check that encoding is contigous numbers 
+            >>> na = NumAlphabetEncoder(alphabet="ACTG", numbers=[0,1,2,4])
+            >>> na.is_contiguous()
+            False
+            >>> na = NumAlphabetEncoder(alphabet="ACTG")
+            >>> na.is_contiguous()
+            True
+        """
+        return max(self._numbers) == (len(self._numbers) - 1)
+
+    def change_arr_encoding(self, arr, axes, arr_enc, drop_chars=""):
+        """ Convert numpy array with elements in one encoding to another
+            Params:
+                arr        :numpy array (any dtype). eg. shape (L,q) or (L,q,L,q)
+                axes       :numpy axis to change. eg axes=1 or axes=(1,3)
+                arr_enc    :alphabet or NumAlphabetEncoder used to create arr
+                drop_chars :remove indices in return value corresponding 
+                            to some chars. eg.  drop_chars = "-"
+            Return:
+                Tuple (ret_arr, ret_enc). ret_arr is a numpy array in the 
+                encoding ret_enc. ret_enc will be self if this encoding is
+                contiguous or drop_chars is empty
+        """
+        if isinstance(arr_enc, str):
+            arr_enc = NumAlphabetEncoder(arr_enc)
+        # return encoding # ensures contigous numbering system
+        ret_enc = self
+        if drop_chars or (not self.is_contiguous()):
+            # create a new encoding system that matches the return type
+            ret_enc  = NumAlphabetEncoder(alphabet="".join(
+                k for k in self._alphabet if k not in drop_chars))
+
+        # these are the columns we should pick up and in this order
+        reorder_cols = np.array([arr_enc.alpha_to_int_dict[k] for k in \
+                ret_enc.alpha_to_int_dict.keys()])
+        if isinstance(axes, int):
+            axes = (axes,) # convert to tuple
+        ret_arr = arr
+        for ax in axes:
+            ret_arr = ret_arr.take(reorder_cols, axis=ax)
+        return (ret_arr, ret_enc)
+       
+        
     @property
     def alpha_to_int_bytes_table(self):
         return self._alpha_to_int_bytes_table
@@ -80,9 +129,15 @@ class NumAlphabetEncoder:
 
 # We can change the DEFAULT_ENCODER by using its init_vars method
 DEFAULT_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters + "-")
+DEFAULT_ENCODER_DICT = DEFAULT_ENCODER.alpha_to_int_dict
+
+#DEFAULT_NO_GAP_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters) 
+
 DEFAULT_DNA_ENCODER = NumAlphabetEncoder(IUPACData.unambiguous_dna_letters)
 
-DEFAULT_ENCODER_DICT = DEFAULT_ENCODER.alpha_to_int_dict
+# OLD Amino acid encoding (not to be used anymore)
+OLD_AA_ORDER = "RKDEQNHSTCYWAILMFVPG-"
+
 
 # Only codons that map to amino acids are included. Excludes the 3 stop codons
 # There are 61 mappings from codons to Amino acids in the dict below
