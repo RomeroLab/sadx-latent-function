@@ -14,49 +14,77 @@ class NumAlphabetEncoder:
     b'\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\t'
     >>> na.alpha_to_int_dict
     {'A': 0, 'C': 1, 'T': 2, 'G': 3}
+    >>> na.int_mutate_dict.keys()
+    dict_keys([0, 1, 2, 3])
+    >>> na.int_mutate_dict[0] # what can indices can A mutate to?
+    [1, 2, 3]
+    >>> na.int_mutate_arr # mutation table for entire alphabet
+    array([[1, 2, 3],
+	   [0, 2, 3],
+	   [0, 1, 3],
+	   [0, 1, 2]], dtype=uint8)
     """
 
     def __init__(self, alphabet, numbers=None):
         """ alphabet is a string """
-        self._alphabet = None # alphabet in strings
-        self._numbers = None
-        self._alphabet_b = None # alphabet in bytes
-        self._numbers_b = None # encoding in bytes
-        self._alpha_to_int_table = None # convert letters to numbers (bytes)
-        self._int_to_alpha_table = None # convert numbers to letters (bytes)
+        self.alphabet = None # alphabet in strings
+        self.numbers = None
+        self.alphabet_b = None # alphabet in bytes
+        self.numbers_b = None # encoding in bytes
+        self.alpha_to_int_table = None # convert letters to numbers (bytes)
+        self.int_to_alpha_table = None # convert numbers to letters (bytes)
 
-        self._alpha_to_int_dict = None 
-        self._int_to_alpha_dict = None
+        self.alpha_to_int_dict = None 
+        self.int_to_alpha_dict = None
+
+        # A mutate dictionary keyed on self.numbers with values being a list
+        # of the other numbers. This tells us which amino acids can mutate to
+        # which other amino acids.
+        self.int_mutate_dict = None
+
+        # A mutate np array of shape (N, q-1) which is a numpy version of
+        # int_mutate_dict. Only defined for contiguous encodings
+        self.int_mutate_arr = None
 
         self.init_vars_inplace(alphabet, numbers)
 
 
     def init_vars_inplace(self, alphabet, numbers=None):
-        self._alphabet = alphabet
+        self.alphabet = alphabet
         if numbers is None:
-            numbers = range(len(self._alphabet))
-        self._numbers = list(numbers)
+            numbers = range(len(self.alphabet))
+        self.numbers = list(numbers)
 
         # check that alphabet and numbers have the same length
-        if len(self._alphabet) != len(self._numbers):
+        if len(self.alphabet) != len(self.numbers):
             raise ValueError("Alphabet and numbers must have the same "
                     "length. Pass in numbers=None to encode with consecutive "
                     "numbers") 
 
         # check that numbers are between 0 and 255 so that we can encode
         # into bytes
-        if ((np.array(self._numbers) > 255).any() or 
-            (np.array(self._numbers) < 0).any()):
+        if ((np.array(self.numbers) > 255).any() or 
+            (np.array(self.numbers) < 0).any()):
             raise ValueError("All numbers have to be between 0 and 255")
 
-        self._alphabet_b = self._alphabet.encode("ASCII")
-        self._numbers_b = np.array(self._numbers, dtype=np.uint8).tobytes()
-        self._alpha_to_int_bytes_table = bytes.maketrans(self._alphabet_b, 
-                                                    self._numbers_b)
-        self._int_to_alpha_bytes_table = bytes.maketrans(self._numbers_b, 
-                                            self._alphabet_b)
-        self._alpha_to_int_dict = dict(zip(self._alphabet, self._numbers))
-        self._int_to_alpha_dict = dict(zip(self._numbers, self._alphabet))
+        self.alphabet_b = self.alphabet.encode("ASCII")
+        self.numbers_b = np.array(self.numbers, dtype=np.uint8).tobytes()
+        self.alpha_to_int_bytes_table = bytes.maketrans(self.alphabet_b, 
+                                                    self.numbers_b)
+        self.int_to_alpha_bytes_table = bytes.maketrans(self.numbers_b, 
+                                            self.alphabet_b)
+        self.alpha_to_int_dict = dict(zip(self.alphabet, self.numbers))
+        self.int_to_alpha_dict = dict(zip(self.numbers, self.alphabet))
+
+        # store dictionary of which aa index mutates to which other aa index
+        self.int_mutate_dict = {k:self.numbers.copy() for k in self.numbers}
+        for k in self.numbers:
+            self.int_mutate_dict[k].remove(k) # remove inplace
+        self.int_mutate_arr = None
+        if self.is_contiguous():
+            self.int_mutate_arr = np.array(
+                    list(self.int_mutate_dict.values()), dtype=np.uint8)
+
 
     def string_to_np(self, s):
         """ Convert string to numpy array using encoder
@@ -75,7 +103,7 @@ class NumAlphabetEncoder:
             >>> na.is_contiguous()
             True
         """
-        return max(self._numbers) == (len(self._numbers) - 1)
+        return max(self.numbers) == (len(self.numbers) - 1)
 
     def change_arr_encoding(self, arr, axes, arr_enc, drop_chars=""):
         """ Convert numpy array with elements in one encoding to another
@@ -97,7 +125,7 @@ class NumAlphabetEncoder:
         if drop_chars or (not self.is_contiguous()):
             # create a new encoding system that matches the return type
             ret_enc  = NumAlphabetEncoder(alphabet="".join(
-                k for k in self._alphabet if k not in drop_chars))
+                k for k in self.alphabet if k not in drop_chars))
 
         # these are the columns we should pick up and in this order
         reorder_cols = np.array([arr_enc.alpha_to_int_dict[k] for k in \
@@ -110,22 +138,6 @@ class NumAlphabetEncoder:
         return (ret_arr, ret_enc)
        
         
-    @property
-    def alpha_to_int_bytes_table(self):
-        return self._alpha_to_int_bytes_table
-
-    @property
-    def int_to_alpha_bytes_table(self):
-        return self._int_to_alpha_bytes_table
-
-    @property
-    def alpha_to_int_dict(self):
-        return self._alpha_to_int_dict
-
-    @property
-    def int_to_alpha_dict(self):
-        return self._int_to_alpha_dict
-
 
 # We can change the DEFAULT_ENCODER by using its init_vars method
 DEFAULT_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters + "-")

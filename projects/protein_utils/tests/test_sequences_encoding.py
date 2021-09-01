@@ -22,6 +22,7 @@ class TestNumAlphabetEncoder(unittest.TestCase):
         ret_arr, ret_enc = self.num_enc.change_arr_encoding(
                 h, arr_enc=old_encoding, axes=1)
         self.assertEqual(ret_enc, self.num_enc)
+        self.assertEqual(ret_arr.shape[1], q)
         # amino acid V is position 17 in old array
         new_v_pos = self.num_enc.alpha_to_int_dict["V"]
         self.assertEqual(h[5, 17], ret_arr[5, new_v_pos])
@@ -30,6 +31,8 @@ class TestNumAlphabetEncoder(unittest.TestCase):
         ret_arr, ret_enc = self.num_enc.change_arr_encoding(
                 e, arr_enc=old_encoding, axes=(1,3))
         self.assertEqual(ret_enc, self.num_enc)
+        self.assertEqual(ret_arr.shape[1], q)
+        self.assertEqual(ret_arr.shape[3], q)
         # amino acid D is position 2 in old array
         new_d_pos = self.num_enc.alpha_to_int_dict["D"]
         self.assertEqual(e[5, 17, 8, 2], 
@@ -39,6 +42,8 @@ class TestNumAlphabetEncoder(unittest.TestCase):
         ret_arr, ret_enc = self.num_enc.change_arr_encoding(
                 e, arr_enc=old_encoding, axes=(1,3), drop_chars="-")
         self.assertNotEqual(ret_enc, self.num_enc) # get a new encoding back
+        self.assertEqual(ret_arr.shape[1], q-1) # gap character dropped
+        self.assertTrue("-" not in ret_enc.alpha_to_int_dict.keys())
         self.assertTrue(ret_enc.is_contiguous())
         self.assertEqual(e[5, 17, 8, 2], 
                 ret_arr[5, new_v_pos, 8, new_d_pos])
