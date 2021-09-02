@@ -143,7 +143,7 @@ class NumAlphabetEncoder:
 DEFAULT_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters + "-")
 DEFAULT_ENCODER_DICT = DEFAULT_ENCODER.alpha_to_int_dict
 
-#DEFAULT_NO_GAP_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters) 
+DEFAULT_NO_GAP_ENCODER = NumAlphabetEncoder(IUPACData.protein_letters) 
 
 DEFAULT_DNA_ENCODER = NumAlphabetEncoder(IUPACData.unambiguous_dna_letters)
 

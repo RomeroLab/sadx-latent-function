@@ -46,6 +46,46 @@ def convert_wt_into_mutant_msa(wt, pos_idx, mut_values, seq_idx=None):
     msa[seq_idx, pos_idx] = mut_values # assign multiple mutations if required
     return msa
     
+def get_random_pos_to_mutate(seq_idx, num_muts, L):
+    """Figure out what positions get mutated
+    params:
+        seq_idx : np.array dtype int with sequence indices
+        num_muts: np.array dtype int with num of mutants per seq
+        L       : total number of positions
+        
+    return:
+        ret_seq_idx, pos_idx : np.array(s) dtype int specifying which positions
+                               each sequence is mutated at.
+                               Both arrays have the same size (num_muts.sum())
+
+    >>> seq_idx = np.array([1, 3, 5])
+    >>> num_muts = np.array([4, 0, 2])
+    >>> L = 4
+    >>> ret_seq_idx, pos_idx = get_random_pos_to_mutate(seq_idx, num_muts, L)
+    >>> ret_seq_idx
+    array([1, 1, 1, 1, 5, 5])
+    >>> ret_seq_idx.size == num_muts.sum() #size of returned array
+    True
+    >>> np.sort(pos_idx[:4]) # all 4 positions to be mutated here
+    array([0, 1, 2, 3])
+    >>> (pos_idx < L).all() # all positions less than L
+    True
+    >>> 3 not in ret_seq_idx # seq #3 is eliminated because it has 0 muts
+    True
+    """
+    assert((seq_idx.ndim == 1)
+            and (num_muts.ndim == 1)
+            and (seq_idx.size == num_muts.size))
+    # repeat every seq_idx num_muts time
+    ret_seq_idx = np.repeat(seq_idx, num_muts) 
+
+    rng = np.random.default_rng()
+    # Pick num_mut positions *without replacement* from L 
+    # do this for every sequence and flatten out the array
+    pos_idx = np.array([pos for num_mut in num_muts 
+                for pos in rng.choice(L, size=num_mut, replace=False) 
+                if num_mut > 0], dtype=int)
+    return ret_seq_idx, pos_idx
 
 def make_random_mutations(msa, seq_idx, pos_idx, 
         mutate_arr=enc.DEFAULT_ENCODER.int_mutate_arr, inplace=True):
@@ -78,14 +118,15 @@ def make_random_mutations(msa, seq_idx, pos_idx,
     # the values that need to be mutated
     mutate_idx = msa[seq_idx, pos_idx] 
     # pick random positions from the mutate table
-    mutate_to = np.random.randint(mutate_arr.shape[1], size=mutate_idx.size)
+    rng = np.random.default_rng()
+    mutate_to = rng.integers(mutate_arr.shape[1], size=mutate_idx.size)
     # set places we want to mutate to random other numbers from mutate
     # table. This ensures we actually get a mutant when where we want it
     mut_msa[seq_idx, pos_idx] = mutate_arr[mutate_idx, mutate_to]
     return mut_msa
 
 if __name__ == "__main__":
-    # to run these doc tests run them as a module 
+    # to run these doctests run them as a module 
     # > PYTHONPATH=".." ipython -m sequences.mutations
     import doctest
     doctest.testmod()

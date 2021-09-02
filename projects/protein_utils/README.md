@@ -3,5 +3,6 @@
 ### Dependencies
 
 1. Biopython
-2. numpy/matplotlib/pandas
-3. Pytorch (optional)
+1. numpy/matplotlib/pandas
+1. pybind11
+1. Pytorch (optional)
