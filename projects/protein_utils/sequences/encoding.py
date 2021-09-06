@@ -94,6 +94,15 @@ class NumAlphabetEncoder:
         """
         return np.array([self.alpha_to_int_dict[a] for a in s], dtype=np.uint8)
 
+    def np_to_string(self, arr):
+        """ Convert string to numpy array using encoder
+            >>> na = NumAlphabetEncoder(alphabet="ACTG")
+            >>> na.np_to_string(np.array([3, 3, 1, 3, 0, 1, 2, 1, 0]))
+            'GGCGACTCA'
+        """
+        return "".join(self.int_to_alpha_dict[i] for i in arr)
+
+
     def is_contiguous(self):
         """ check that encoding is contigous numbers 
             >>> na = NumAlphabetEncoder(alphabet="ACTG", numbers=[0,1,2,4])
