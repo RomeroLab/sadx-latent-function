@@ -71,7 +71,10 @@ def energy_calc_msa(msa, h_i_a, e_i_a_j_b):
         
        Returns: energy (np float array of size nseqs)
     """
-
+    if msa.size == 0: # incase an empty array is passed in
+        # return an empty array
+        # if we do not check this then msa.max() fails below
+        return np.array([], dtype=float)
     if msa.max() >= h_i_a.shape[1]: # bounds checking
         raise ValueError("Max value in msa should be less than alphabet size")
     return _potts.energy_calc_msa(msa, h_i_a, e_i_a_j_b)
