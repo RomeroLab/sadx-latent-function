@@ -39,9 +39,6 @@ if __name__ == "__main__":
     ret = timeit.timeit('energy_py.energy_calc_msa(msa, h, e)', 
             globals=globals(), number=10)
     print(f"Calc MSA c++ (direct)       : {ret/10/num_seqs*1000:7.2f}ms")
-    #ret = timeit.timeit('energy_py.energy_calc_msa(msa, h, e, interaction_arrs=interaction_arrs)', 
-    #        globals=globals(), number=10)
-    #print(f"Calc MSA c++ (interaction)  : {ret/10/num_seqs*1000:7.2f}ms")
     ret = timeit.timeit('calc_energy_msa_using_single(msa, h, e)', 
             globals=globals(), number=10)
     print(f"Calc MSA c++ (using single) : {ret/10/num_seqs*1000:7.2f}ms")
