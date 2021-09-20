@@ -67,6 +67,8 @@ py::array_t<double> energy_calc_msa(
 
 void check_canonical_parameter_shapes(py::array_t<double> h_i_a,
                                       py::array_t<double> e_i_a_j_b) {
+    // Doesn't seem like we need to pass by reference to this function as
+    // somehow it isn't making a copy of the arrays
     auto buf_h = h_i_a.unchecked<2>(); 
     auto buf_e = e_i_a_j_b.unchecked<4>();
 
