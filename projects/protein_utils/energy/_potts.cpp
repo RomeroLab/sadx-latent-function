@@ -3,67 +3,14 @@
 
 namespace py = pybind11;
 
-py::array_t<double> energy_calc_msa(
-           py::array_t<long> msa, /* shape (num_seqs, L) */
-           py::array_t<double> h_i_a,  /* shape (L, q) */
-           py::array_t<double> e_i_a_j_b) /* shape (L, q, L, q) */ {
+// dtype of the msa or seqs passed in
+typedef long seq_dtype; // change this later to uint8?
 
-    auto buf_m = msa.unchecked<2>(); 
-    auto buf_h = h_i_a.unchecked<2>(); 
-    auto buf_e = e_i_a_j_b.unchecked<4>();
-
-    if (buf_h.ndim() != 2) 
-        throw std::runtime_error("Number of dimensions for fields must be 2");
-    if (buf_e.ndim() != 4) 
-        throw std::runtime_error("Number of dimensions for couplings must be 4");
-
-    if (buf_m.shape(1) != buf_h.shape(0))
-        throw std::runtime_error("msa and fields do not match "
-                                 "along the length dimension");
-    if (buf_h.shape(0) != buf_e.shape(0))
-        throw std::runtime_error("couplings and fields do not match "
-                                 "along the length dimension");
-    if (buf_e.shape(0) != buf_e.shape(2))
-        throw std::runtime_error("couplings do not match "
-                                 "along the length dimension");
-
-    if (buf_h.shape(1) != buf_e.shape(1))
-        throw std::runtime_error("couplings and fields do not match "
-                                 "along the alphabet dimension");
-    if (buf_e.shape(1) != buf_e.shape(3))
-        throw std::runtime_error("couplings do not match "
-                                 "along the alphabet dimension");
-
-    size_t num_seqs = (unsigned) buf_m.shape(0);
-    size_t L = (unsigned) buf_h.shape(0);
-    //size_t q = (unsigned) buf_h.shape(1);
-
-    // Resulting Energy Array
-    auto result = py::array_t<double>(num_seqs);
-    auto buf_r = result.request();
-
-    double  *ptr_r = (double *) buf_r.ptr;
-
-
-    for (size_t seq_idx = 0; seq_idx < num_seqs; seq_idx++) {
-        //loop over each sequence    
-        double energy = 0.;
-        for (size_t i = 0; i < L ; i++) {
-            // loop over each residue position
-            auto i_idx = buf_m(seq_idx, i); // AA index
-            energy += buf_h(i, i_idx );
-            for (size_t j = i+1; j < L; j++) {
-                // double loop over residue position
-                auto j_idx = buf_m(seq_idx, j); // AA index
-                energy += buf_e(i, i_idx, j, j_idx);
-            }
-        }
-        ptr_r[seq_idx] = -energy;
-    }
-
-    return result;
+template <typename T1, typename T2>
+void assert_equal(T1 x, T2 y, std::string msg) {
+  if (x != y) 
+    throw std::runtime_error(msg);      
 }
-
 
 void check_canonical_parameter_shapes(py::array_t<double> h_i_a,
                                       py::array_t<double> e_i_a_j_b) {
@@ -72,31 +19,105 @@ void check_canonical_parameter_shapes(py::array_t<double> h_i_a,
     auto buf_h = h_i_a.unchecked<2>(); 
     auto buf_e = e_i_a_j_b.unchecked<4>();
 
-    if (buf_h.ndim() != 2) 
-        throw std::runtime_error("Number of dimensions for fields must be 2");
-    if (buf_e.ndim() != 4) 
-        throw std::runtime_error("Number of dimensions for couplings must be 4");
-
-    if (buf_h.shape(0) != buf_e.shape(0))
-        throw std::runtime_error("couplings and fields do not match "
-                                 "along the length dimension");
-    if (buf_e.shape(0) != buf_e.shape(2))
-        throw std::runtime_error("couplings do not match "
-                                 "along the length dimension");
-
-    if (buf_h.shape(1) != buf_e.shape(1))
-        throw std::runtime_error("couplings and fields do not match "
-                                 "along the alphabet dimension");
-    if (buf_e.shape(1) != buf_e.shape(3))
-        throw std::runtime_error("couplings do not match "
-                                 "along the alphabet dimension");
-
+    assert_equal(buf_h.ndim(), 2, "Number of dims for fields must be 2");
+    assert_equal(buf_e.ndim(), 4, "Number of dims for couplings must be 4");
+    assert_equal(buf_h.shape(0), buf_e.shape(0), "couplings and fields "
+                                  "do not match along the length dimension");
+    assert_equal(buf_e.shape(0), buf_e.shape(2), "couplings do not match "
+                                  "along the length dimension");
+    assert_equal(buf_h.shape(1), buf_e.shape(1), "couplings and fields "
+                                  "do not match along the alphabet dimension");
+    assert_equal(buf_e.shape(1), buf_e.shape(3), "couplings do not match "
+                                  "along the alphabet dimension");
 }
 
 
+template <typename T>
+class SeqFromMSA {
+  // Takes a sequence idx and a pointer to the MSA and allows
+  // the operator () to directly access the sequence with one index only
+  private:
+    T m_ptr_;
+    int m_seq_idx;
+    
+  public:
+    size_t operator()(size_t idx) {return m_ptr_(m_seq_idx, idx);}
+    SeqFromMSA(T ptr, int seq_idx) : m_ptr_(ptr), m_seq_idx(seq_idx) {}
+
+};
+
+// Potts energy calculator 
+template <typename T>
+double potts_energy(T& w,  // any type that implements () to give us the index
+                py::detail::unchecked_reference<double,2>& buf_h,
+                py::detail::unchecked_reference<double,4>& buf_e) {
+  size_t L = (unsigned) buf_h.shape(0);
+  double energy(0.);
+  for (size_t i = 0; i < L ; i++) {
+    // loop over each residue position
+    auto i_idx = w(i); // AA index
+    energy += buf_h(i, i_idx );
+    for (size_t j = i+1; j < L; j++) {
+      // double loop over residue position
+      auto j_idx = w(j); // AA index
+      energy += buf_e(i, i_idx, j, j_idx);
+    }
+  }
+  return -energy;
+}
+
+double potts_energy_i_only(size_t i, seq_dtype a,  
+                py::detail::unchecked_reference<seq_dtype,1>& buf_w,
+                py::detail::unchecked_reference<double,2>& buf_h,
+                py::detail::unchecked_reference<double,4>& buf_e) {
+  size_t L = (unsigned) buf_h.shape(0);
+  double energy_wt_i = buf_h(i, a);
+  for (size_t j = 0; j < L; j++) {
+      if (j == i) continue;
+      if (j < i) {
+          energy_wt_i += buf_e(j, buf_w(j), i, a);
+      } else {
+          energy_wt_i += buf_e(i, a, j, buf_w(j));
+      }
+  }
+  return -energy_wt_i;
+}
+
+
+py::array_t<double> energy_calc_msa(
+           py::array_t<seq_dtype> msa, /* shape (num_seqs, L) */
+           py::array_t<double> h_i_a,  /* shape (L, q) */
+           py::array_t<double> e_i_a_j_b) /* shape (L, q, L, q) */ {
+
+    auto buf_m = msa.unchecked<2>(); 
+    auto buf_h = h_i_a.unchecked<2>(); 
+    auto buf_e = e_i_a_j_b.unchecked<4>();
+
+    check_canonical_parameter_shapes(h_i_a, e_i_a_j_b);
+    assert_equal(buf_m.shape(1), buf_h.shape(0), "msa and fields do not match "
+                                                 "along the length dimension");
+
+    size_t num_seqs = (unsigned) buf_m.shape(0);
+
+    // Resulting Energy Array
+    auto result = py::array_t<double>(num_seqs);
+    auto buf_r = result.request();
+    double *ptr_r = (double *) buf_r.ptr;
+    
+    // loop over all sequences one at a time
+    for (size_t seq_idx = 0; seq_idx < num_seqs; seq_idx++) {
+        typedef SeqFromMSA<py::detail::unchecked_reference<seq_dtype, 2>> 
+                    seq_from_msa;
+        auto w = seq_from_msa(buf_m, seq_idx);
+        ptr_r[seq_idx] = potts_energy<seq_from_msa>(w, buf_h, buf_e);
+    }
+
+    return result;
+}
+
 
 py::tuple energy_calc_single_mutants(
-                py::array_t<long> wt, /* shape (L, ) */
+                py::array_t<seq_dtype> wt, /* shape (L, ) */
                 py::array_t<double> h_i_a,  /* shape (L, q) */
                 py::array_t<double> e_i_a_j_b )  {
 
@@ -116,7 +137,7 @@ py::tuple energy_calc_single_mutants(
     // Resulting Energy Array
     size_t num_mutants = L * (q-1);
     auto mut_shape = pybind11::array::ShapeContainer({(long) num_mutants, 2});
-    auto mutants = py::array_t<long>( mut_shape);
+    auto mutants = py::array_t<long>(mut_shape);
     auto buf_m = mutants.request();
     auto writer_m = mutants.mutable_unchecked<2>();
 
@@ -125,50 +146,29 @@ py::tuple energy_calc_single_mutants(
     auto writer_en = energies.mutable_unchecked<1>();
 
     // Calculate the energy of the sequence passed in
-    double energy_wt = 0;
-    for (size_t i = 0; i < L ; i++) {
-        auto aa_i = buf_w(i); // AA index of sequence
-        energy_wt += buf_h(i, aa_i);
-        for (size_t j = i+1; j < L; j++) {
-            // double loop over residue position
-            auto aa_j = buf_w(j); // AA index
-            energy_wt += buf_e(i, aa_i, j, aa_j);
-        }
-    }
-    
+    typedef py::detail::unchecked_reference<seq_dtype, 1> plain_seq;
+    double energy_wt = potts_energy<plain_seq>(buf_w, buf_h, buf_e);
+   
     // Now calculate the energy of the single mutants
     size_t mutant_counter = 0;
     for (size_t i = 0 ; i < L; i++) {
         // loop over each residue position
         auto wt_i = (unsigned) buf_w(i); // AA index of sequence
-        double energy_wt_i = buf_h(i, wt_i);
-        for (size_t j = 0; j < L; j++) {
-            if (j == i) continue;
-            if (j < i) {
-                energy_wt_i += buf_e(j, buf_w(j), i, wt_i);
-            } else {
-                energy_wt_i += buf_e(i, wt_i, j, buf_w(j));
-            }
-        }
+        double energy_wt_i = potts_energy_i_only(
+                                    i, wt_i, buf_w, buf_h, buf_e);
         for (size_t a = 0; a < q; a++) {
             if (a == wt_i) continue; // this is wt and not a mutant
-            auto energy_mut_i = buf_h(i, a);
-            for (size_t j = 0; j < L; j++) {
-                if (j == i) continue;
-                if (j < i) {
-                    energy_mut_i += buf_e(j, buf_w(j), i, a);
-                } else {
-                    energy_mut_i += buf_e(i, a, j, buf_w(j));
-                }
-            }
+            double energy_mut_i = potts_energy_i_only(
+                                    i, a, buf_w, buf_h, buf_e);
+
             if (mutant_counter >= num_mutants) {
                 throw std::runtime_error("mutant counter larger than"
-                                " num_mutants"); 
+                                         " num_mutants"); 
             }
             writer_m(mutant_counter, 0) = i;
             writer_m(mutant_counter, 1) = a;
             auto energy_mut = energy_mut_i - energy_wt_i + energy_wt; 
-            writer_en(mutant_counter) = -energy_mut;
+            writer_en(mutant_counter) = energy_mut;
 
             ++mutant_counter;
         }
