@@ -46,13 +46,15 @@ class TestEnergyCalc(unittest.TestCase):
     def test_single_mutants(self):
         muts, energy = energy_py.energy_calc_single_mutants(self.wt, 
                                     self.h_i_a, self.e_i_a_j_b)
+        num_muts = self.L * (self.q - 1)
+        self.assertEqual(energy.size, num_muts)
 
-        # make the first mutant manually    
-        mut = self.wt.copy()
-        mut[muts.i[1]] = muts.a[0] 
-        # check energy of first mutant
-        e_mut = energy_py.energy_calc_single(mut, self.h_i_a, self.e_i_a_j_b)
-        self.assertAlmostEqual(e_mut, energy[0])
+        # check the first few mutants manually    
+        for idx in np.random.choice(num_muts, size=10, replace=False):
+            mut = self.wt.copy()
+            mut[muts.i[idx]] = muts.a[idx] 
+            e_mut = energy_py.energy_calc_single(mut, self.h_i_a, self.e_i_a_j_b)
+            self.assertAlmostEqual(e_mut, energy[idx])
 
 
 
