@@ -1,6 +1,7 @@
 import numpy as np
 from . import _potts
 
+empty_adj_mat = np.empty(shape=(0,0), dtype=int)
 
 class EnergyFunctionCalculator:
     """ Calculate Energy for integer index arrays via __call__
@@ -29,14 +30,14 @@ class EnergyFunctionCalculator:
                                  f" Shape : {shape}")
             else:
                 ret = energy_calc_single(protein, self.h_i_a, 
-                        self.e_i_a_j_b)
+                        self.e_i_a_j_b, *args, **kwargs)
         elif len(shape) == 2:
             if shape[1] != self.L:
                 raise ValueError(f"MSA Protein needs {self.L} in 2nd dim."
                                  f" Shape : {shape}")
             else:
                 ret = energy_calc_msa(protein, self.h_i_a, 
-                        self.e_i_a_j_b)
+                        self.e_i_a_j_b, *args, **kwargs)
         else:
             raise ValueError(f"input can only be dimension 1 or 2."
                              f" Shape : {shape}")
@@ -58,7 +59,7 @@ def energy_calc_single(prot_np, h_i_a, e_i_a_j_b):
     return energy.squeeze()
 
 
-def energy_calc_msa(msa, h_i_a, e_i_a_j_b):
+def energy_calc_msa(msa, h_i_a, e_i_a_j_b, adj_mat = empty_adj_mat):
     """msa     : A numpy integer array of shape (nseqs, L) 
                   (with the correct Amino acid index in each position)
                   Maximum value prot_np should be 20 (or q)
@@ -77,10 +78,11 @@ def energy_calc_msa(msa, h_i_a, e_i_a_j_b):
         return np.array([], dtype=float)
     if msa.max() >= h_i_a.shape[1]: # bounds checking
         raise ValueError("Max value in msa should be less than alphabet size")
-    return _potts.energy_calc_msa(msa, h_i_a, e_i_a_j_b)
+    return _potts.energy_calc_msa(msa, h_i_a, e_i_a_j_b, adj_mat)
 
 
-def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, recarray=True):
+def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, adj_mat=empty_adj_mat,
+                                    recarray=True):
     """seq      : A numpy integer array of shape (L,) 
                   (with the correct Amino acid index in each position)
                   Maximum value prot_np should be 20 (or q)
@@ -92,7 +94,7 @@ def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, recarray=True):
         raise ValueError("Max value in seq should be less than alphabet size")
     L, q = h_i_a.shape
     muts, mut_energies = _potts.energy_calc_single_mutants(seq.squeeze(), 
-                                    h_i_a, e_i_a_j_b)
+                                    h_i_a, e_i_a_j_b, adj_mat)
     if recarray: # convert muts to recarray
         assert(muts.shape == (L * (q-1), 2) )
         muts = np.core.records.fromrecords(muts, names="i,a")

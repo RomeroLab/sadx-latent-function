@@ -30,15 +30,18 @@ if __name__ == "__main__":
     e_sparse = e.copy()
     e_sparse[i_idx[int_mask], :, j_idx[int_mask], :] = 0
 
-    interaction_arrs = [list(j_idx[int_select][i_idx[int_select] == i]) 
-                            for i in range(L)]
-    
+    adj_mat = np.zeros(shape=(L,L), dtype=int)
+    adj_mat[i_idx[int_mask], j_idx[int_mask]] = 1
+    adj_mat[j_idx[int_mask], i_idx[int_mask]] = 1
 
     print("All timings are normalized so that they are per energy calculation")
     print()
     ret = timeit.timeit('energy_py.energy_calc_msa(msa, h, e)', 
             globals=globals(), number=10)
     print(f"Calc MSA c++ (direct)       : {ret/10/num_seqs*1000:7.2f}ms")
+    ret = timeit.timeit('energy_py.energy_calc_msa(msa, h, e_sparse, adj_mat)', 
+            globals=globals(), number=10)
+    print(f"Calc MSA c++ (interaction)  : {ret/10/num_seqs*1000:7.2f}ms")
     ret = timeit.timeit('calc_energy_msa_using_single(msa, h, e)', 
             globals=globals(), number=10)
     print(f"Calc MSA c++ (using single) : {ret/10/num_seqs*1000:7.2f}ms")
@@ -56,8 +59,11 @@ if __name__ == "__main__":
             globals=globals(), number=10)
     print(f"Calc WT python  : {ret/10*1000:7.2f}ms")
 
-    print()
+    print("Calculating single mutants")
     ret = timeit.timeit('energy_py.energy_calc_single_mutants(wt, h, e)', 
             globals=globals(), number=10)
-    print(f"Calc Single mutants: {ret/10*1000:7.2f}ms")
+    print(f"Calc Single mutants (direct)       : {ret/10*1000:7.2f}ms")
+    ret = timeit.timeit('energy_py.energy_calc_single_mutants(wt, h, e_sparse, adj_mat)', 
+            globals=globals(), number=10)
+    print(f"Calc Single mutants (interactions) : {ret/10*1000:7.2f}ms")
 
