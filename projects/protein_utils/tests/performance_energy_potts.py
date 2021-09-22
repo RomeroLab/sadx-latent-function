@@ -34,7 +34,7 @@ if __name__ == "__main__":
     adj_mat[i_idx[int_mask], j_idx[int_mask]] = 1
     adj_mat[j_idx[int_mask], i_idx[int_mask]] = 1
 
-    print("All timings are normalized so that they are per energy calculation")
+    print("Timings are normalized so that they are per energy calculation")
     print()
     ret = timeit.timeit('energy_py.energy_calc_msa(msa, h, e)', 
             globals=globals(), number=10)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     print()
     ret = timeit.timeit('energy_py.energy_calc_single(wt, h, e)', 
             globals=globals(), number=1000)
-    print(f"Calc WT c++     : {ret/1000*1000:7.2f}ms")
+    print(f"Calc WT c++     : {ret/num_seqs*1000:7.2f}ms")
     ret = timeit.timeit('energy_py.energy_calc_single_einsum(wt, h, e)', 
             globals=globals(), number=10)
     print(f"Calc WT einsum  : {ret/10*1000:7.2f}ms")
@@ -59,7 +59,7 @@ if __name__ == "__main__":
             globals=globals(), number=10)
     print(f"Calc WT python  : {ret/10*1000:7.2f}ms")
 
-    print("Calculating single mutants")
+    print("\nCalculating single mutants")
     ret = timeit.timeit('energy_py.energy_calc_single_mutants(wt, h, e)', 
             globals=globals(), number=10)
     print(f"Calc Single mutants (direct)       : {ret/10*1000:7.2f}ms")

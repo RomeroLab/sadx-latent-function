@@ -59,7 +59,7 @@ def energy_calc_single(prot_np, h_i_a, e_i_a_j_b):
     return energy.squeeze()
 
 
-def energy_calc_msa(msa, h_i_a, e_i_a_j_b, adj_mat = empty_adj_mat):
+def energy_calc_msa(msa, h_i_a, e_i_a_j_b, adj_mat=None):
     """msa     : A numpy integer array of shape (nseqs, L) 
                   (with the correct Amino acid index in each position)
                   Maximum value prot_np should be 20 (or q)
@@ -76,12 +76,14 @@ def energy_calc_msa(msa, h_i_a, e_i_a_j_b, adj_mat = empty_adj_mat):
         # return an empty array
         # if we do not check this then msa.max() fails below
         return np.array([], dtype=float)
+    if adj_mat is None:
+        adj_mat = empty_adj_mat
     if msa.max() >= h_i_a.shape[1]: # bounds checking
         raise ValueError("Max value in msa should be less than alphabet size")
     return _potts.energy_calc_msa(msa, h_i_a, e_i_a_j_b, adj_mat)
 
 
-def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, adj_mat=empty_adj_mat,
+def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, adj_mat=None,
                                     recarray=True):
     """seq      : A numpy integer array of shape (L,) 
                   (with the correct Amino acid index in each position)
@@ -93,6 +95,8 @@ def energy_calc_single_mutants(seq, h_i_a, e_i_a_j_b, adj_mat=empty_adj_mat,
     if seq.max() >= h_i_a.shape[1]: # bounds checking
         raise ValueError("Max value in seq should be less than alphabet size")
     L, q = h_i_a.shape
+    if adj_mat is None:
+        adj_mat = empty_adj_mat
     muts, mut_energies = _potts.energy_calc_single_mutants(seq.squeeze(), 
                                     h_i_a, e_i_a_j_b, adj_mat)
     if recarray: # convert muts to recarray

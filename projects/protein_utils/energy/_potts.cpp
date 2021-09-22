@@ -121,6 +121,7 @@ double potts_energy_i_only(size_t i, seq_dtype a,
 }
 
 
+// convert adjacency matrix into std::vector of vectors
 bool convert_to_interactions(py::array_t<adj_dtype> adj_mat, size_t L, 
                           std::vector<std::vector<unsigned int>>& interactions,
                           bool upper_tri) /* only upper tri interactions */ {
@@ -139,17 +140,16 @@ bool convert_to_interactions(py::array_t<adj_dtype> adj_mat, size_t L,
         for (size_t j=i+1; j < L; ++j) {
           if (buf_a(i,j)) interactions[i].push_back(j);
         }
-      }
+      } // converted upper tri matrix into vectors
     } else { // do full adj matrix instead of upper tri
       for(size_t i=0; i < L; ++i) {
         interactions[i].reserve(L - 1);
-        for (size_t j=1; j < L; ++j) {
+        for (size_t j=0; j < L; ++j) {
           if (j == i) continue;
           if (buf_a(i,j)) interactions[i].push_back(j);
         }
       }
-    }
-
+    } // finished doing upper and lower triangular matrix
     valid_interactions = true;
   }
   return valid_interactions;
