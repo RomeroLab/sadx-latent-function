@@ -1,9 +1,9 @@
-Bin Name,Category,Individual samples,Response
-2D-R1-B1,High Hydroxylation,14,3
-2D-R1-B2,Parent Hydroxylation,25,2
-2D-R1-B3,Low Hydroxylation,186,1
-2D-R1-B4,No Hydroxylation,675,0
-2D-R1-B5,High Azidation,16,3
-2D-R1-B6,Parent Azidation,27,2
-2D-R1-B7,Low Azidation,174,1
-2D-R1-B8,No Azidation,683,0
+bin_num,bin_name,category,num_samples,response
+1,2D-R1-B1,High Hydroxylation,14,3
+2,2D-R1-B2,Parent Hydroxylation,25,2
+3,2D-R1-B3,Low Hydroxylation,186,1
+4,2D-R1-B4,No Hydroxylation,675,0
+5,2D-R1-B5,High Azidation,16,3
+6,2D-R1-B6,Parent Azidation,27,2
+7,2D-R1-B7,Low Azidation,174,1
+8,2D-R1-B8,No Azidation,683,0

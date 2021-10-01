@@ -51,6 +51,7 @@ def num_muts_filter(s):
     return hamming_dist(s, WT) < mut_cut
 
 if __name__ == "__main__":
+    import sys
     import argparse
     import logging
     parser = argparse.ArgumentParser()
@@ -61,7 +62,8 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--loglevel",
         help="Logging Level", default="INFO")
     args = parser.parse_args()
-    logging.basicConfig(level=getattr(logging, args.loglevel))
+    logging.basicConfig(stream=sys.stdout, 
+                            level=getattr(logging, args.loglevel))
 
     logging.info(f"Reading filename: {args.fastq_file}")
     records = get_fastq_records(args.fastq_file)
@@ -70,8 +72,8 @@ if __name__ == "__main__":
     records = list(filter(length_filter, records))
     logging.info(f"Number of records after length filter : {len(records)}")
 
-    records = list(filter(quality_filter, records))
-    logging.info(f"Number of records after quality filter: {len(records)}")
+    #records = list(filter(quality_filter, records))
+    #logging.info(f"Number of records after quality filter: {len(records)}")
 
     records = list(map(complement_and_translate, records))
     logging.info(f"Number of records after translate map : {len(records)}")
