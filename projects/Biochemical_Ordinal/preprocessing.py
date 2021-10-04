@@ -17,23 +17,25 @@ end = 875
 
 length_cutoff = 1
 min_phred_base = 93
-mut_cut = 10
+mut_cut = 15
 
 def hamming_dist(s1, s2):
     assert(len(s1) == len(s2))
     return sum(1 for (a, b) in zip(s1, s2) if a != b)
 
 
-def complement_and_translate(r):
+def complement_and_translate(r, translate=False):
     sel = r[start:end].seq
     sel_r = r.reverse_complement()[start:end].seq
     dist = hamming_dist(sel, WT_DNA)
     dist_r = hamming_dist(sel_r, WT_DNA)
     ret = None
     if dist_r > dist:
-        ret = sel.translate()
+        ret = sel
     else:
-        ret = sel_r.translate()
+        ret = sel_r
+    if translate:
+        ret = ret.translate()
     return ret
 
 def get_fastq_records(filename):
@@ -48,7 +50,7 @@ def quality_filter(r):
                 >= min_phred_base
 
 def num_muts_filter(s):
-    return hamming_dist(s, WT) < mut_cut
+    return hamming_dist(s, WT_DNA) < mut_cut
 
 if __name__ == "__main__":
     import sys
