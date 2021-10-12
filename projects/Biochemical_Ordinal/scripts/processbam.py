@@ -7,8 +7,7 @@ import Bio
 import Bio.SeqIO
 import pysam
 
-datadir = "data/jared_PacBio_data_2"
-bamdir = "/mnt/scratch/sameer/ordinal"
+datadir = "../data/2D"
 
 WT_fasta = Bio.SeqIO.read(datadir + "/2D.fasta", format="fasta")
 WT_DNA = WT_fasta.seq

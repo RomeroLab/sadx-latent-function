@@ -6,7 +6,7 @@ import Bio.SeqIO
 import numpy as np
 import pandas as pd
 
-datadir = "data/jared_PacBio_data_2"
+datadir = "../data/2D"
 
 WT_fasta = Bio.SeqIO.read(datadir + "/2D.fasta", format="fasta")
 WT_DNA = WT_fasta.seq
