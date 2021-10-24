@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-fasta_filename="../data/WT/sadA_wt_trimmed.fasta"
+fasta_filename="../../data/WT/sadA_wt_trimmed.fasta"
 stub="sadA"
-working_dir="../cache"
+working_dir="../../cache"
 
 sto_filename=${working_dir}/${stub}.sto
 out_txt_filename=${working_dir}/${stub}.out.txt
