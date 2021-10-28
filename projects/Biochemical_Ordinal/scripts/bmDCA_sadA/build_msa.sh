@@ -1,8 +1,12 @@
 #!/bin/bash
 
 
-fasta_filename="../../data/WT/sadA_wt_trimmed.fasta"
-stub="sadA"
+#fasta_filename="../../data/WT/sadA_wt_trimmed.fasta"
+#stub="sadA"
+
+fasta_filename="../../data/WT/sadA_wt_with_start.fasta"
+stub="sadA_full"
+
 working_dir="../../cache"
 
 sto_filename=${working_dir}/${stub}.sto
@@ -30,7 +34,7 @@ python3 ~/VAEs/source/reweighting_tools.py \
         -i ${clean_filename} \
         -o ${weights_filename}
 
-rm -f ${sto_filename} ${out_txt_filename} ${afa_filename}
+#rm -f ${sto_filename} ${out_txt_filename} ${afa_filename}
 
-mv ${clean_filename} ${weights_filename} ../data/
+mv ${clean_filename} ${weights_filename} ../../data/
 
