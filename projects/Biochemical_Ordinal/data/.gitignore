@@ -1,2 +1,3 @@
-sadA_clean.fasta
-sadA_clean.weights.npy
+sadA_*.fasta
+sadA_*.weights.npy
+
