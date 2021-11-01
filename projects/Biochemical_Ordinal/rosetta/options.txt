@@ -9,8 +9,8 @@
 		-extra_res_fa AKG.params
 		-extra_res_fa NEU.params
 -out
-#	-file
-#		-score_only score.sc
+	-file
+		-score_only score.sc
 	-path
 		-all Models
 #the packing options allow Rosetta to sample additional rotamers for
