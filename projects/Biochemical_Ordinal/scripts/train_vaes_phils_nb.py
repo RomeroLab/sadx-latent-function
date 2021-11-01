@@ -189,12 +189,14 @@ class ConvVAE(pl.LightningModule):
 
         
     def training_step(self, batch, batch_idx):
+        weights, batch = batch[1], batch[0]
+
         # pass through network 
         z_mean, z_log_var, encoded, decoded = self(batch)
 
         # cost = reconstruction loss + Kullback-Leibler divergence
-        kl_divergence = (0.5 * (z_mean**2 + torch.exp(z_log_var) - z_log_var - 1)).sum()
-        ce_loss = F.cross_entropy(decoded,batch,reduction='sum')
+        kl_divergence = (0.5 * (z_mean**2 + torch.exp(z_log_var) - z_log_var - 1) * weights[:, None]).sum()
+        ce_loss = (F.cross_entropy(decoded,batch,reduction='none') * weights[:, None]).sum()
         cost = kl_divergence + ce_loss 
         
         # log 
@@ -204,12 +206,13 @@ class ConvVAE(pl.LightningModule):
 
     
     def validation_step(self, batch, batch_idx):
+        weights, batch = batch[1], batch[0]
         # pass through network 
         z_mean, z_log_var, encoded, decoded = self(batch)
 
         # cost = reconstruction loss + Kullback-Leibler divergence
-        kl_divergence = (0.5 * (z_mean**2 + torch.exp(z_log_var) - z_log_var - 1)).sum()
-        ce_loss = F.cross_entropy(decoded,batch,reduction='sum')
+        kl_divergence = (0.5 * (z_mean**2 + torch.exp(z_log_var) - z_log_var - 1) * weights[:, None]).sum()
+        ce_loss = (F.cross_entropy(decoded,batch,reduction='none') * weights[:, None]).sum()
         cost = kl_divergence + ce_loss 
         
         # log 
