@@ -11,13 +11,14 @@ OPTIONS_FILE=$2
 NUM_STRUCTS=$3
 
 ROSETTA_SCRIPTS_EXEC=rosetta_scripts.static.linuxgccrelease
-ROSETTA_PATH="."
-DATABASE_PATH="database"
+ROSETTA_PATH=`pwd`
+DATABASE_PATH="${ROSETTA_PATH}/database"
+WORKING_DIR="working"
 GROUP_SERVER_NAME="biocas-00996l.ad.wisc.edu"
 
 #CHTC_CLEANUP=
 
-mkdir -p working
+mkdir -p ${WORKING_DIR}
 
 if [ $(uname -n)  == "${GROUP_SERVER_NAME}" ] ; 
 then
@@ -25,23 +26,20 @@ then
   ROSETTA_PATH="/mnt/scratch/sameer/rosetta/squid"
   DATABASE_PATH="${ROSETTA_PATH}/database"
 
-  cp *.params *.pdb *.xml options.txt working
+  cp *.params *.pdb *.xml options.txt ${WORKING_DIR}
 
 else
   echo "Running on CHTC"
-  # piece together database files and utar
-  cat db.tar.bz2.part* | tar -jx  --directory working
+  # piece together database files and untar
+  # this goes into a database directory and not working dir
+  cat db.tar.bz2.part* | tar -jx 
   
   # clean up database fragments
   rm -f db.tar.bz2.part*
 
   # copy all input files to working directory
-  tar -zxf inputs.tar.gz --directory working
+  tar -zxf inputs.tar.gz --directory ${WORKING_DIR}
 fi
-
-cd working
-# make output directory for structures
-mkdir -p Models
 
 ROSETTA_SCRIPTS_BIN="${ROSETTA_PATH}/${ROSETTA_SCRIPTS_EXEC}"
 if [ ! -f "$ROSETTA_SCRIPTS_BIN" ]; then
@@ -49,6 +47,11 @@ if [ ! -f "$ROSETTA_SCRIPTS_BIN" ]; then
     exit 1
 fi
 chmod +x ${ROSETTA_SCRIPTS_BIN}
+
+# Now let's move to the working directory
+cd working
+# make output directory for structures
+mkdir -p Models
 
 OPTIONS_FILE=options.txt
 if [ ! -f "$OPTIONS_FILE" ]; then
