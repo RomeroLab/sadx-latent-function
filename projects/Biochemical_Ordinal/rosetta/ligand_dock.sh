@@ -17,20 +17,29 @@ GROUP_SERVER_NAME="biocas-00996l.ad.wisc.edu"
 
 #CHTC_CLEANUP=
 
+mkdir -p working
+
 if [ $(uname -n)  == "${GROUP_SERVER_NAME}" ] ; 
 then
   echo "Running on Group Computational Server"
   ROSETTA_PATH="/mnt/scratch/sameer/rosetta/squid"
   DATABASE_PATH="${ROSETTA_PATH}/database"
+
+  cp *.params *.pdb *.xml options.txt working
+
 else
   echo "Running on CHTC"
   # piece together database files and utar
-  cat db.tar.bz2.part* | tar -jx  
+  cat db.tar.bz2.part* | tar -jx  --directory working
   
   # clean up database fragments
   rm -f db.tar.bz2.part*
+
+  # copy all input files to working directory
+  tar -zxf inputs.tar.gz --directory working
 fi
 
+cd working
 # make output directory for structures
 mkdir -p Models
 
@@ -58,18 +67,7 @@ ROSETTA3_DB=${DATABASE_PATH} ${ROSETTA_SCRIPTS_BIN} \
 
 # This file should be returned
 # We should name it something appropriate
-mv Models/score.sc .
-
-## clean up binary file
-#if [ $(uname -n)  != "${GROUP_SERVER_NAME}" ] ; 
-#then
-#  if [ -z "$CHTC_CLEANUP" ] ;
-#  then
-#    echo rm -f ${ROSETTA_SCRIPTS_BIN} 
-#    echo rm -rf database
-#  fi
-#fi
-
+mv Models/score.sc ..
 
 
 
