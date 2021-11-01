@@ -4,6 +4,7 @@ clean:
 	rm -f ROSETTA_CRASH.log
 	rm -f score.sc
 	rm -r Models
+	rm -f logs/*
 
 # test on group server
 test_gs:
