@@ -5,7 +5,7 @@
 
 -in
 	-file
-		-s SadA_NSLeu_Corrected.pdb
+		-s SadA_NSLeu_Corrected_3701.pdb
 		-extra_res_fa AKG.params
 		-extra_res_fa NEU.params
 -out
