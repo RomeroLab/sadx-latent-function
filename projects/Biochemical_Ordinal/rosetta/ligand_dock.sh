@@ -70,7 +70,7 @@ ROSETTA3_DB=${DATABASE_PATH} ${ROSETTA_SCRIPTS_BIN} \
 
 # This file should be returned
 # We should name it something appropriate
-mv Models/scores.sc ..
+mv Models/score.sc ..
 
 
 
