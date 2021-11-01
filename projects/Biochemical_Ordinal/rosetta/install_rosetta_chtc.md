@@ -4,8 +4,9 @@
 
 ```shell
 # make directory to store the tmp files
-mkdir -p /mnt/scratch/sameer/tmp
-cd /mnt/scratch/sameer/tmp
+export ROSETTA_SQUID_COPY="/mnt/scratch/sameer/rosetta/squid"
+mkdir -p ${ROSETTA_SQUID_COPY}
+cd ${ROSETTA_SQUID_COPY}
 
 export ROSETTA_MAIN_DIR="/mnt/scratch/software/rosetta/rosetta_bin_linux_2019.35.60890_bundle/main"
 
@@ -23,13 +24,14 @@ mkdir -p /squid/dcosta2/3_10 # Rosetta version number 3.10
 
 ### Copy files from group server to CHTC
 ```shell
-cd /mnt/scratch/sameer/tmp
+cd ${ROSETTA_SQUID_COPY}
+cp ${ROSETTA_MAIN_DIR}/source/build/src/release/linux/3.10/64/x86/gcc/4.8/static/rosetta_scripts.static.linuxgccrelease .
 
-# copy over parts of the database
-scp db.tar.bz2.part* dcosta2@transfer.chtc.wisc.edu:/squid/dcosta2/3_10
+# copy over parts of the database and the binary
+scp db.tar.bz2.part* rosetta_scripts.static.linuxgccrelease dcosta2@transfer.chtc.wisc.edu:/squid/dcosta2/3_10
 
-# copy over the binary 
-scp ${ROSETTA_MAIN_DIR}/source/build/src/release/linux/3.10/64/x86/gcc/4.8/static/rosetta_scripts.static.linuxgccrelease dcosta2@transfer.chtc.wisc.edu:/squid/dcosta2/3_10
+# create a local database copy
+cat db.tar.bz2.part* | tar -jx
 
 # delete database parts
 /bin/rm -f db.tar.bz2.part?
