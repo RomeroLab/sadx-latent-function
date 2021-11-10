@@ -11,6 +11,7 @@ OPTIONS_FILE=$2
 NUM_STRUCTS=$3
 
 ROSETTA_SCRIPTS_EXEC=rosetta_scripts.static.linuxgccrelease
+ROSETTA_RELAX_EXEC=relax.static.linuxgccrelease
 ROSETTA_PATH=`pwd`
 DATABASE_PATH="${ROSETTA_PATH}/database"
 WORKING_DIR="working"
@@ -42,11 +43,18 @@ else
 fi
 
 ROSETTA_SCRIPTS_BIN="${ROSETTA_PATH}/${ROSETTA_SCRIPTS_EXEC}"
+ROSETTA_RELAX_BIN="${ROSETTA_PATH}/${ROSETTA_RELAX_EXEC}"
 if [ ! -f "$ROSETTA_SCRIPTS_BIN" ]; then
     echo "Error: Rosetta scripts binary $ROSETTA_SCRIPTS_BIN not found"
     exit 1
 fi
 chmod +x ${ROSETTA_SCRIPTS_BIN}
+
+if [ ! -f "$ROSETTA_RELAX_BIN" ]; then
+    echo "Error: Rosetta relax binary $ROSETTA_RELAX_BIN not found"
+    exit 1
+fi
+chmod +x ${ROSETTA_RELAX_BIN}
 
 # Now let's move to the working directory
 cd working
