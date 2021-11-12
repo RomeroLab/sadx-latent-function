@@ -1,0 +1,18 @@
+<ROSETTASCRIPTS>
+
+		<SCOREFXNS>
+		</SCOREFXNS>
+
+		<MOVERS>
+			<MutateResidue name="mutant1" target="28A" new_res="GLY"/>
+			<MutateResidue name="mutant2" target="31A" new_res="GLY"/>
+			<MutateResidue name="mutant3" target="157A" new_res="GLY"/>
+		</MOVERS>
+		<PROTOCOLS>
+			<Add mover_name="mutant1"/>
+			<Add mover_name="mutant2"/>
+			<Add mover_name="mutant3"/>
+		</PROTOCOLS>
+
+
+</ROSETTASCRIPTS>
