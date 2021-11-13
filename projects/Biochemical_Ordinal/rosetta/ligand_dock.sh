@@ -2,12 +2,12 @@
 
 
 if [[ $# -le 2 ]] ; then
-    echo 'Usage: ./$0 PROCESS_NUM OPTIONS_FILE NUM_STRUCTS'
+    echo 'Usage: ./$0 PROCESS_NUM VARIANT NUM_STRUCTS'
     exit 1
 fi
 
 PROCESS_NUM=$1
-OPTIONS_FILE=$2
+VARIANT=$2
 NUM_STRUCTS=$3
 
 ROSETTA_SCRIPTS_EXEC=rosetta_scripts.static.linuxgccrelease

@@ -1,5 +1,4 @@
 
-
 clean:
 	rm -f ROSETTA_CRASH.log
 	rm -f score.sc
@@ -12,7 +11,7 @@ inputs.tar.gz: *.pdb *.xml *.params options.txt
 
 # test on group server
 test_gs: inputs.tar.gz
-	./ligand_dock.sh 0 options.txt 10
+	./ligand_dock.sh 0 
 
 
 # submit on chtc
