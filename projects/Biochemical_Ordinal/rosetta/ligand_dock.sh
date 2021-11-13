@@ -10,6 +10,15 @@ PROCESS_NUM=$1
 VARIANT=$2
 NUM_STRUCTS=$3
 
+CHAIN="A"
+
+function reportError() {
+  if [ $1 -ne 0 ]; then
+    echo $2
+    exit $1
+  fi
+}
+
 ROSETTA_SCRIPTS_EXEC=rosetta_scripts.static.linuxgccrelease
 ROSETTA_RELAX_EXEC=relax.static.linuxgccrelease
 ROSETTA_PATH=`pwd`
@@ -27,7 +36,7 @@ then
   ROSETTA_PATH="/mnt/scratch/sameer/rosetta/squid"
   DATABASE_PATH="${ROSETTA_PATH}/database"
 
-  cp *.params *.pdb *.xml options.txt ${WORKING_DIR}
+  cp *.params *.pdb *.xml options_*.txt ${WORKING_DIR}
 
 else
   echo "Running on CHTC"
@@ -56,29 +65,59 @@ if [ ! -f "$ROSETTA_RELAX_BIN" ]; then
 fi
 chmod +x ${ROSETTA_RELAX_BIN}
 
+# create the variant file to mutate
+chmod +x create_variant_xml.sh
+./create_variant_xml.sh "$VARIANT" "$CHAIN" > "${WORKING_DIR}"/SadA_mutate.xml
+reportError $? "Create Variant XML script failed"
+
 # Now let's move to the working directory
 cd working
 # make output directory for structures
-mkdir -p Models
+mkdir -p Relax_commandline
 
-OPTIONS_FILE=options.txt
-if [ ! -f "$OPTIONS_FILE" ]; then
-    echo "Error: Options file $OPTIONS_FILE not found"
+OPTIONS_MUTATE_FILE=options_mutate.txt
+if [ ! -f "$OPTIONS_MUTATE_FILE" ]; then
+    echo "Error: Options file $OPTIONS_MUTATE_FILE not found"
     exit 1
 fi
+
+OPTIONS_DOCK_FILE=options_dock.txt
+if [ ! -f "$OPTIONS_DOCK_FILE" ]; then
+    echo "Error: Options file $OPTIONS_DOCK_FILE not found"
+    exit 1
+fi
+
 
 if [ -z "$NUM_STRUCTS" ]; then
     echo "Error: Number of structs $NUM_STRUCTS not specified"
     exit 1
 fi
 
-ROSETTA3_DB=${DATABASE_PATH} ${ROSETTA_SCRIPTS_BIN} \
-    @${OPTIONS_FILE} \
+# Make the mutations 
+ROSETTA3_DB="${DATABASE_PATH}" \
+	"${ROSETTA_SCRIPTS_BIN}" \
+	@${OPTIONS_MUTATE_FILE} \
+	-nstruct 1
+
+# relax the mutated file
+ROSETTA3_DB="${DATABASE_PATH}" \
+	"${ROSETTA_RELAX_BIN}" \
+	-in:file:s Relax_commandline/SadA_NSLeu_Corrected_3701_0001.pdb \
+	-in:file:extra_res_fa NEU.params \
+	-in:file:extra_res_fa AKG.params  \
+	-relax:constrain_relax_to_start_coords \
+	-relax:fast \
+	-out:path:all Relax_commandline
+
+# dock
+ROSETTA3_DB="${DATABASE_PATH}" \
+	"${ROSETTA_SCRIPTS_BIN}" \
+    @${OPTIONS_DOCK_FILE} \
     -nstruct ${NUM_STRUCTS} \
 
 # This file should be returned
 # We should name it something appropriate
-mv Models/score.sc ..
+#mv Relax_commandline/score.sc ..
 
 
 
