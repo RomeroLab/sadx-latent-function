@@ -5,7 +5,7 @@
 
 -in
 	-file
-		-s SadA_NSLeu_Corrected_3701_0002_0001_0002.pdb
+		-s Relax_commandline/SadA_NSLeu_Corrected_3701_0002_0001_0001.pdb
 		-extra_res_fa AKG.params
 		-extra_res_fa NEU.params
 -out

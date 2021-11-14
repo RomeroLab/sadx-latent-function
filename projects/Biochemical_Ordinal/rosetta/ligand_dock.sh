@@ -65,15 +65,18 @@ if [ ! -f "$ROSETTA_RELAX_BIN" ]; then
 fi
 chmod +x ${ROSETTA_RELAX_BIN}
 
+echo "Creating Variant XML file"
 # create the variant file to mutate
 chmod +x create_variant_xml.sh
 ./create_variant_xml.sh "$VARIANT" "$CHAIN" > "${WORKING_DIR}"/SadA_mutate.xml
 reportError $? "Create Variant XML script failed"
 
+echo "Making working directories"
 # Now let's move to the working directory
 cd working
 # make output directory for structures
-mkdir -p Relax_commandline
+mkdir -p Relax_commandline # for Rosetta output
+mkdir -p output # for output returned from chtc
 
 OPTIONS_MUTATE_FILE=options_mutate.txt
 if [ ! -f "$OPTIONS_MUTATE_FILE" ]; then
@@ -93,31 +96,56 @@ if [ -z "$NUM_STRUCTS" ]; then
     exit 1
 fi
 
+echo "Making the mutations"
 # Make the mutations 
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
 	@${OPTIONS_MUTATE_FILE} \
 	-nstruct 1
 
+echo "Relaxing the mutation pdb"
 # relax the mutated file
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_RELAX_BIN}" \
-	-in:file:s Relax_commandline/SadA_NSLeu_Corrected_3701_0001.pdb \
+	-in:file:s Relax_commandline/SadA_NSLeu_Corrected_3701_0002_0001.pdb \
 	-in:file:extra_res_fa NEU.params \
 	-in:file:extra_res_fa AKG.params  \
 	-relax:constrain_relax_to_start_coords \
 	-relax:fast \
 	-out:path:all Relax_commandline
 
+echo "Copying relaxed structure and scores to output directory"
+OUTPUT_YAML=output/info.yaml
+echo "starting_struct: " SadA_NSLeu_Corrected_3701_0002  > ${OUTPUT_YAML}
+echo "Variant: " "$VARIANT" >> ${OUTPUT_YAML}
+
+cp Relax_commandline/SadA_NSLeu_Corrected_3701_0002_0001_0001.pdb \
+	output/variant_relaxed.pdb
+mv Relax_commandline/score.sc output/variant_relaxed_score.sc
+
+echo "Docking relaxed structure"
 # dock
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
     @${OPTIONS_DOCK_FILE} \
-    -nstruct ${NUM_STRUCTS} \
+    -nstruct ${NUM_STRUCTS} 
 
-# This file should be returned
-# We should name it something appropriate
-#mv Relax_commandline/score.sc ..
+echo "copying the best structure and scores to output directory"
+# identify and copy the best structure
+best_struct=`sort -n -k2 Relax_commandline/score.sc | head -1 | awk  '{print $NF}'`
+cp Relax_commandline/"${best_struct}.pdb" output/variant_docked.pdb
+
+# copy the first two lines of the score file
+head -2 Relax_commandline/score.sc > output/variant_docked_score.sc
+# copy the scores of the best structure
+grep "${best_struct}" Relax_commandline/score.sc  >> output/variant_docked_score.sc
+
+echo "tar up output directory"
+# tar the output file in the parent directory (above working directory)
+# This .tar.gz file will be returned by chtc
+tar zcf "../SadA_${VARIANT}_rosetta.tar.gz" -C output .
+
+echo "Done!"
 
 
 

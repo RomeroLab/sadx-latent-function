@@ -6,6 +6,9 @@ clean:
 	rm -f inputs.tar.gz
 	rm -f logs/*
 
+deepclean: clean
+	rm -f *.tar.gz
+
 inputs.tar.gz: *.pdb *.xml *.params options_*.txt 
 	tar zcf inputs.tar.gz *.pdb *.xml *.params options_*.txt 
 
