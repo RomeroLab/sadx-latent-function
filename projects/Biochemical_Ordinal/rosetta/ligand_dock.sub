@@ -7,15 +7,17 @@ output = logs/ligand_dock_$(Cluster)_$(Process).out
 requirements = (OpSysMajorVer == 7) && (has_avx == true)
 
 executable = ligand_dock.sh
-arguments = $(Process) options.txt 10
+arguments = $(Process) $(variant) 100
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
 transfer_input_files = inputs.tar.gz,\
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/3_10/rosetta_scripts.static.linuxgccrelease,\
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/3_10/db.tar.bz2.partaa,\
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/3_10/db.tar.bz2.partab
+    create_variant_xml.sh, \
+    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/rosetta_scripts.static.linuxgccrelease,\
+    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/relax.static.linuxgccrelease,\
+    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/db.tar.bz2.partaa,\
+    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/db.tar.bz2.partab
 
 
 request_cpus = 1
@@ -23,5 +25,5 @@ request_memory = 4GB
 request_disk = 5GB
 
 # Tell HTCondor to run some instances of our job:
-queue 1
+queue variant from variant_list.txt
 

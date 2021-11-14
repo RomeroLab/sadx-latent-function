@@ -1,10 +1,10 @@
 
 clean:
 	rm -f ROSETTA_CRASH.log
-	rm -f score.sc
 	rm -rf working
 	rm -f inputs.tar.gz
 	rm -f logs/*
+	mv -f SadA_*_rosetta.tar.gz results/
 
 deepclean: clean
 	rm -f *.tar.gz
