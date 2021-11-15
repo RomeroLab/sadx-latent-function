@@ -4,6 +4,8 @@ clean:
 	rm -rf working
 	rm -f inputs.tar.gz
 	rm -f logs/*
+
+move_results:
 	mv -f SadA_*_rosetta.tar.gz results/
 
 deepclean: clean
