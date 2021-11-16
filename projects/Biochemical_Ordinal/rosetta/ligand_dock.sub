@@ -25,5 +25,5 @@ request_memory = 4GB
 request_disk = 5GB
 
 # Tell HTCondor to run some instances of our job:
-queue variant from variant_list.txt
+queue variant from $(VARIANT_LIST_FILE)
 
