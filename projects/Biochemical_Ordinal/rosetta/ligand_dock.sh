@@ -1,14 +1,14 @@
 #!/bin/bash
 
-
-if [[ $# -le 2 ]] ; then
-    echo 'Usage: ./$0 PROCESS_NUM VARIANT NUM_STRUCTS'
+if [[ $# -le 3 ]] ; then
+    echo 'Usage: ./$0 PROCESS_NUM START_STRUCT VARIANT NUM_STRUCTS'
     exit 1
 fi
 
 PROCESS_NUM=$1
-VARIANT=$2
-NUM_STRUCTS=$3
+START_STRUCT=$2
+VARIANT=$3
+NUM_STRUCTS=$4
 
 CHAIN="A"
 
@@ -18,6 +18,11 @@ function reportError() {
     exit $1
   fi
 }
+
+
+# https://stackoverflow.com/questions/2664740/extract-file-basename-without-path-and-extension-in-bash/
+START_STRUCT_NO_PATH="${START_STRUCT##*/}"
+START_STRUCT_BASE="${START_STRUCT_NO_PATH%.pdb}"
 
 ROSETTA_SCRIPTS_EXEC=rosetta_scripts.static.linuxgccrelease
 ROSETTA_RELAX_EXEC=relax.static.linuxgccrelease
@@ -36,7 +41,7 @@ then
   ROSETTA_PATH="/mnt/scratch/sameer/rosetta/squid"
   DATABASE_PATH="${ROSETTA_PATH}/database"
 
-  cp *.params *.pdb *.xml options_*.txt ${WORKING_DIR}
+  cp *.params *.pdb *.xml ${WORKING_DIR}
 
 else
   echo "Running on CHTC"
@@ -78,19 +83,6 @@ cd working
 mkdir -p Relax_commandline # for Rosetta output
 mkdir -p output # for output returned from chtc
 
-OPTIONS_MUTATE_FILE=options_mutate.txt
-if [ ! -f "$OPTIONS_MUTATE_FILE" ]; then
-    echo "Error: Options file $OPTIONS_MUTATE_FILE not found"
-    exit 1
-fi
-
-OPTIONS_DOCK_FILE=options_dock.txt
-if [ ! -f "$OPTIONS_DOCK_FILE" ]; then
-    echo "Error: Options file $OPTIONS_DOCK_FILE not found"
-    exit 1
-fi
-
-
 if [ -z "$NUM_STRUCTS" ]; then
     echo "Error: Number of structs $NUM_STRUCTS not specified"
     exit 1
@@ -100,14 +92,25 @@ echo "Making the mutations"
 # Make the mutations 
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
-	@${OPTIONS_MUTATE_FILE} \
+    -in:file:s "${START_STRUCT}" \
+    -in:file:extra_res_fa AKG.params \
+    -in:file:extra_res_fa NEU.params \
+    -out:path:all Relax_commandline \
+    -packing:ex1 \
+    -packing:ex2 \
+	-packing:no_optH false \
+	-packing:flip_HNQ true \
+	-packing:ignore_ligand_chi true \
+    -parser:protocol SadA_mutate.xml \
+    -overwrite \
+    -mistakes \
 	-nstruct 1
 
 echo "Relaxing the mutation pdb"
 # relax the mutated file
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_RELAX_BIN}" \
-	-in:file:s Relax_commandline/SadA_NSLeu_Corrected_3701_0002_0001.pdb \
+	-in:file:s Relax_commandline/"${START_STRUCT_BASE}"_0001.pdb \
 	-in:file:extra_res_fa NEU.params \
 	-in:file:extra_res_fa AKG.params  \
 	-relax:constrain_relax_to_start_coords \
@@ -116,10 +119,10 @@ ROSETTA3_DB="${DATABASE_PATH}" \
 
 echo "Copying relaxed structure and scores to output directory"
 OUTPUT_YAML=output/info.yaml
-echo "starting_struct: " SadA_NSLeu_Corrected_3701_0002  > ${OUTPUT_YAML}
+echo "starting_struct: " ${START_STRUCT_BASE}  > ${OUTPUT_YAML}
 echo "Variant: " "$VARIANT" >> ${OUTPUT_YAML}
 
-cp Relax_commandline/SadA_NSLeu_Corrected_3701_0002_0001_0001.pdb \
+cp Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
 	output/variant_relaxed.pdb
 mv Relax_commandline/score.sc output/variant_relaxed_score.sc
 
@@ -127,7 +130,19 @@ echo "Docking relaxed structure"
 # dock
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
-    @${OPTIONS_DOCK_FILE} \
+    -in:file:s Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
+	-in:file:extra_res_fa AKG.params \
+	-in:file:extra_res_fa NEU.params \
+    -out:path:all Relax_commandline
+    -packing:ex1 \
+    -packing:ex2 \
+	-packing:no_optH false \
+	-packing:flip_HNQ true \
+	-packing:ignore_ligand_chi true \
+    -parser:protocol SadA_mutant_dock.xml \
+    -overwrite \
+    -mistakes \
+	-restore_pre_talaris_2013_behavior true \
     -nstruct ${NUM_STRUCTS} 
 
 echo "copying the best structure and scores to output directory"

@@ -7,7 +7,7 @@ output = logs/ligand_dock_$(Cluster)_$(Process).out
 requirements = (OpSysMajorVer == 7) && (has_avx == true)
 
 executable = ligand_dock.sh
-arguments = $(Process) $(variant) 100
+arguments = $(Process) $(START_STRUCT) $(variant) 100
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT

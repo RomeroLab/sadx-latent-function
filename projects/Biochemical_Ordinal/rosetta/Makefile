@@ -11,15 +11,18 @@ move_results:
 deepclean: clean
 	rm -f *.tar.gz
 
-inputs.tar.gz: *.pdb *.xml *.params options_*.txt 
-	tar zcf inputs.tar.gz *.pdb *.xml *.params options_*.txt 
+inputs.tar.gz: *.pdb *.xml *.params
+	tar zcf inputs.tar.gz *.pdb *.xml *.params
 
 # test on group server
 test_gs: inputs.tar.gz
-	./ligand_dock.sh 0 "X42A.X100D" 100
+	./ligand_dock.sh 0 SadA_NSLeu_Corrected_3701_0002.pdb "X42A.X100D" 100
 
 
 # submit on chtc
-submit: inputs.tar.gz
-	condor_submit ligand_dock.sub
+submit_wt: inputs.tar.gz
+	condor_submit START_STRUCT=SadA_NSLeu_Corrected_3701_0002.pdb ligand_dock.sub
+
+submit_2d: inputs.tar.gz
+	condor_submit START_STRUCT=SadA_NSLeu_2D.pdb ligand_dock.sub
 
