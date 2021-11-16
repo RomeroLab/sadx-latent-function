@@ -133,7 +133,7 @@ ROSETTA3_DB="${DATABASE_PATH}" \
     -in:file:s Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
 	-in:file:extra_res_fa AKG.params \
 	-in:file:extra_res_fa NEU.params \
-    -out:path:all Relax_commandline
+    -out:path:all Relax_commandline \
     -packing:ex1 \
     -packing:ex2 \
 	-packing:no_optH false \

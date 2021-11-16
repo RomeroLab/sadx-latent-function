@@ -3,3 +3,4 @@ inputs.tar.gz
 working
 logs
 results*/
+*.tar.gz
