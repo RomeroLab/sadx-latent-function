@@ -49,13 +49,17 @@ def load_chtc_results_to_sqlite(tar_gz_filelist, db_con):
 
 
 if __name__ == "__main__":
-    db_con = get_sqlite_dbcon(parent="WT")
+#    db_con = get_sqlite_dbcon(parent="WT")
+#
+#    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/results_WT_campaign1")
+#    load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), db_con)
+#
+#    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/results_WT_random")
+#    load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), db_con)
+#
 
-    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/results_WT_campaign1")
+    db_con = get_sqlite_dbcon(parent="2D")
+
+    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/results_2D/")
     load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), db_con)
-
-    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/results_WT_random")
-    load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), db_con)
-
-
 
