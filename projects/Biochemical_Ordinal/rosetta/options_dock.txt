@@ -5,7 +5,7 @@
 
 -in
 	-file
-		-s SadA_NSLeu_Corrected_3701_0002.pdb
+#		-s SadA_NSLeu_Corrected_3701_0002_0001_0002.pdb
 		-extra_res_fa AKG.params
 		-extra_res_fa NEU.params
 -out
@@ -28,7 +28,7 @@
 #parser:protocol locates the XML file for RosettaScripts
 
 -parser
-	-protocol SadA_mutate.xml
+	-protocol SadA_mutant_dock.xml
 
 #overwrite allows Rosetta to write over previous structures and scores
 
@@ -38,4 +38,5 @@
 #This flag restores certain parameters to previously published values
 
 -mistakes
+	-restore_pre_talaris_2013_behavior true
  

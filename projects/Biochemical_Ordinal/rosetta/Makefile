@@ -11,12 +11,15 @@ move_results:
 deepclean: clean
 	rm -f *.tar.gz
 
-inputs.tar.gz: *.pdb *.xml *.params
-	tar zcf inputs.tar.gz *.pdb *.xml *.params
+inputs.tar.gz: *.pdb *.xml *.params options_*.txt
+	tar zcf inputs.tar.gz *.pdb *.xml *.params options_*.txt
 
 # test on group server
 test_gs: inputs.tar.gz
 	./ligand_dock.sh 0 SadA_NSLeu_Corrected_3701_0002.pdb "X42A.X100D" 100
+
+test_variant_xml:
+	bash -c 'diff <(./create_variant_xml.sh X65G.X71G.X157G A) attic/SadA_mutate_example.xml'
 
 
 # submit on chtc

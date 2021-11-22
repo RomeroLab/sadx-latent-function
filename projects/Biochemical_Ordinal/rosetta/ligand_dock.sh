@@ -41,7 +41,7 @@ then
   ROSETTA_PATH="/mnt/scratch/sameer/rosetta/squid"
   DATABASE_PATH="${ROSETTA_PATH}/database"
 
-  cp *.params *.pdb *.xml ${WORKING_DIR}
+  cp *.params *.pdb *.xml options_*.txt ${WORKING_DIR}
 
 else
   echo "Running on CHTC"
@@ -93,17 +93,7 @@ echo "Making the mutations"
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
     -in:file:s "${START_STRUCT}" \
-    -in:file:extra_res_fa AKG.params \
-    -in:file:extra_res_fa NEU.params \
-    -out:path:all Relax_commandline \
-    -packing:ex1 \
-    -packing:ex2 \
-	-packing:no_optH false \
-	-packing:flip_HNQ true \
-	-packing:ignore_ligand_chi true \
-    -parser:protocol SadA_mutate.xml \
-    -overwrite \
-    -mistakes \
+    @options_mutate.txt  \
 	-nstruct 1
 
 echo "Relaxing the mutation pdb"
@@ -131,18 +121,7 @@ echo "Docking relaxed structure"
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
     -in:file:s Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
-	-in:file:extra_res_fa AKG.params \
-	-in:file:extra_res_fa NEU.params \
-    -out:path:all Relax_commandline \
-    -packing:ex1 \
-    -packing:ex2 \
-	-packing:no_optH false \
-	-packing:flip_HNQ true \
-	-packing:ignore_ligand_chi true \
-    -parser:protocol SadA_mutant_dock.xml \
-    -overwrite \
-    -mistakes \
-	-restore_pre_talaris_2013_behavior true \
+    @options_dock.txt \
     -nstruct ${NUM_STRUCTS} 
 
 echo "copying the best structure and scores to output directory"
