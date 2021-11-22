@@ -80,7 +80,8 @@ echo "Making working directories"
 # Now let's move to the working directory
 cd working
 # make output directory for structures
-mkdir -p Relax_commandline # for Rosetta output
+mkdir -p Models # for output of rosetta scripts
+mkdir -p Relax_commandline # for Rosetta relax output
 mkdir -p output # for output returned from chtc
 
 if [ -z "$NUM_STRUCTS" ]; then
@@ -100,7 +101,7 @@ echo "Relaxing the mutation pdb"
 # relax the mutated file
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_RELAX_BIN}" \
-	-in:file:s Relax_commandline/"${START_STRUCT_BASE}"_0001.pdb \
+	-in:file:s Models/"${START_STRUCT_BASE}"_0001.pdb \
 	-in:file:extra_res_fa NEU.params \
 	-in:file:extra_res_fa AKG.params  \
 	-relax:constrain_relax_to_start_coords \
@@ -112,6 +113,7 @@ OUTPUT_YAML=output/info.yaml
 echo "starting_struct: " ${START_STRUCT_BASE}  > ${OUTPUT_YAML}
 echo "Variant: " "$VARIANT" >> ${OUTPUT_YAML}
 
+echo "Copying files to output directory" 
 cp Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
 	output/variant_relaxed.pdb
 mv Relax_commandline/score.sc output/variant_relaxed_score.sc
@@ -126,13 +128,15 @@ ROSETTA3_DB="${DATABASE_PATH}" \
 
 echo "copying the best structure and scores to output directory"
 # identify and copy the best structure
-best_struct=`sort -n -k2 Relax_commandline/score.sc | head -1 | awk  '{print $NF}'`
+sort -n -k2 Relax_commandline/score.sc > Relax_commandline/sorted_score.sc
+# last field of the first row in the sorted score file
+best_struct=`awk  'NR==1{print $NF}' Relax_commandline/sorted_score.sc`
 cp Relax_commandline/"${best_struct}.pdb" output/variant_docked.pdb
 
 # copy the first two lines of the score file
 head -2 Relax_commandline/score.sc > output/variant_docked_score.sc
 # copy the scores of the best structure
-grep "${best_struct}" Relax_commandline/score.sc  >> output/variant_docked_score.sc
+head -1 Relax_commandline/sorted_score.sc >> output/variant_docked_score.sc 
 
 echo "tar up output directory"
 # tar the output file in the parent directory (above working directory)
