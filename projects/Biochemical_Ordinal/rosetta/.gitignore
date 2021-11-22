@@ -4,5 +4,4 @@ working
 logs
 results*/
 *.tar.gz
-variant_list_WT.txt
-variant_list_2D_random.txt
+variant_list_*.txt

@@ -68,6 +68,7 @@ if __name__ == "__main__":
 
     for _ in range(n):
         variant_positions = random.sample(positions_to_mutate, d)
+        variant_positions.sort()
         variant = ".".join([make_random_point_mutation(parent, pos)
                         for pos in variant_positions])
         print(variant)

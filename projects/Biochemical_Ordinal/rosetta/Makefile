@@ -37,13 +37,34 @@ submit_wt: inputs.tar.gz
 			VARIANT_LIST_FILE=variant_list_WT.txt \
 			ligand_dock.sub
 
-submit_2d: inputs.tar.gz
-	condor_submit \
+#submit_2d: inputs.tar.gz
+	#condor_submit \
 			START_STRUCT=SadA_NSLeu_2D.pdb  \
 			VARIANT_LIST_FILE=variant_list_2D_EPPCR.txt \
 			ligand_dock.sub
-	condor_submit \
+	#condor_submit \
 			START_STRUCT=SadA_NSLeu_2D.pdb  \
 			VARIANT_LIST_FILE=variant_list_2D_random.txt \
 			ligand_dock.sub
 
+submit_2d_random: inputs.tar.gz
+	condor_submit \
+			START_STRUCT=SadA_NSLeu_2D.pdb  \
+			VARIANT_LIST_FILE=variant_list_2D_random_aa.txt \
+			ligand_dock.sub
+	condor_submit \
+			START_STRUCT=SadA_NSLeu_2D.pdb  \
+			VARIANT_LIST_FILE=variant_list_2D_random_ab.txt \
+			ligand_dock.sub
+	condor_submit \
+			START_STRUCT=SadA_NSLeu_2D.pdb  \
+			VARIANT_LIST_FILE=variant_list_2D_random_ac.txt \
+			ligand_dock.sub
+	condor_submit \
+			START_STRUCT=SadA_NSLeu_2D.pdb  \
+			VARIANT_LIST_FILE=variant_list_2D_random_ad.txt \
+			ligand_dock.sub
+	condor_submit \
+			START_STRUCT=SadA_NSLeu_2D.pdb  \
+			VARIANT_LIST_FILE=variant_list_2D_random_ae.txt \
+			ligand_dock.sub
