@@ -1,3 +1,6 @@
+RDRIVE_TAR=/mnt/rdrive/promero2/General/Sameer/SadA_azidation/rosetta/2D_triple_mutants.tar
+CHTC_RESULTS_PATH=sameerd/projects/Biochemical_Ordinal/rosetta/results
+SCRATCH_OUTPUT_DIR=../data/scratch/rosetta/2D_triple_mutants
 
 clean:
 	rm -f ROSETTA_CRASH.log
@@ -11,12 +14,13 @@ tidy:
 	rm -f logs/*.out
 
 move_chtc_results:
-	scp dcosta2@submit-1.chtc.wisc.edu:sameerd/projects/Biochemical_Ordinal/rosetta/results/"*" ../data/scratch/rosetta/2D_triple_mutants/
-	ssh dcosta2@submit-1.chtc.wisc.edu 'rm sameerd/projects/Biochemical_Ordinal/rosetta/results/*'
+	scp dcosta2@submit-1.chtc.wisc.edu:${CHTC_RESULTS_PATH}/"*" \
+		${SCRATCH_OUTPUT_DIR} 
+	ssh dcosta2@submit-1.chtc.wisc.edu 'rm ${CHTC_RESULTS_PATH}/*'
 
 rdrive_backup:
-	rm -f /mnt/rdrive/promero2/General/Sameer/SadA_azidation/rosetta/2D_triple_mutants.tar 
-	tar cf /mnt/rdrive/promero2/General/Sameer/SadA_azidation/rosetta/2D_triple_mutants.tar -C ../data/scratch/rosetta 2D_triple_mutants
+	mv -f ${RDRIVE_TAR} ${RDRIVE_TAR}.bak
+	tar cf ${RDRIVE_TAR} -C ../data/scratch/rosetta 2D_triple_mutants
 
 deepclean: clean
 	rm -f *.tar.gz
@@ -47,20 +51,14 @@ submit_wt: inputs.tar.gz
 			VARIANT_LIST_FILE=variant_list_WT.txt \
 			ligand_dock.sub
 
-#submit_2d: inputs.tar.gz
-	#condor_submit \
-			START_STRUCT=SadA_NSLeu_2D.pdb  \
-			VARIANT_LIST_FILE=variant_list_2D_EPPCR.txt \
-			ligand_dock.sub
-	#condor_submit \
-			START_STRUCT=SadA_NSLeu_2D.pdb  \
-			VARIANT_LIST_FILE=variant_list_2D_random.txt \
-			ligand_dock.sub
-
 submit_2d_random: inputs.tar.gz
+	#@for f in $(shell ls variant_list_2D_random_a[a-e].txt); do \
+	#@for f in $(shell ls variant_list_2D_random_a[f-g].txt); do \
+	#
 	@for f in $(shell ls variant_list_2D_random_a[h-i].txt); do \
 		echo condor_submit \
 			START_STRUCT=SadA_NSLeu_2D.pdb  \
 			VARIANT_LIST_FILE=$${f} \
 			ligand_dock.sub; \
 	 done
+	#@for f in $(shell ls variant_list_2D_random_a[j-l].txt); do \
