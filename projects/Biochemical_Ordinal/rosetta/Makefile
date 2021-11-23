@@ -8,6 +8,14 @@ clean:
 move_results:
 	mv -f SadA_*_rosetta.tar.gz results/
 
+move_chtc_results:
+	scp dcosta2@submit-1.chtc.wisc.edu:sameerd/projects/Biochemical_Ordinal/rosetta/results/"*" ../data/scratch/rosetta/2D_triple_mutants/
+	ssh dcosta2@submit-1.chtc.wisc.edu 'rm sameerd/projects/Biochemical_Ordinal/rosetta/results/*'
+
+rdrive_backup:
+	rm -f /mnt/rdrive/promero2/General/Sameer/SadA_azidation/rosetta/2D_triple_mutants.tar 
+	tar cf /mnt/rdrive/promero2/General/Sameer/SadA_azidation/rosetta/2D_triple_mutants.tar -C ../data/scratch/rosetta 2D_triple_mutants
+
 deepclean: clean
 	rm -f *.tar.gz
 
