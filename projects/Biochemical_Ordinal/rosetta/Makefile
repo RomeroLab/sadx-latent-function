@@ -21,6 +21,7 @@ move_chtc_results:
 rdrive_backup:
 	mv -f ${RDRIVE_TAR} ${RDRIVE_TAR}.bak
 	tar cf ${RDRIVE_TAR} -C ../data/scratch/rosetta 2D_triple_mutants
+	du -s -h ${RDRIVE_TAR}
 
 deepclean: clean
 	rm -f *.tar.gz
