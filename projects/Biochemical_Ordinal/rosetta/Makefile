@@ -18,7 +18,7 @@ move_chtc_results:
 		${SCRATCH_OUTPUT_DIR} 
 	ssh dcosta2@submit-1.chtc.wisc.edu 'rm ${CHTC_RESULTS_PATH}/*'
 
-rdrive_backup:
+backup_results:
 	mv -f ${RDRIVE_TAR} ${RDRIVE_TAR}.bak
 	tar cf ${RDRIVE_TAR} -C ../data/scratch/rosetta 2D_triple_mutants
 	du -s -h ${RDRIVE_TAR}
