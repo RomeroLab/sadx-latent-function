@@ -55,11 +55,11 @@ submit_wt: inputs.tar.gz
 submit_2d_random: inputs.tar.gz
 	#@for f in $(shell ls variant_list_2D_random_a[a-e].txt); do \
 	#@for f in $(shell ls variant_list_2D_random_a[f-g].txt); do \
+	#@for f in $(shell ls variant_list_2D_random_a[h-i].txt); do \
 	#
-	@for f in $(shell ls variant_list_2D_random_a[h-i].txt); do \
-		echo condor_submit \
+	@for f in $(shell ls variant_list_2D_random_a[j-l].txt); do \
+		condor_submit \
 			START_STRUCT=SadA_NSLeu_2D.pdb  \
 			VARIANT_LIST_FILE=$${f} \
 			ligand_dock.sub; \
 	 done
-	#@for f in $(shell ls variant_list_2D_random_a[j-l].txt); do \
