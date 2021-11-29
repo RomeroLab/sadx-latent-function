@@ -59,7 +59,6 @@ if __name__ == "__main__":
 #
 
     db_con = get_sqlite_dbcon(parent="2D")
-
-    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/results_2D/")
+    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/2D_triple_mutants")
     load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), db_con)
 
