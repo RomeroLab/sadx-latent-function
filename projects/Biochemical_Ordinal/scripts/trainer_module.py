@@ -42,7 +42,7 @@ def train(model_name, num_variants=100000,
             embed_freeze=True, # whether the embedding is trainable or not
             max_epochs=50, gpus=0, seed = 1111, 
             log_dir="../data/scratch/rosetta/training_logs",
-            **model_kwargs):
+            *args, **model_kwargs):
 
     pl.utilities.seed.seed_everything(seed)
     logger = CSVLogger(log_dir, name='RosettaEnergiesTraining')
@@ -52,7 +52,7 @@ def train(model_name, num_variants=100000,
     # initialize model from the model_name
     model = getattr(model_module, model_name)(slen=dm.slen,
                         nparam=dm.nparam, embed_ncomp=embed_ncomp, 
-                        embed_freeze=embed_freeze, **model_kwargs)
+                        embed_freeze=embed_freeze, *args, **model_kwargs)
     trainer.fit(model, dm)
 
     # return info on training process
@@ -91,6 +91,8 @@ if __name__ == "__main__":
                     action='store_true')  # default False i.e. frozen embedding
     parser.add_argument("-g", "--gpus",
                     help="GPUs", default=0, type=int) 
+    parser.add_argument("-k", "--kernel_size",
+                    help="kernel size", default=0, type=int) 
     args = parser.parse_args()
 
     model, retd = train(
@@ -100,7 +102,8 @@ if __name__ == "__main__":
             embed_freeze=not args.embed_unfreeze, # embedding is trainable? 
             max_epochs=args.max_epochs, 
             gpus=args.gpus, 
-            seed = args.seed) 
+            seed = args.seed, 
+            ks=args.kernel_size) 
 
     if args.output_pickle is not None:
         op_filename = pathlib.Path(args.output_pickle).with_suffix(".pkl")

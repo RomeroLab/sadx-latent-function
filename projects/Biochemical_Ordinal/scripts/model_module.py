@@ -2,6 +2,7 @@
 import torch
 import torch.optim 
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 import pytorch_lightning as pl
@@ -17,7 +18,7 @@ class RosettaEnergyPrediction(pl.LightningModule):
                 nparam, # number of energy terms to predict (dm.nparam)
                 embed_ncomp=0,  # 0 means one-hot, >0 means PCA encoding
                 embed_freeze=True, # whether the embedding is trainable or not
-                learning_rate=0.01):
+                learning_rate=0.01, *args, **kwargs):
         
         super().__init__()
 
@@ -94,3 +95,44 @@ class LinearRosettaEnergyPrediction(RosettaEnergyPrediction):
         x = self.linear(x)
         return x
   
+
+class CNNRosettaEnergyPrediction(RosettaEnergyPrediction):
+    
+    def __init__(self,
+                slen,  # sequence length (get from data_module dm.slen)
+                nparam, # number of energy terms to predict (dm.nparam)
+                embed_ncomp=0,  # 0 means one-hot, >0 means PCA encoding
+                embed_freeze=True, # whether the embedding is trainable or not
+                learning_rate=0.01,
+                ks=0, # kernel size
+                ):
+        self.ks = ks
+        super().__init__(slen=slen, nparam=nparam, embed_ncomp=embed_ncomp, 
+                         embed_freeze=embed_freeze, learning_rate=learning_rate)
+
+    
+    def setup_layers(self):
+        edim = self.edim
+        ks = self.ks
+        slen = self.slen
+        
+        self.enc_conv_1 = torch.nn.Conv1d(in_channels=  edim, 
+                out_channels=2*edim, kernel_size=ks)
+        self.enc_conv_2 = torch.nn.Conv1d(in_channels=2*edim, 
+                out_channels=4*edim, kernel_size=ks) 
+        # each convolution reduces slen by ks-1, 
+        # multiply by the # output channels 
+        self.conv_nparam = (slen-2*(ks-1))*(4*edim) 
+        self.linear_1 = torch.nn.Linear(self.conv_nparam, self.nparam)
+        
+    def forward(self, x):
+        x = self.embed(x)
+        x = x.permute(0,2,1) # swap length and channel dims
+        x = self.enc_conv_1(x)        
+        x = F.leaky_relu(x)
+        x = self.enc_conv_2(x)
+        x = F.leaky_relu(x)
+        x = x.view(-1, self.conv_nparam )
+        x = self.linear_1(x)
+        
+        return (x)
