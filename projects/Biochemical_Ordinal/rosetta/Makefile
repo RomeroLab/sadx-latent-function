@@ -1,4 +1,5 @@
-RDRIVE_TAR=/mnt/rdrive/promero2/General/Sameer/SadA_azidation/rosetta/2D_triple_mutants.tar
+RDRIVE_DIR=/mnt/rdrive/promero2/General/Sameer/SadA_azidation/rosetta
+RDRIVE_TAR=$(RDRIVE_DIR)/2D_triple_mutants.tar
 CHTC_RESULTS_PATH=sameerd/projects/Biochemical_Ordinal/rosetta/results
 SCRATCH_OUTPUT_DIR=../data/scratch/rosetta/2D_triple_mutants
 
@@ -18,10 +19,23 @@ move_chtc_results:
 		${SCRATCH_OUTPUT_DIR} 
 	ssh dcosta2@submit-1.chtc.wisc.edu 'rm ${CHTC_RESULTS_PATH}/*'
 
+# CHTC results re-done on test set
+move_chtc_test_set_results:
+	mkdir -p ${SCRATCH_OUTPUT_DIR}_test_set
+	scp dcosta2@submit-1.chtc.wisc.edu:${CHTC_RESULTS_PATH}/"*" \
+		${SCRATCH_OUTPUT_DIR}_test_set
+	ssh dcosta2@submit-1.chtc.wisc.edu 'rm ${CHTC_RESULTS_PATH}/*'
+
 backup_results:
 	mv -f ${RDRIVE_TAR} ${RDRIVE_TAR}.bak
 	tar cf ${RDRIVE_TAR} -C ../data/scratch/rosetta 2D_triple_mutants
 	du -s -h ${RDRIVE_TAR}
+
+backup_test_set_results:
+	tar cf ${RDRIVE_DIR}/2D_triple_mutants_test_set.tar \
+    		   	-C ../data/scratch/rosetta 2D_triple_mutants_test_set
+	du -s -h ${RDRIVE_DIR}/2D_triple_mutants_test_set.tar
+
 
 deepclean: clean
 	rm -f *.tar.gz
