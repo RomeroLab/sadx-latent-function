@@ -57,7 +57,9 @@ def load_chtc_results_to_sqlite(tar_gz_filelist, db_con,
                 if_exists='append', index=False,
                 dtype={"variant":'text', "description":'text'})
 
-def get_energy_scores_from_sqlite(db_con, remove_description=True):
+def get_energy_scores_from_sqlite(db_con, 
+                                  remove_description=True,
+                                  table_name_postfix=""):
     """ Get an inner join of relaxed scores and docking scores
 
         remove_description : remove columns r_description and d_description
@@ -66,9 +68,11 @@ def get_energy_scores_from_sqlite(db_con, remove_description=True):
             should be floats. 
 
     """
-    df = pd.read_sql("select r.*, d.* from relaxed_scores as r "
-                     "inner join docked_scores as d on d.variant = r.variant;"
-                     , db_con)
+    df = pd.read_sql(
+            f"select r.*, d.* from relaxed_scores{table_name_postfix} as r "
+            f"inner join docked_scores{table_name_postfix} as d "
+            f"on d.variant = r.variant;"
+            , db_con)
 
     # We have duplicated column names because they have similar names in the
     # two columns now relabel the columns so that the first columns are
@@ -93,9 +97,11 @@ def get_energy_scores_from_sqlite(db_con, remove_description=True):
 
     return df
 
-def get_energy_scores(parent):
+def get_energy_scores(parent, table_name_postfix=""):
     db_con = get_sqlite_dbcon(parent=parent)
-    df = get_energy_scores_from_sqlite(db_con, remove_description=True)
+    df = get_energy_scores_from_sqlite(db_con=db_con, 
+            remove_description=True,
+            table_name_postfix=table_name_postfix)
     db_con.close()
     return df
 
