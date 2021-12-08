@@ -24,3 +24,9 @@ less ../data/2D/azid_model_sequences.csv  \
     | grep . \
     | sed '1d' > variant_3D_EPPCR.txt
 ```
+
+### Split list of test set variants
+
+```
+split -l 5000 variant_list_2D_test_set.txt variant_list_2D_test_set_ --additional-suffix=.txt
+```

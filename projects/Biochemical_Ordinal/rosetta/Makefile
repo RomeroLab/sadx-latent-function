@@ -11,7 +11,7 @@ clean:
 tidy:
 	mv -f SadA_*_rosetta.tar.gz results/
 	rm -f logs/*.err
-	rm -f logs/*.out
+	rm -f logs/*.out 
 
 move_chtc_results:
 	scp dcosta2@submit-1.chtc.wisc.edu:${CHTC_RESULTS_PATH}/"*" \
@@ -51,7 +51,7 @@ submit_wt: inputs.tar.gz
 			VARIANT_LIST_FILE=variant_list_WT.txt \
 			ligand_dock.sub
 
-submit_2d_random: inputs.tar.gz
+submit_2D_random: inputs.tar.gz
 	#@for f in $(shell ls variant_list_2D_random_a[a-e].txt); do \
 	#@for f in $(shell ls variant_list_2D_random_a[f-g].txt); do \
 	#@for f in $(shell ls variant_list_2D_random_a[h-i].txt); do \
@@ -62,3 +62,16 @@ submit_2d_random: inputs.tar.gz
 			VARIANT_LIST_FILE=$${f} \
 			ligand_dock.sub; \
 	 done
+
+
+submit_2D_test_set: inputs.tar.gz
+	@for f in $(shell ls variant_list_2D_test_set_a[a-b].txt); do \
+		condor_submit \
+			START_STRUCT=SadA_NSLeu_2D.pdb  \
+			VARIANT_LIST_FILE=$${f} \
+			ligand_dock.sub; \
+	 done
+
+
+
+
