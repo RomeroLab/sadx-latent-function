@@ -31,7 +31,8 @@ def read_rosetta_score_file(fh):
     del ret["SCORE:"] # the first column is "SCORE:" we do not want
     return ret
 
-def load_chtc_results_to_sqlite(tar_gz_filelist, db_con):
+def load_chtc_results_to_sqlite(tar_gz_filelist, db_con, 
+                                    table_name_postfix=""):
     for archive_file in tqdm.tqdm(tar_gz_filelist):
         tf = tarfile.open(archive_file, mode='r:gz')
         variant_info = yaml.safe_load(tf.extractfile("./info.yaml"))
@@ -42,7 +43,8 @@ def load_chtc_results_to_sqlite(tar_gz_filelist, db_con):
         # only put the last score into the relax_scores table
         # the first score is just the mutation without any relaxation
         # the second (or the last) score is the relaxed mutation
-        relaxed_score_df.iloc[-1:].to_sql(name="relaxed_scores", con=db_con, 
+        relaxed_score_df.iloc[-1:].to_sql(
+                name="relaxed_scores" + table_name_postfix, con=db_con, 
                 if_exists='append', index=False,
                 dtype={"variant":'text', "description":'text'} )
 
@@ -50,9 +52,10 @@ def load_chtc_results_to_sqlite(tar_gz_filelist, db_con):
         docked_score_df = read_rosetta_score_file(
                 tf.extractfile("./variant_docked_score.sc"))
         docked_score_df["variant"] = variant_info["Variant"]
-        docked_score_df.to_sql(name="docked_scores", con=db_con, 
-                 if_exists='append', index=False,
-                 dtype={"variant":'text', "description":'text'})
+        docked_score_df.to_sql(
+                name="docked_scores" + table_name_postfix, con=db_con, 
+                if_exists='append', index=False,
+                dtype={"variant":'text', "description":'text'})
 
 def get_energy_scores_from_sqlite(db_con, remove_description=True):
     """ Get an inner join of relaxed scores and docking scores
@@ -102,16 +105,17 @@ def get_energy_scores(parent):
 
 
 if __name__ == "__main__":
-#    db_con = get_sqlite_dbcon(parent="WT")
-#
-#    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/results_WT_campaign1")
-#    load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), db_con)
-#
-#    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/results_WT_random")
-#    load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), db_con)
-#
+    # put in the 2D simulated scores from CHTC into sqlite
+    #db_con = get_sqlite_dbcon(parent="2D")
+    #chtc_results_dir=pathlib.Path("../data/scratch/rosetta/2D_triple_mutants")
+    #load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), 
+    #               db_con=db_con)
 
+    # put the test set data (which was done a second time) into table names
+    # with a postfix
     db_con = get_sqlite_dbcon(parent="2D")
-    chtc_results_dir=pathlib.Path("../data/scratch/rosetta/2D_triple_mutants")
-    load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), db_con)
-
+    chtc_results_dir=pathlib.Path(
+            "../data/scratch/rosetta/2D_triple_mutants_test_set")
+    load_chtc_results_to_sqlite(list(chtc_results_dir.glob("*.tar.gz")), 
+            db_con=db_con,
+            table_name_postfix="_redo_test_set")
