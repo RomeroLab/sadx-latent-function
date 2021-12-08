@@ -101,6 +101,12 @@ def expand_mut_str_list_to_seq(mut_str, ref, split_mut_char=";", offset=1):
     return "".join(mut)
 # ****************************************************************************
 
+def get_columns_below_std_threshold(df, std_threshold=0.001):
+    """ Looks at numeric columns and figures out which ones are below 
+        the std threshold """
+    df_std = df.std(numeric_only=True)
+    return list(df_std[df_std < std_threshold].index)
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
