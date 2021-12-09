@@ -30,14 +30,13 @@ def get_predictions(trainer, model, dm):
 
     ret = trainer.predict(model, dm) # ret is in batches
     # Concat tensors in ret to get predictions and values
-    predictions = torch.cat([batch[0].sum(dim=1) for batch in ret]).numpy()
-    values = torch.cat([batch[1].sum(dim=1) for batch in ret]).numpy()
+    predictions = torch.cat([batch[0] for batch in ret]).numpy()
+    values = torch.cat([batch[1] for batch in ret]).numpy()
 
     return predictions, values
 
 
-
-def train(model_name, num_variants=100000, 
+def train(model_name, num_train_variants=-1, 
             embed_ncomp=0, # one-hot encoding
             embed_freeze=True, # whether the embedding is trainable or not
             max_epochs=50, gpus=0, seed = 1111, 
@@ -46,7 +45,7 @@ def train(model_name, num_variants=100000,
 
     pl.utilities.seed.seed_everything(seed)
     logger = CSVLogger(log_dir, name='RosettaEnergiesTraining')
-    dm = RosettaEnergiesDataModule(parent="2D", num_variants=num_variants)
+    dm = RosettaEnergiesDataModule(parent="2D", num_train_variants=num_train_variants)
     trainer = pl.Trainer(logger=logger, max_epochs=max_epochs, 
                             gpus=gpus)
     # initialize model from the model_name
@@ -56,7 +55,7 @@ def train(model_name, num_variants=100000,
     trainer.fit(model, dm)
 
     # return info on training process
-    retd = {'num_variants':num_variants, 'max_epochs':max_epochs, 'seed':seed,
+    retd = {'num_train_variants':num_train_variants, 'max_epochs':max_epochs, 'seed':seed,
             'embed_ncomp':embed_ncomp, 'embed_freeze':embed_freeze}
     retd.update(model_kwargs)
     retd['log_dir'] = logger.log_dir #logging.log_dir is subdir of log_dir
@@ -78,7 +77,7 @@ if __name__ == "__main__":
                     help="Max number of epochs", default=5, type=int)
     parser.add_argument("-o", "--output_pickle",
                     help="Output pickle file", default=None)
-    parser.add_argument("-n", "--num_variants",
+    parser.add_argument("-n", "--num_train_variants",
                     help="Num variants", default=1000, type=int) 
     parser.add_argument("-m", "--model_name",
                     help="Model name from model_module.py", 
@@ -97,7 +96,7 @@ if __name__ == "__main__":
 
     model, retd = train(
             model_name=args.model_name, 
-            num_variants=args.num_variants, 
+            num_train_variants=args.num_train_variants, 
             embed_ncomp=args.embed_ncomp, # one-hot encoding
             embed_freeze=not args.embed_unfreeze, # embedding is trainable? 
             max_epochs=args.max_epochs, 

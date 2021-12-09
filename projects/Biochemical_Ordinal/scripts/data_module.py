@@ -38,11 +38,12 @@ class RosettaSQLdf(torch.utils.data.Dataset):
 
 class RosettaEnergiesDataModule(pl.LightningDataModule):
     
-    def __init__(self, parent = "2D", num_variants=100000, batch_size=32, 
+    def __init__(self, parent = "2D", num_train_variants=-1, batch_size=32, 
                  num_workers=1):
+        """ num_train_variants == -1 means use all variants to train """
         super().__init__()
         self.parent = parent
-        self.num_variants = num_variants
+        self.num_train_variants = num_train_variants
         self.batch_size = batch_size
         self.num_workers = num_workers
         
@@ -61,12 +62,26 @@ class RosettaEnergiesDataModule(pl.LightningDataModule):
 
         # number of parameters to predict dropping last column (variant)
         self.nparam = len(self.df.columns) - 1 
+        self.column_names = list(self.df.columns)[:-1]
 
         N = len(self.df) # only 90% of the dataset as 10% is the hidden test set
-        n_train = int(0.9 * N) # 81% of the total dataset
-        n_val = N - n_train # 9% of the total dataset
+        n_train = int(80/90 * N) # 80% of the total dataset
+        n_val = N - n_train # 10% of the total dataset
         self.train_idx, self.val_idx = \
                 data_utils.random_split(range(N),[n_train, n_val])
+
+        # Now reduce the number of training variants if requested
+        if self.num_train_variants <= 0:
+            self.num_train_variants = N
+        if self.num_train_variants < N: 
+            # num_train_variants passed in was something other than 0 or -1 
+            # Also, it is less than N so we should subset train_idx and val_idx
+            n_train = int(self.num_train_variants * 80/90)
+            self.train_idx = data_utils.Subset(self.train_idx, 
+                    torch.arange(n_train))
+            self.val_idx = data_utils.Subset(self.val_idx,
+                    torch.arange(self.num_train_variants - n_train))
+
 
     def setup(self, stage=None):
               
