@@ -72,7 +72,10 @@ def sidechain_dist_calc(atom_list1, atom_list2):
 
 def compute_distance_mat(chain, extract_atoms_func, compute_distance_func):
     """ Take a chain and extract atoms and then compute distances using
-        extracted atoms """
+        extracted atoms 
+        FIXME: Later. Calculate the distance between two chains. Then this
+        functionality can be done by passing in the same chain twice.
+    """
     resatoms = [] # list of residues containing list of atoms 
     for residue in chain:
         atoms = extract_atoms_func(residue)

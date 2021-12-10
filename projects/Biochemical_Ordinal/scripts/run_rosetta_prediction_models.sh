@@ -2,13 +2,14 @@
 
 model_stats_dir=../data/scratch/model_stats
 model_name_arr=(LinearRosettaEnergyPrediction CNNRosettaEnergyPrediction)
-num_variants_arr=(1000 10000 100000)
+#num_variants_arr=(1000 10000 100000)
+num_variants_arr=(0)
 embed_ncomp_arr=(0 8)
 epochs=50
+kernel_size=5
 
 # override
-model_name_arr=(CNNRosettaEnergyPrediction)
-kernel_size=5
+model_name_arr=(LinearRosettaEnergyPrediction CNNRosettaEnergyPrediction)
 
 
 for model_name in ${model_name_arr[@]}; 
