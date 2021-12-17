@@ -46,6 +46,11 @@ inputs.tar.gz: *.pdb *.xml *.params options_*.txt
 # test on group server
 test_gs: inputs.tar.gz
 	./ligand_dock.sh 0 SadA_NSLeu_Corrected_3701_0002.pdb "X42A.X100D" 10
+	
+# test on group server
+test_gs_long: inputs.tar.gz
+	./ligand_dock.sh 0 SadA_NSLeu_Corrected_3701_0002.pdb "X42A.X100D" 10000
+
 
 # test difference between xml output and example script from Mark
 # should be identical and show no differences

@@ -83,6 +83,7 @@ cd working
 mkdir -p Models # for output of rosetta scripts
 mkdir -p Relax_commandline # for Rosetta relax output
 mkdir -p output # for output returned from chtc
+mkdir -p grid_cache_dir # for storing grid scores
 
 if [ -z "$NUM_STRUCTS" ]; then
     echo "Error: Number of structs $NUM_STRUCTS not specified"
@@ -124,6 +125,7 @@ ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
     -in:file:s Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
     @options_dock.txt \
+#    -qsar:grid_dir grid_cache_dir \
     -nstruct ${NUM_STRUCTS} 
 
 echo "copying the best structure and scores to output directory"
