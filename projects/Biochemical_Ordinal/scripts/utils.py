@@ -47,6 +47,23 @@ def add_projects_to_path():
     if module_path not in sys.path:
         sys.path.append(module_path)
 
+def add_openfold_to_path():
+    # Modify the module path (if required) so that we can import
+    # modules from this repository
+    module_path = os.path.expanduser("~/software/openfold")
+    if module_path not in sys.path:
+        sys.path.append(module_path)
+
+def add_alphafold_to_path():
+    # Modify the module path (if required) so that we can import
+    # modules from this repository
+    module_path = os.path.expanduser("~/software/alphafold")
+    if module_path not in sys.path:
+        sys.path.append(module_path)
+
+
+
+
 def hamming_dist(s1, s2):
     assert(len(s1) == len(s2))
     return sum(1 for (a, b) in zip(s1, s2) if a != b)
