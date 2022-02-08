@@ -5,12 +5,15 @@ COMPARISON_TO_REF_RESULTS="results/ref_comparison.txt"
 # Results for comparison to repeated rosetta simulation (2nd try on test set)
 COMPARISON_TO_REPEAT_RESULTS="results/repeat_comparison.txt"
 
+# This is the modified TMscore binary that has outfmt==3. 
+# This output format includes the GDT scores as well as TMscores
+# in a compact format
 TMSCORE_BIN="../../bin/TMscore"
 
 ROSETTA_SCRATCH_DIR="../../data/scratch/rosetta"
 VARIANT_LIST="${ROSETTA_SCRATCH_DIR}/2D_splits/test_variants.txt"
 VARIANTS_2D_DIR="${ROSETTA_SCRATCH_DIR}/2D_triple_mutants"
-VARIANTS_2D_TMP_DIR="${ROSETTA_SCRATCH_DIR}/2D_triple_mutants_test_set"
+VARIANTS_2D_TEST_DIR="${ROSETTA_SCRATCH_DIR}/2D_triple_mutants_test_set"
 
 GLOBAL_COMPARISON_PDB="SadA_NSLeu_Corrected_3701_0002.pdb"
 
@@ -35,7 +38,7 @@ do
           -outfmt 3  | sed '/^#/d' >> "${COMPARISON_TO_REF_RESULTS}"
 
   # extract the second rosetta simulation of the same variant
-  tar -xzf "${VARIANTS_2D_TMP_DIR}"/*"${variant}"*tar.gz \
+  tar -xzf "${VARIANTS_2D_TEST_DIR}"/*"${variant}"*tar.gz \
           -C "${TMP_DIR}" ./variant_relaxed.pdb
   mv "${TMP_DIR}/variant_relaxed.pdb" "${VARIANT_PDB2}"
   ${TMSCORE_BIN} "${VARIANT_PDB2}" "${VARIANT_PDB}" \
