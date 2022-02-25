@@ -1,0 +1,20 @@
+universe = vanilla
+
+
+executable = test_hmmer_small.sh
+arguments = test_query.fasta
+
+log = test_hmmer_small.log
+output = test_hmmer_small.out
+error = test_hmmer_small.err
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+transfer_input_files = hmmer.tar.gz, uniref100_small.fasta.gz, test_query.fasta
+
+request_cpus = 1
+request_memory = 1GB
+request_disk = 100MB
+
+queue
