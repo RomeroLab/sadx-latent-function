@@ -32,12 +32,33 @@ cd "${WORKDIR}"
 echo "Target database size: " `du -s -h targetdb.fasta`
 
 
-QUERY_BASE=`basename ${QUERY_FASTA}`
+QUERY_BASE=${QUERY_FASTA%%.*}
+
+echo "Running jackhmmer on : ${QUERY_BASE}"
 
 jackhmmer -A "${QUERY_BASE}".sto \
           -o "${QUERY_BASE}".out.txt \
           ${QUERY_FASTA} \
           targetdb.fasta
 
-tar xcf ../"${QUERY_BASE}"_results.tar.gz *.sto *.out.txt
+
+RESULTS_ARCHIVE="${QUERY_BASE}"_results.tar.gz
+echo "Archiving results to : ${RESULTS_ARCHIVE}"
+
+tar cf "${RESULTS_ARCHIVE}" *.sto *.out.txt
+
+
+## to return results locally we just move this .tar.gz
+## to the parent directory and it gets automatically returned
+# mv "${RESULTS_ARCHIVE}" ..
+## However, it might be too big so we just copy back to staging
+
+# We can only store 1 output file at a time so we
+# use this prefix to delete any previous output files
+OUTPUT_PREFIX=/staging/dcosta2/hmmer
+rm -f "${OUTPUT_PREFIX}"_*
+mv ${RESULTS_ARCHIVE} "${OUTPUT_PREFIX}_${RESULTS_ARCHIVE}"
+
+echo "Copied to staging directory"
+
 

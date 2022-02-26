@@ -1,11 +1,19 @@
 
 clean:
-	rm -f *.out *.err *.log
+	@rm -rf output
+	@mkdir -p output
 
-# make small fasta for testing
-small_fasta: uniref100_small.fasta.gz
+deepclean: clean
+	rm -f uniref100_small.fasta.gz
+
+uniref100_small.fasta.gz:
 	zcat /staging/dcosta2/uniref100.fasta.gz | head -999 | gzip --best  > uniref100_small.fasta.gz
 
+# make small fasta for testing
+prepare_files: uniref100_small.fasta.gz
+	@mkdir -p output
+
 # submit small job 
-ss: small_fasta
+ss: prepare_files
+	mkdir -p output
 	condor_submit test_hmmer_small.sub
