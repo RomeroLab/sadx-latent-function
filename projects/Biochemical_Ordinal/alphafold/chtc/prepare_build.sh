@@ -4,5 +4,6 @@ condor_submit -i build.sub
 
 # now run build_script.sh
 
+# move output package to squid
 mkdir -p /squid/dcosta2/py39
 mv alphafold_packages.tar.gz /squid/dcosta2/py39
