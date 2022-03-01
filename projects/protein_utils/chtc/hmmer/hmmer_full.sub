@@ -1,16 +1,16 @@
 universe = vanilla
 
 executable = run_hmmer.sh
-arguments = test_query.fasta SMALL
+arguments = jojoba.fasta SMALL
 
-log = output/test_hmmer_small.log
-output = output/test_hmmer_small.out
-error = output/test_hmmer_small.err
+log = output/hmmer_full.log
+output = output/hmmer_full.out
+error = output/hmmer_full.err
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
-transfer_input_files = hmmer.tar.gz, test_query.fasta
+transfer_input_files = hmmer.tar.gz, jojoba.fasta
 
 # IMPORTANT! Require execute servers that can access /staging
 Requirements = (Target.HasCHTCStaging == true)

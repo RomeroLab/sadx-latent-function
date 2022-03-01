@@ -3,6 +3,7 @@
 # have job exit if any command returns with non-zero exit status (aka failure)
 set -e
 
+# setup conda environment
 # replace env-name on the right hand side of this line with the name of your conda environment
 ENVNAME=hmmer
 # if you need the environment directory to be named something other than the environment name, change this line
@@ -13,6 +14,8 @@ export PATH
 mkdir $ENVDIR
 tar -xzf $ENVNAME.tar.gz -C $ENVDIR
 . $ENVDIR/bin/activate
+
+# conda env is setup, now run the script
 
 QUERY_FASTA=$1
 QUERY_BASE=${QUERY_FASTA%%.*}
