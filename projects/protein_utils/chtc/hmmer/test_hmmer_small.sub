@@ -13,6 +13,9 @@ when_to_transfer_output = ON_EXIT
 
 transfer_input_files = hmmer.tar.gz, uniref100_small.fasta.gz, test_query.fasta
 
+# IMPORTANT! Require execute servers that can access /staging
+Requirements = (Target.HasCHTCStaging == true)
+
 request_cpus = 1
 request_memory = 1GB
 request_disk = 100MB
