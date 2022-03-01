@@ -2,7 +2,7 @@ universe = vanilla
 
 
 executable = test_hmmer_small.sh
-arguments = test_query.fasta
+arguments = test_query.fasta SMALL
 
 log = output/test_hmmer_small.log
 output = output/test_hmmer_small.out
@@ -11,7 +11,7 @@ error = output/test_hmmer_small.err
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
-transfer_input_files = hmmer.tar.gz, uniref100_small.fasta.gz, test_query.fasta
+transfer_input_files = hmmer.tar.gz, test_query.fasta
 
 # IMPORTANT! Require execute servers that can access /staging
 Requirements = (Target.HasCHTCStaging == true)

@@ -17,18 +17,28 @@ tar -xzf $ENVNAME.tar.gz -C $ENVDIR
 QUERY_FASTA=$1
 QUERY_BASE=${QUERY_FASTA%%.*}
 
-STAGING_DIR=/staging/dcosta2
+FULL_UNIREF=false
+if [ "$2" = "FULL" ]; then
+  FULL_UNIREF=true
+fi
 
-TARGET_DB=uniref100_small.fasta.gz
-#TARGET_DB="${STAGING_DIR}"/uniref100.fasta.gz
+STAGING_DIR=/staging/dcosta2
+TARGET_DB="${STAGING_DIR}"/uniref100.fasta.gz
 
 WORKDIR=work
 mkdir -p ${WORKDIR}
-
 cp "${QUERY_FASTA}" "${WORKDIR}"
 
-echo "Extracting target database"
-gunzip -c "${TARGET_DB}" > ${WORKDIR}/targetdb.fasta
+echo -n "Extracting target database : "
+if [ "${FULL_UNIREF}" = true ] ;
+then
+  echo "using FULL database"
+  gunzip -c "${TARGET_DB}" > "${WORKDIR}/targetdb.fasta"
+else
+  echo "using SMALL database"
+  # only get a few fasta sequences
+  gunzip -c "${TARGET_DB}" | head -999 > "${WORKDIR}/targetdb.fasta"
+fi
 
 cd "${WORKDIR}"
 echo "Target database size : " `du -s -h targetdb.fasta`
