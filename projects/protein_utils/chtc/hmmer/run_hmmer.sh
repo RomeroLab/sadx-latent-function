@@ -57,7 +57,7 @@ RESULTS_ARCHIVE="${QUERY_BASE}"_results.tar.gz
 echo "Archiving results to : ${RESULTS_ARCHIVE}"
 
 
-tar cf "${RESULTS_ARCHIVE}" *.sto *.out.txt
+tar czf "${RESULTS_ARCHIVE}" *.sto *.out.txt
 echo "Current directory    : "
 ls -al
 echo "Staging directory    : "
