@@ -46,11 +46,12 @@ fi
 cd "${WORKDIR}"
 echo "Target database size : " `du -s -h targetdb.fasta`
 
-echo "Running jackhmmer on : ${QUERY_BASE}"
+# the stdout can be large so we only save the round numbers
+# to know what part of the program is running
 jackhmmer -A "${QUERY_BASE}".sto \
-          -o "${QUERY_BASE}".out.txt \
+          --noali \
           ${QUERY_FASTA} \
-          targetdb.fasta
+          targetdb.fasta | grep -i round > "${QUERY_BASE}".out.txt
 
 
 RESULTS_ARCHIVE="${QUERY_BASE}"_results.tar.gz
