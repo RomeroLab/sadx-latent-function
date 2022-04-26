@@ -1,0 +1,22 @@
+universe = vanilla
+
+executable = run_sfetch.sh
+arguments = test_sfetch_ids.txt SMALL
+
+log = output/test_sfetch_small.log
+output = output/test_sfetch_small.out
+error = output/test_sfetch_small.err
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+transfer_input_files = hmmer.tar.gz, test_sfetch_ids.txt
+
+# IMPORTANT! Require execute servers that can access /staging
+Requirements = (Target.HasCHTCStaging == true)
+
+request_cpus = 1
+request_memory = 1GB
+request_disk = 100MB
+
+queue

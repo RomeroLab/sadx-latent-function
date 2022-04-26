@@ -17,8 +17,8 @@ tar -xzf $ENVNAME.tar.gz -C $ENVDIR
 
 # conda env is setup, now run the script
 
-QUERY_FASTA=$1
-QUERY_BASE=${QUERY_FASTA%%.*}
+QUERY_TXT=$1
+QUERY_BASE=${QUERY_TXT%%.*}
 
 FULL_UNIREF=false
 if [ "$2" = "FULL" ]; then
@@ -30,7 +30,7 @@ TARGET_DB="${STAGING_DIR}"/uniref100.fasta.gz
 
 WORKDIR=work
 mkdir -p ${WORKDIR}
-cp "${QUERY_FASTA}" "${WORKDIR}"
+cp "${QUERY_TXT}" "${WORKDIR}"
 
 echo -n "Extracting target database : "
 if [ "${FULL_UNIREF}" = true ] ;
@@ -46,19 +46,14 @@ fi
 cd "${WORKDIR}"
 echo "Target database size : " `du -s -h targetdb.fasta`
 
-# the stdout can be large so we only save the round numbers
-# to know what part of the program is running
-jackhmmer -A "${QUERY_BASE}".sto \
-          --noali \
-          ${QUERY_FASTA} \
-          targetdb.fasta | grep -i round > "${QUERY_BASE}".out.txt
+echo "Creating index file"
+esl-sfetch --index targetdb.fasta
+
+RESULTS_FASTA="${QUERY_BASE}".fasta
+echo "fetching sequences"
+esl-sfetch -o "${RESULTS_FASTA}" -f targetdb.fasta "${QUERY_TXT}"
 
 
-RESULTS_ARCHIVE="${QUERY_BASE}"_results.tar.gz
-echo "Archiving results to : ${RESULTS_ARCHIVE}"
-
-
-tar czf "${RESULTS_ARCHIVE}" *.sto *.out.txt
 echo "Current directory    : "
 ls -al
 echo "Staging directory    : "
@@ -66,16 +61,8 @@ ls -al ${STAGING_DIR}
 
 ## to return results locally we just move this .tar.gz
 ## to the parent directory and it gets automatically returned
-# mv "${RESULTS_ARCHIVE}" ..
-## However, it might be too big so instead we copy back to staging
+mv "${RESULTS_FASTA}" ..
 
-# We can only store 1 output file at a time on staging so we
-# use this prefix to delete any previous output files
-OUTPUT_PREFIX="${STAGING_DIR}/hmmer"
-# This deletes anything named hmmer_* in staging
-echo "Deleting any previous output hmmer files"
-rm -f "${OUTPUT_PREFIX}"_*
+cd ..
+gzip "${RESULTS_FASTA}"
 
-mv ${RESULTS_ARCHIVE} "${OUTPUT_PREFIX}_${RESULTS_ARCHIVE}"
-echo "Copied job results to staging directory"
-echo "Done"

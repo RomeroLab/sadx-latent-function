@@ -6,7 +6,7 @@ clean:
 prepare_files: 
 	@mkdir -p output
 	@echo "Found" `ls -al /staging/dcosta2/hmmer_* | wc -l` \
-				"output files which will be overwritten"
+				"output files which may be overwritten"
 
 # submit small job 
 ss: prepare_files
@@ -14,3 +14,11 @@ ss: prepare_files
 
 submit: prepare_files
 	condor_submit hmmer_full.sub
+
+# fetching sequences from uniref100 file
+sfetch_small: prepare_files
+	condor_submit test_sfetch_small.sub
+
+sfetch: prepare_files
+	condor_submit sfetch_full.sub
+
