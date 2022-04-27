@@ -5,7 +5,7 @@ clean:
 
 prepare_files: 
 	@mkdir -p output
-	@echo "Found" `ls -al /staging/dcosta2/hmmer_* | wc -l` \
+	@echo "Found" `ls -al /staging/dcosta2/hmmer_* 2> /dev/null | wc -l` \
 				"output files which may be overwritten"
 
 # submit small job 

@@ -15,8 +15,8 @@ transfer_input_files = hmmer.tar.gz, hmmer_MAACR_scored_seqs.ids.txt
 # IMPORTANT! Require execute servers that can access /staging
 Requirements = (Target.HasCHTCStaging == true)
 
-request_cpus = 1
-request_memory = 2GB
+request_cpus = 2
+request_memory = 50GB
 request_disk = 150GB
 
 queue
