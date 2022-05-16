@@ -41,7 +41,7 @@ def guess_msa_filetype_from_filename(filename):
     filetype = None
     if len(suffixes) > 1 and suffixes[-1] == ".gz":
         suffix = suffixes[-2] # handle .fasta.gz
-    if suffix == ".fasta" or suffix == ".a2m":
+    if suffix == ".fasta" or suffix == ".a2m" or suffix == ".afa":
         filetype = "fasta"
     elif suffix == ".txt" or suffix == ".text" or suffix == ".aln":
         filetype = "txt"
