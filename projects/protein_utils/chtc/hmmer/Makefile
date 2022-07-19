@@ -12,7 +12,7 @@ prepare_files:
 ss: prepare_files
 	condor_submit test_hmmer_small.sub
 
-submit: prepare_files
+jackhmmer: prepare_files
 	condor_submit hmmer_full.sub
 
 # fetching sequences from uniref100 file

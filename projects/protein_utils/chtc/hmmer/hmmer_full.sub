@@ -4,7 +4,8 @@ executable = run_hmmer.sh
 #arguments = jojoba.fasta FULL
 #arguments = MAACR.fasta FULL
 #arguments = MAACR_dom_AHR.fasta FULL
-arguments = MAACR_dom_ATR.fasta FULL
+#arguments = MAACR_dom_ATR.fasta FULL
+arguments = bgl3.fasta FULL
 
 log = output/hmmer_full.log
 output = output/hmmer_full.out
@@ -16,7 +17,8 @@ when_to_transfer_output = ON_EXIT
 #transfer_input_files = hmmer.tar.gz, jojoba.fasta
 #transfer_input_files = hmmer.tar.gz, MAACR.fasta
 #transfer_input_files = hmmer.tar.gz, MAACR_dom_AHR.fasta
-transfer_input_files = hmmer.tar.gz, MAACR_dom_ATR.fasta
+#transfer_input_files = hmmer.tar.gz, MAACR_dom_ATR.fasta
+transfer_input_files = hmmer.tar.gz, bgl3.fasta
 
 # IMPORTANT! Require execute servers that can access /staging
 Requirements = (Target.HasCHTCStaging == true)
