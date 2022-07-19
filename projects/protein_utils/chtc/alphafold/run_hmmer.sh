@@ -31,6 +31,7 @@ cp "${QUERY_FASTA}" "${WORKDIR}"
 
 
 gunzip -c "${TARGET_DB_FASTA_GZ}" > "${WORKDIR}/targetdb.fasta"
+rm "${TARGET_DB_FASTA_GZ}"
 
 cd "${WORKDIR}"
 echo "Target database size : " `du -s -h targetdb.fasta`
