@@ -72,12 +72,14 @@ if __name__ == "__main__":
                             rc_better = True
                             seq = r_seq
                             ref_dist = r_ref_dist
-                    ss = shorten_seq(Bio.Seq.Seq(seq).translate(), WT)
-                    keep_seqs.append([ss, ref_dist, rc_better])
+                    seq_translate = Bio.Seq.Seq(seq).translate()
+                    ss = shorten_seq(seq_translate, WT)
+                    aa_dist = hamming_dist(seq_translate, WT) 
+                    keep_seqs.append([ss, aa_dist, ref_dist, rc_better])
             #if i > 1000:
             #    break
         samfile.close()
-        keep_seqs = pd.DataFrame(keep_seqs, columns=["ss", "aa_dist", "rc_better"])     
+        keep_seqs = pd.DataFrame(keep_seqs, columns=["ss", "aa_dist", "dna_dist", "rc_better"])     
         keep_seqs.to_csv(output_dir / f"{barcode}.tsv", sep="\t", index=False)
         with open(samples_counts, "a") as fh_out:
             print(f"{barcode},{samples.Bio_Sample[b_idx]},{i},{len(keep_seqs)}", file=fh_out)
