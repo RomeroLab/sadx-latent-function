@@ -26,7 +26,8 @@ def Bio_SeqIO_gen(filename, filetype="fasta"):
     with opener(filename, "rt") as fh: # open in text
         for seq_record in Bio.SeqIO.parse(fh, filetype):
             # Biopython is now storing all seqs in bytes from version 1.9
-            # so conversion should be backwards and forwards compatible
+            # so we convert using the bytes function. This only works in
+            # Biopython>=1.80. For earlier versions, change this to "encode"
             yield bytes(seq_record.seq) # convert to bytes 
 
 
