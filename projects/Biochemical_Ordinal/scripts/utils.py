@@ -2,6 +2,7 @@ import os
 import sys
 import re
 
+import Bio.SeqIO
 
 PARENT_2D_DNA= 'ATGCAGCATACCTATCCGGCACAGCTGATGCGTTTTGGCACCGCAGCACGTGCAGAACATATGACCATTGCAGCAGCAATTCATGCACTGGATGCAGATGAAGCAGATGCAATTGTTATGGATATTGTTCCGGATGGTGAACGTGATGCATGGTGGGATGATGAAGGTTTTAGCAGCAGCCCGTTTACCAAAGATGCACATCATGCAGGAGTTGTTGCAACCAGCGTTACCCTGGGTCAGCTGCAGCGTGAACAGGGTGATAAACTGGTTAGCAAAGCAGCAGAATATTTTGGTATTGCCTGCCGTGTTAATGATGGTCTGCGTACCACCCGTTTTGTTCGTCTGTTTAGTGATGCCCTGGATGCCAAACCGCTGACCATTGGTCATGATTATGAAGTTGAATTTCTGCTGGCAACCCGTCGTGTTTATGAACCGTTTGAAGCACCGTTTAACTTTGCACCGCATTGTGGCGATGTTAGCTATGGTCGTGATACCGTTAATTGGCCTCTGAAACATAGCTTTCCGCGTCAGCTGGGTGGTTTTCTGACCATTCAGGGTGCAGATAATGATGCCGGTATGGTTATGTGGGATAATCGTCCGGAAAGCCGTGCAGCGCTGGATGAAATGCATGCAGAATATCGTGAAACCGGTGCAATTGCCGCACTGGAACGTGCAGCCAAAATCATGCTGAAACCGCAGCCTGGCCAGCTGACACTGTTTCAGAGCAAAAATCTGCATGCCATTGAACGTTGTACCAGCACCCGTCGTACCATGGGTCTGTTTCTGATTCATACCGAAGATGGTTGGCGTATGTTTGATTGA'
 
@@ -29,14 +30,22 @@ def parent2d_to_wt(p = PARENT_2D_AA):
 WT_AA = parent2d_to_wt(PARENT_2D_AA)
 WT = WT_AA
 
+parent_map = {"2D":"2-D", "1VH":"1-VH", "2L":"2-L", "3VRL":"3-VRL"}
 
 def get_parent_seq(parent):
-    """ parent can be WT or 2D """
+    """ parent can be WT or 2D 
+        or 1-VH, 2-L or 3-VRL
+    """
     ret = None
+    # get formal parent code from parent_map if it exists
+    parent = parent_map.get(parent, parent)
     if parent == "WT":
         ret = WT_AA
-    elif parent == "2D":
+    elif parent == "2-D":
         ret = PARENT_2D_AA
+    elif parent in ("1-VH", "2-L",  "3-VRL"):
+        ret = Bio.SeqIO.read(f"../data/{parent}.fasta", "fasta")
+        ret = str(ret.translate().seq)
     return ret
 
 
@@ -112,10 +121,13 @@ def expand_mut_str_list_to_seq(mut_str, ref, split_mut_char=";", offset=1):
     >>> expand_mut_str_list_to_seq("", "ABAB", offset=1)
     'ABAB'
     """
-    mut = expand_mut_str_list_to_list(mut_str, list(ref), 
+    ret = ref
+    if mut_str != "*0*":
+        mut = expand_mut_str_list_to_list(mut_str, list(ref), 
                 encoder = lambda x: x,
                 split_mut_char=split_mut_char, offset=offset)
-    return "".join(mut)
+        ret = "".join(mut)
+    return ret
 # ****************************************************************************
 
 def get_columns_below_std_threshold(df, std_threshold=0.001):
