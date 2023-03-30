@@ -332,9 +332,26 @@ if __name__ == "__main__":
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    msas, labels, dataset_labels = load_synthetic_data()
-    msas, labels, dataset_labels = load_synthetic_data(round_nums=[1])
+    msas, labels, dataset_labels = load_synthetic_data() #all rounds
+    # correlation 0.4503
+    #msas, labels, dataset_labels = load_synthetic_data(round_nums=[1])
+    # correlation 0.2096
+    #msas, labels, dataset_labels = load_synthetic_data(round_nums=[2])
+    # correlation 0.2056
+    #msas, labels, dataset_labels = load_synthetic_data(round_nums=[3])
+    # correlation 0.1642
+    #msas, labels, dataset_labels = load_synthetic_data(round_nums=[1,2])
+    # correlation 0.3695
+    #msas, labels, dataset_labels = load_synthetic_data(round_nums=[1,3])
+    # correlation 0.3578
+    #msas, labels, dataset_labels = load_synthetic_data(round_nums=[2,3])
+    # correlation 0.3354
     #msas, labels, dataset_labels = load_synthetic_3x_data()
+    # correlation 0.4243
+    #msas, labels, dataset_labels = load_synthetic_data(size=10000, round_nums=[1])
+    # correlation 0.6530
+    #msas, labels, dataset_labels = load_synthetic_data(size=100000, round_nums=[1])
+    # correlation 0.8596
     #print(msas.shape, labels.shape, dataset_labels.shape)
     data_module = DataModule(msas, labels, dataset_labels)
 
