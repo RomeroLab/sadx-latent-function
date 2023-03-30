@@ -318,13 +318,6 @@ def load_synthetic_data(size=1000, round_nums=(1,2,3)):
     dataset_labels = np.concatenate(dataset_labels) - 1
     return msas, labels, dataset_labels
 
-def load_synthetic_3x_data():
-    with np.load(f"../output/synthetic/msa_round_1_N_3000.npz", 
-                allow_pickle=True) as data:
-        msas = data["msa"]
-        dataset_labels = np.repeat(0, msas.shape[0])
-        labels = data["labels"]
-    return msas, labels, dataset_labels
 
 if __name__ == "__main__":
     seed=100
@@ -346,7 +339,9 @@ if __name__ == "__main__":
     # correlation 0.3578
     #msas, labels, dataset_labels = load_synthetic_data(round_nums=[2,3])
     # correlation 0.3354
-    #msas, labels, dataset_labels = load_synthetic_3x_data()
+    #msas, labels, dataset_labels = load_synthetic_data(size=2000, round_nums=[1])
+    # correlation 0.3059
+    #msas, labels, dataset_labels = load_synthetic_data(size=3000, round_nums=[1])
     # correlation 0.4243
     #msas, labels, dataset_labels = load_synthetic_data(size=10000, round_nums=[1])
     # correlation 0.6530
