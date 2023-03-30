@@ -32,7 +32,7 @@ WT = WT_AA
 
 parent_map = {"2D":"2-D", "1VH":"1-VH", "2L":"2-L", "3VRL":"3-VRL"}
 
-def get_parent_seq(parent):
+def get_parent_seq(parent, asdna=False):
     """ parent can be WT or 2D 
         or 1-VH, 2-L or 3-VRL
     """
@@ -40,12 +40,17 @@ def get_parent_seq(parent):
     # get formal parent code from parent_map if it exists
     parent = parent_map.get(parent, parent)
     if parent == "WT":
+        if asdna: raise NotImplementedError
         ret = WT_AA
     elif parent == "2-D":
+        if asdna: raise NotImplementedError
         ret = PARENT_2D_AA
     elif parent in ("1-VH", "2-L",  "3-VRL"):
         ret = Bio.SeqIO.read(f"../data/{parent}.fasta", "fasta")
-        ret = str(ret.translate().seq)
+        if asdna:
+            ret = str(ret.seq)
+        else:
+            ret = str(ret.translate().seq)
     return ret
 
 
