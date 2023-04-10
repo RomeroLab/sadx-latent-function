@@ -225,14 +225,30 @@ class LightningMLP(pl.LightningModule):
 class DataModule(pl.LightningDataModule):
 
     def __init__(self, syn_data, syn_labels, syn_datasets, 
-                    batch_size=BATCH_SIZE, num_workers=NUM_WORKERS):
+                    batch_size=BATCH_SIZE, num_workers=NUM_WORKERS,
+                    L = None):
+        """
+            L is the length of the protein. The First L features will be
+            one-hot encoded.  
+        """
         super().__init__()
         self.syn_data = syn_data
         self.syn_labels = syn_labels
         self.label_map = {'H':3, "P":2, "L":1, "N":0}
+
+        num_features = self.syn_data.shape[1]
+        if not L: # L is not specified
+            L = num_features
+        if L > num_features:
+            raise ValueError("L cannot be greater than the number of features")
         
-        self.data_features = one_hot(torch.LongTensor(self.syn_data), 
-                num_classes=q).flatten(start_dim=1, end_dim=-1)
+        self.data_features =  \
+                one_hot(torch.Tensor(self.syn_data[:, :L]).to(torch.long), 
+                    num_classes=q).flatten(start_dim=1, end_dim=-1)
+        if L < num_features:
+            self.data_features = torch.hstack(
+                    [self.data_features, 
+                     torch.Tensor(self.syn_data[:, L:]).to(torch.float)])
         self.syn_labels = pd.Series(syn_labels)
         self.data_labels = torch.LongTensor(self.syn_labels.map(
                                 self.label_map.__getitem__))
