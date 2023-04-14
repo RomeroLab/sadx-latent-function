@@ -35,10 +35,10 @@ cp run_alphafold.py "${WORKDIR}"
 mkdir alphafold_params
 
 cd alphafold_params
-wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_aa
-wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ab
-wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ac
-wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ad
+(for letter in {a..d}; do echo $letter; done) | xargs -n1 -P2 bash -c \
+        'i=$0; 
+url="http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_a${i}"; 
+wget ${url}'
 cd ..
 
 mkdir -p alphafold/data/params
@@ -46,4 +46,4 @@ cat alphafold_params/* | tar xvf - -C alphafold/data/params
 rm -r alphafold_params/
 
 cd "${WORKDIR}"
-python alphafold.py
+python run_alphafold.py
