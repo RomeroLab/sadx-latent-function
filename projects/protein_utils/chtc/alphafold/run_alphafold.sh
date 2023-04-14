@@ -30,15 +30,15 @@ cp "${QUERY_FASTA}" "${WORKDIR}"
 
 mkdir alphafold_params
 
-cd alphafold_params
-wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_aa
-wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ab
-wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ac
-wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ad
-cd ..
-
-mkdir -p alphafold/lib/python3.9/site-packages/alphafold/data/params
-cat alphafold_params/* | tar xvf - -C alphafold/lib/python3.9/site-packages/alphafold/data/params
-rm -r alphafold_params/
+#cd alphafold_params
+#wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_aa
+#wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ab
+#wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ac
+#wget http://proxy.chtc.wisc.edu/SQUID/dcosta2/alphafold_params/alphafold_params_colab_tar_ad
+#cd ..
+#
+#mkdir -p alphafold/lib/python3.9/site-packages/alphafold/data/params
+#cat alphafold_params/* | tar xvf - -C alphafold/lib/python3.9/site-packages/alphafold/data/params
+#rm -r alphafold_params/
 
 
