@@ -4,15 +4,20 @@ conda create -n alphafold python=3.9
 conda activate alphafold
 
 pip3 install py3dmol
-conda install -qy conda==4.13.0
+conda install -c conda-forge pdbfixer openmm=7.5.1 ipython 
+
+#conda install -qy conda==4.13.0
 # extra stuff for interactively using alphafold
-conda install -qy -c conda-forge python=3.9 openmm=7.5.1 pdbfixer notebook ipython
+#conda install -qy -c conda-forge python=3.9 openmm=7.5.1 pdbfixer notebook ipython
 #ipython kernel install --name "alphafold-conda" --user
 #conda install -qy -c conda-forge python=3.9 openmm=7.5.1 pdbfixer 
+#
 
 cd ~
 git clone --branch main https://github.com/deepmind/alphafold alphafold
 pip3 install -r ~/alphafold/requirements.txt
+pip3 install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
 
 pip3 install --no-dependencies ./alphafold
 #pip3 install --upgrade pyopenssl
@@ -27,6 +32,7 @@ conda deactivate
 # install conda-pack if we dont already have it
 # conda install -c conda-forge conda-pack
 
+rm -f alphafold.tar.gz # delete old archive if it exists
 conda pack --ignore-missing-files -n alphafold
 split -b 900M alphafold.tar.gz alphafold_conda_tar_gz_
 mv alphafold_conda_tar_gz_a* /squid/dcosta2/py39
