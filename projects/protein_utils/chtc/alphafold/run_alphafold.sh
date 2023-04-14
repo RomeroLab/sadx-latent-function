@@ -30,7 +30,7 @@ QUERY_BASE=${QUERY_FASTA%%.*}
 WORKDIR=work
 mkdir -p ${WORKDIR}
 cp "${QUERY_FASTA}" "${WORKDIR}"
-cp alphafold.py "${WORKDIR}"
+cp run_alphafold.py "${WORKDIR}"
 
 mkdir alphafold_params
 
