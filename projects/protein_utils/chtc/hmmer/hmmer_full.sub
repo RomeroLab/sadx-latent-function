@@ -5,7 +5,8 @@ executable = run_hmmer.sh
 #arguments = MAACR.fasta FULL
 #arguments = MAACR_dom_AHR.fasta FULL
 #arguments = MAACR_dom_ATR.fasta FULL
-arguments = bgl3.fasta FULL
+#arguments = bgl3.fasta FULL
+arguments = novozymeskaggle.fasta FULL
 
 log = output/hmmer_full.log
 output = output/hmmer_full.out
@@ -18,16 +19,17 @@ when_to_transfer_output = ON_EXIT
 #transfer_input_files = hmmer.tar.gz, MAACR.fasta
 #transfer_input_files = hmmer.tar.gz, MAACR_dom_AHR.fasta
 #transfer_input_files = hmmer.tar.gz, MAACR_dom_ATR.fasta
-transfer_input_files = hmmer.tar.gz, bgl3.fasta
+#transfer_input_files = hmmer.tar.gz, bgl3.fasta
+transfer_input_files = hmmer.tar.gz, novozymeskaggle.fasta
 
 # IMPORTANT! Require execute servers that can access /staging
 Requirements = (Target.HasCHTCStaging == true)
 
 request_cpus = 4
 # for jojoba
-#request_memory = 50GB
+request_memory = 50GB
 # for MAACR we need more memory
-request_memory = 80GB
+#request_memory = 80GB
 request_disk = 150GB
 
 queue
