@@ -27,13 +27,10 @@ from alphafold.common import protein
 #from alphafold.relax import relax
 #from alphafold.relax import utils
 
-#from alphafold.relax import relax
-#from alphafold.relax import utils
-
 #from IPython import display
 #from ipywidgets import GridspecLayout
 #from ipywidgets import Output
 
 # testing
-#model_name = "model_1"
-#params = data.get_model_haiku_params(model_name, '../alphafold/data')
+model_name = "model_1"
+params = data.get_model_haiku_params(model_name, '../alphafold/data')

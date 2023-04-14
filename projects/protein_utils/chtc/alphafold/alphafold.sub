@@ -10,15 +10,18 @@ error = logs/alphafold.err
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
-transfer_input_files = run_alphafold.sh, target.fasta, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_aa, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_ab, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_ac 
+transfer_input_files = run_alphafold.sh, run_alphafold.py, target.fasta, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_aa, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_ab 
+#http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_ac 
 
-request_memory = 10GB
+request_memory = 5GB
 request_disk = 20GB
 request_cpus = 1
 
 request_gpus = 1
 +WantGPULab = true
 +GPUJobLength = "short"
-require_gpus = (DriverVersion >= 11.1)
++is_resumable = true
+
+#require_gpus = (DriverVersion >= 11.1)
 
 queue
