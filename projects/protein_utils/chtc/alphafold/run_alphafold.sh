@@ -1,10 +1,12 @@
 #!/bin/bash
+#
+echo 'Date: ' `date`
+echo 'Host: ' `hostname`
+echo 'System: ' `uname -spo`
+echo 'GPU: ' `lspci | grep NVIDIA`
 
 # have job exit if any command returns with non-zero exit status (aka failure)
 set -e
-
-
-
 
 ENVNAME=alphafold
 ENVDIR=$ENVNAME
