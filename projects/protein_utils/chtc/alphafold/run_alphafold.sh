@@ -9,6 +9,8 @@ nvidia-smi
 # have job exit if any command returns with non-zero exit status (aka failure)
 set -e
 
+echo "Creating conda environment"
+
 ENVNAME=alphafold
 ENVDIR=$ENVNAME
 
@@ -19,10 +21,15 @@ cat alphafold_conda_tar_gz_a? | tar xzf -  -C $ENVDIR
 rm alphafold_conda_tar_gz_a?
 
 . $ENVDIR/bin/activate
+conda-unpack
 
+echo "patching openmm"
+(cd alphafold/lib/python3.9/site-packages; patch -p0 < alphafold/lib/python3.9/site-packages/alphafold/docker/openmm.patch)
+
+echo "Testing out Jax"
 python -c "import jax; print(jax.local_devices()[0].platform)"
 
-# conda env is setup, now run the script
+echo "conda env is setup, now run the script"
 
 QUERY_FASTA=$1
 QUERY_BASE=${QUERY_FASTA%%.*}
