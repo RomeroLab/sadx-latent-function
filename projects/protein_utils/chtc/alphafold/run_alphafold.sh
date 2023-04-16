@@ -82,6 +82,7 @@ WORKDIR=work
 mkdir -p ${WORKDIR}
 cp "${QUERY_FASTA}" "${WORKDIR}"
 cp run_alphafold.py "${WORKDIR}"
+tar xzvf hmmer_output.tar.gz -C "${WORKDIR}"
 
 mkdir alphafold_params
 
@@ -93,7 +94,7 @@ wget ${url}'
 cd ..
 
 mkdir -p alphafold/data/params
-cat alphafold_params/* | tar xvf - -C alphafold/data/params
+cat alphafold_params/* | tar xzvf - -C alphafold/data/params
 rm -r alphafold_params/
 
 cd "${WORKDIR}"

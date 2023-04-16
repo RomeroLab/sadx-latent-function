@@ -10,17 +10,23 @@ error = logs/alphafold.err
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
-transfer_input_files = run_alphafold.sh, run_alphafold.py, target.fasta, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_aa, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_ab 
+transfer_input_files = run_alphafold.sh, run_alphafold.py, target.fasta, hmmer_output.tar.gz, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_aa, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_ab 
 
 request_memory = 5GB
 request_disk = 20GB
 request_cpus = 1
 
-request_gpus = 1
-+WantGPULab = true
-+GPUJobLength = "short"
-+is_resumable = true
+if ! defined DISABLE_GPU
+# condor_submit was run from the command line like 
+# condor_submit DISABLE_GPU=1 alphafold.sub 
+  request_gpus = 1
+  # We require a machine with a modern version of the CUDA driver
+  #Requirements = (Target.CUDADriverVersion >= 10.1) && (Target.CUDACapability >= 5) 
+  #require_gpus = (DriverVersion >= 11.1)
 
-#require_gpus = (DriverVersion >= 11.1)
+  +WantGPULab = true
+  +GPUJobLength = "short"
+  +is_resumable = true
+endif
 
 queue
