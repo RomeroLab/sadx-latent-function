@@ -20,8 +20,8 @@ do
 done
 for i in {1..101}
 do
-  wget ${DB_ROOT_PATH}/uniref90_2022_01.fasta.${i}
-  gzip uniref90_2022_01.fasta.${i} &
+  wget ${DB_ROOT_PATH}/uniprot_2021_04.fasta.${i}
+  gzip uniprot_2021_04.fasta.${i} &
 done
 
 
