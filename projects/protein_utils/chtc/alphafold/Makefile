@@ -7,7 +7,8 @@ clean:
 	rm -f logs/*
 
 deepclean: clean
-	rm -f output/*
+	rm -f hmmer_output/*
+	rm -f hmmer_output.tar.gz
 
 sweep:
 	mv *.tblout.txt *.sto hmmer_output/
@@ -22,6 +23,6 @@ inter_hmmer:
 inter_cpu_alphafold:
 	condor_submit DISABLE_GPU=1 -i alphafold.sub
 
-submit:
+hmmer:
 	condor_submit hmmer.sub
 

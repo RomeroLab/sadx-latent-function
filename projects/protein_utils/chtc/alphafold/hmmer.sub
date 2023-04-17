@@ -17,14 +17,17 @@ request_cpus = 1
 request_memory = 1GB
 request_disk = 2GB
 
-DB_Z_VAL=135301051
-queue DB_GZ matching files /squid/dcosta2/alphafold_db/uniref90_2021_03.fasta.*.gz
+DB_Z_VAL=144113457
+queue DB_GZ matching files /squid/dcosta2/alphafold_db/uniref90_2022_01.fasta.*.gz
 
 DB_Z_VAL=65984053
 queue DB_GZ matching files /squid/dcosta2/alphafold_db/bfd-first_non_consensus_sequences.fasta.*.gz
 
-DB_Z_VAL=304820129
-queue DB_GZ matching files /squid/dcosta2/alphafold_db/mgy_clusters_2019_05.fasta.*.gz
+DB_Z_VAL=623796864
+queue DB_GZ matching files /squid/dcosta2/alphafold_db/mgy_clusters_2022_05.fasta.*.gz
 
+# uniprot is only for multimers so do not use it for now
+#DB_Z_VAL=225578953
+#queue DB_GZ matching files /squid/dcosta2/alphafold_db/mgy_clusters_2021_04.fasta.*.gz
 
 
