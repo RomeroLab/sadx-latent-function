@@ -16,6 +16,7 @@ The challenge here was to install everything in a way that `conda pack` did not 
 conda create -qy -n alphafold \
         --channel conda-forge \
         python=3.9 \
+        cudatoolkit=11.1.1 \
         openmm=7.5.1 \
         pdbfixer \
         numpy=1.21.6
@@ -33,7 +34,7 @@ pip3 install -r ~/alphafold/requirements.txt
 # we need to download a cuda version of jax. somehow pip installed the 
 # wrong version of jaxlib above (not compatible with jax)
 # so we reinstall the correct version below
-pip3 install --upgrade jaxlib==0.3.25+cuda11.cudnn82 -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+pip3 install --upgrade jax==0.3.25 jaxlib==0.3.25+cuda11.cudnn805 -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 # now install the actual alphafold package
 pip3 install --no-dependencies ./alphafold
