@@ -45,6 +45,11 @@ from alphafold.relax import utils
 #from ipywidgets import GridspecLayout
 #from ipywidgets import Output
 
+# Color bands for visualizing plddt
+PLDDT_BANDS = [(0, 50, '#FF7D45'),
+               (50, 70, '#FFDB13'),
+               (70, 90, '#65CBF3'),
+               (90, 100, '#0053D6')]
 
 ## Cell 3. Enter the amino acid sequence(s) to fold
 import Bio.SeqIO
