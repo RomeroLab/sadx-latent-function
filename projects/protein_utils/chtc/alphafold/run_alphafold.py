@@ -262,6 +262,8 @@ elif model_type_to_use == ModelType.MULTIMER:
 ## Cell 5. Run AlphaFold and download prediction
 # testing
 
+ALPHAFOLD_PARAMS_DIR='../alphafold/data'
+
 run_relax = False
 relax_use_gpu = False
 multimer_model_max_num_recycles = 3  
@@ -274,8 +276,10 @@ elif model_type_to_use == ModelType.MULTIMER:
 output_dir = 'prediction'
 os.makedirs(output_dir, exist_ok=True)
 
-#model_name = "model_1"
-#params = data.get_model_haiku_params(model_name, '../alphafold/data')
+plddts = {}
+ranking_confidences = {}
+pae_outputs = {}
+unrelaxed_proteins = {}
 
 for model_name in model_names:
   print(f'Running {model_name}')
@@ -291,7 +295,7 @@ for model_name in model_names:
     cfg.model.num_recycle = multimer_model_max_num_recycles
     cfg.model.recycle_early_stop_tolerance = 0.5
 
-  params = data.get_model_haiku_params(model_name, '../alphafold/data')
+  params = data.get_model_haiku_params(model_name, ALPHAFOLD_PARAMS_DIR)
   model_runner = model.RunModel(cfg, params)
   processed_feature_dict = model_runner.process_features(np_example, random_seed=0)
   prediction = model_runner.predict(processed_feature_dict, random_seed=random.randrange(sys.maxsize))

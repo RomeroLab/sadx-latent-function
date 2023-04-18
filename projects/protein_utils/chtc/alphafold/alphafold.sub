@@ -13,7 +13,7 @@ when_to_transfer_output = ON_EXIT
 transfer_input_files = run_alphafold.sh, run_alphafold.py, target.fasta, hmmer_output.tar.gz, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_aa, http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_ab , http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/alphafold_conda_tar_gz_ac 
 
 
-request_memory = 5GB
+request_memory = 16GB
 request_disk = 20GB
 request_cpus = 1
 
