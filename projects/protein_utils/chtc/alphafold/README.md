@@ -11,7 +11,7 @@ the full Alphafold2 for most monomers.
 
 * See if it is possible to download a structure from the [Alphafold Structure Database](https://alphafold.ebi.ac.uk/)
 * See if it is feasible to use *Alphafold2 Colab* on Google colab
-* See if it is possible to use *Colabfold* (an community version) of Alphafold2 Colab on Google colab.
+* See if it is possible to use *Colabfold* (an community version) of *Alphafold2 Colab* on Google colab.
 
 If none of the above work, then running Alphafold2 Colab on CHTC might be a
 decent alternative. 
@@ -22,7 +22,7 @@ There are two steps.
 1. Use `hmmer` to search the various databases.
    ([Uniref90](https://www.uniprot.org/help/uniref), [Small
 bfd](https://bfd.mmseqs.com/) soil metagenome clusters,
-[Mgnify](https://www.ebi.ac.uk/metagenomics/) metagenomic clusters. These
+[Mgnify](https://www.ebi.ac.uk/metagenomics/) metagenomic clusters). These
 databases around 300GB in total and are searched in chunks of 1GB in parallel.
 It is quite fast since nearly all the jobs can be running in parallel at the
 same time and only use a cpu.
