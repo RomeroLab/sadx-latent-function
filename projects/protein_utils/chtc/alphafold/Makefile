@@ -22,6 +22,9 @@ inter_hmmer:
 inter_cpu_alphafold:
 	condor_submit DISABLE_GPU=1 -i alphafold.sub
 
+cpu_alphafold:
+	condor_submit DISABLE_GPU=1 alphafold.sub
+
 inter_alphafold:
 	condor_submit -i alphafold.sub
 
