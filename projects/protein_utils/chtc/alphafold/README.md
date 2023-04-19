@@ -22,10 +22,10 @@ There are two steps.
 1. Use `hmmer` to search the various databases.
    ([Uniref90](https://www.uniprot.org/help/uniref), [Small
 bfd](https://bfd.mmseqs.com/) soil metagenome clusters,
-[Mgnify](https://www.ebi.ac.uk/metagenomics/) metagenomic clusters). These
-databases around 300GB in total and are searched in chunks of 1GB in parallel.
-It is quite fast since nearly all the jobs can be running in parallel at the
-same time and only use a cpu.
+[Mgnify](https://www.ebi.ac.uk/metagenomics/) microbiome clusters). These
+stripped down databases are around 300GB in total and are searched in chunks of
+1GB in parallel.  It is quite fast since nearly all the jobs are run in
+parallel at the same time and each job only uses a single cpu.
 2. The results of the `hmmer` search are gathered up and used as input to the
    Alphafold script which runs on a gpu. 
 
@@ -37,7 +37,7 @@ same time and only use a cpu.
 5. Run `make hmmer` to run JackHmmer against all the database chunks. It will spawn 199 jobs and they should all finish in a few minutes.
 6. Run `make sweep` to compress all the results and get them ready for the next step
 7. Run `make alphafold` to run alphafold. (Use `make cpu_alphafold` if you want to use the cpu instead of the GPU)
-8. The result is a file called `prediction.tar.gz` that has a pdb for the best structure out of the 5 or 6 alphafold models that are run. The b-values of the pdb file have the confidence values.
+8. The result is a file called `prediction.tar.gz` that has a pdb for the best structure out of the 5 or 6 alphafold models that are run. The b-factors of the pdb file have the confidence values.
 
 
 
