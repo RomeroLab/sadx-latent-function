@@ -79,7 +79,7 @@ QUERY_FASTA=$1
 QUERY_BASE=${QUERY_FASTA%%.*}
 
 WORKDIR=work
-mkdir -p ${WORKDIR}
+mkdir -p ${WORKDIR}/prediction
 cp "${QUERY_FASTA}" "${WORKDIR}"
 cp run_alphafold.py "${WORKDIR}"
 tar xzvf hmmer_output.tar.gz -C "${WORKDIR}"
@@ -94,8 +94,11 @@ wget ${url}'
 cd ..
 
 mkdir -p alphafold/data/params
-cat alphafold_params/* | tar xzvf - -C alphafold/data/params
+# params are not compressed with tar so don't use z to extract
+cat alphafold_params/* | tar xvf - -C alphafold/data/params
 rm -r alphafold_params/
 
 cd "${WORKDIR}"
 python run_alphafold.py
+# return the predictions directory
+tar zcf ../prediction.tar.gz prediction

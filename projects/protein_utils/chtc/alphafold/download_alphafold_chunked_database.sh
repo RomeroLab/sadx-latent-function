@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# takes 160GB of space after compression so do this on a drive with space
 
 DB_ROOT_PATH=https://storage.googleapis.com/alphafold-colab/latest
 
