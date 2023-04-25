@@ -1,0 +1,4 @@
+http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2022-06-07_20-53-56/rtl.tar.gz.aa
+http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2022-06-07_20-53-56/rtl.tar.gz.ab
+http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2022-06-07_20-53-56/rtl.tar.gz.ac
+http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2022-06-07_20-53-56/rtl.tar.gz.ad
