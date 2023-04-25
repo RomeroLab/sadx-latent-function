@@ -71,8 +71,14 @@ echo "Activating Python environment"
 export PATH
 . env/bin/activate
 
+echo "Conda environment"
+ls env/conda-meta/*.json | xargs basename -s .json
+
+echo "Pip environment"
+pip list
+
 echo "Launching $RUN_SCRIPT"
 
-conda list
-python3 -c "import torch; print(torch.__version__)"
-python3 -c "import esm; print(esm.__version__)"
+python3 -c "import torch; print('torch version : ' + torch.__version__)"
+python3 -c "import esm; print('esm version : ' + esm.__version__)"
+

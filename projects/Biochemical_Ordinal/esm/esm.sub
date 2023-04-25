@@ -11,7 +11,7 @@ output = run_output/condor_logs/job_$(Cluster)_$(cProcess).out
 # these files get transferred from the submit node to the server on which the program is executing
 # transfer over code, data, and arguments
 #transfer_input_files = run.sh, code.tar.gz, args/$(cProcess).txt, {transfer_input_files}
-transfer_input_files = run.sh, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2022-06-07_20-53-56/rtl.tar.gz.aa, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2022-06-07_20-53-56/rtl.tar.gz.ab, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2022-06-07_20-53-56/rtl.tar.gz.ac, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2022-06-07_20-53-56/rtl.tar.gz.ad
+transfer_input_files = run.sh, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2023-01-05_19-21-14/rtl.tar.gz.aa, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2023-01-05_19-21-14/rtl.tar.gz.ab, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2023-01-05_19-21-14/rtl.tar.gz.ac, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2023-01-05_19-21-14/rtl.tar.gz.ad, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2023-01-05_19-21-14/rtl.tar.gz.ae, http://proxy.chtc.wisc.edu/SQUID/sgelman2/py_distr/rtl_2023-01-05_19-21-14/rtl.tar.gz.af
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
@@ -23,7 +23,7 @@ requirements = (OpSysMajorVer == 7 || OpSysMajorVer == 8)
 
 request_cpus = 1
 request_memory = 2GB
-request_disk = 10GB
+request_disk = 20GB
 
 
 +WantFlocking = true
