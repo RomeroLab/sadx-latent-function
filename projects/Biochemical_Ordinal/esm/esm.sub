@@ -22,8 +22,8 @@ requirements = (OpSysMajorVer == 7 || OpSysMajorVer == 8)
 
 
 request_cpus = 1
-request_memory = 1GB
-request_disk = 5GB
+request_memory = 2GB
+request_disk = 10GB
 
 
 +WantFlocking = true

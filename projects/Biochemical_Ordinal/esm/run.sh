@@ -73,4 +73,6 @@ export PATH
 
 echo "Launching $RUN_SCRIPT"
 
+conda list
 python3 -c "import torch; print(torch.__version__)"
+python3 -c "import esm; print(esm.__version__)"
