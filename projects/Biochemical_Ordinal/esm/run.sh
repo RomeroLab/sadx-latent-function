@@ -82,3 +82,4 @@ echo "Launching $RUN_SCRIPT"
 python3 -c "import torch; print('torch version : ' + torch.__version__)"
 python3 -c "import esm; print('esm version : ' + esm.__version__)"
 
+python3 esm_model.py
