@@ -7,17 +7,15 @@ The challenge here was to install everything in a way that `conda pack` did not 
 ## Remove old environment if we are not starting clean
 #conda env remove -n huggingface
 
-conda create -qy -n huggingface \
-        --channel huggingface \
-        transformers pytorch
+conda create -qy -n huggingface pytorch torchvision torchaudio \
+        pytorch-cuda=11.8 transformers -c pytorch -c nvidia -c huggingface
 
 # activate the environment
 conda activate huggingface
 
-conda install pytorch torchvision torchaudio \
-        pytorch-cuda=11.8 -c pytorch -c nvidia
-
 pip install ipython
+
+conda deactivate
 ```
 
 ## Installing ESM-2
@@ -40,4 +38,15 @@ from transformers import AutoTokenizer, EsmModel
 tokenizer = AutoTokenizer.from_pretrained("facebook/esm2_t6_8M_UR50D")
 model = EsmModel.from_pretrained("facebook/esm2_t6_8M_UR50D")
 EOF
+```
+
+## Make conda environment
+```shell
+conda pack -n huggingface
+tar tvf huggingface.tar.gz
+
+du -sh huggingface.tar.gz
+
+
+
 ```
