@@ -18,7 +18,7 @@ import models
 import shared_model
 from target_model import verify_set_seed, log_config, init_callbacks, es_warning, log_metrics, add_target_args
 import utils
-from esm_shared import ESMDataModule, ESMSequenceRep
+from esm_shared import ESMOrdDataModule as ESMDataModule, ESMSequenceRep
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -226,8 +226,9 @@ def main(args: argparse.Namespace):
 
     # set up logger callbacks for training
     loggers = shared_model.init_loggers(log_dir, my_uuid, args.wandb_online, args.wandb_project)
-    # log some config parameters for wandb to make exploring runs easier
-    log_config(loggers, args)
+    ## ** Commented out by Sameer ** ##
+    ## log some config parameters for wandb to make exploring runs easier
+    #log_config(loggers, args)
 
     # load the ESM task and datamodule
     task, dm = init_esm_task_and_dm(args)
@@ -336,3 +337,4 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(parents=[parser], fromfile_prefix_chars='@', add_help=False)
     main(parser.parse_args())
+

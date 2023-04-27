@@ -256,8 +256,9 @@ def main(args: argparse.Namespace):
     # set up logger callbacks for training
     loggers = shared_model.init_loggers(log_dir, my_uuid, args.wandb_online, args.wandb_project)
 
-    # log some config parameters for wandb to make exploring runs easier
-    log_config(loggers, args)
+    ## ** Commented out by Sameer ** ##
+    ## log some config parameters for wandb to make exploring runs easier
+    #log_config(loggers, args)
 
     # load data and split via the datamodule
     dm = DMSDataModule(**vars(args))

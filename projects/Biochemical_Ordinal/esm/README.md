@@ -7,7 +7,7 @@ cd ~/software
 git clone git@github.com:samgelman/RosettaTL.git
 
 cd RosettaTL
-mamba env create -f env_2.yml # conda is too close
+mamba env create -f env_2.yml # conda is too slow
 conda activate rtl2
 
 # something missing from env_2.yml that is needed in one of the imports
