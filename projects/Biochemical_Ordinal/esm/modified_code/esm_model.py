@@ -18,7 +18,8 @@ import models
 import shared_model
 from target_model import verify_set_seed, log_config, init_callbacks, es_warning, log_metrics, add_target_args
 import utils
-from esm_shared import ESMOrdDataModule as ESMDataModule, ESMSequenceRep
+from esm_shared import ESMSequenceRep
+from esm_shared_ordinal import ESMDataModule
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
