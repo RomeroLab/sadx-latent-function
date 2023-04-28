@@ -6,15 +6,12 @@ from typing import Optional, Union
 import torch
 import torch.nn as nn
 import torch.utils.data as data_utils
-from torch import Tensor
-from torch.utils.data import Dataset
 
 # FIXME remove random_split and do that somewhere else
 from torch.utils.data import random_split
 
 import pandas as pd
 import pytorch_lightning as pl
-
 
 from esm_shared import ESMCollate, ESMDataset
 
@@ -27,34 +24,13 @@ class ESMDataModule(pl.LightningDataModule):
 
         parser.add_argument("--ds_fn",
                             help="filename of the csv/hdf5 dataset",
-                            type=str, default="data/rosetta_data/gb1_sample/gb1_sample.h5")
+                            type=str, default="data/ordinal_Oct22_sequences_with_dca_score.csv")
 
         parser.add_argument("--encoding",
                             help="which data encoding to use. should be int_seqs if using an embedding."
                                  " for backwards compat, auto will adopt old behavior of choosing encoding"
                                  " based on the model type",
                             type=str, default="auto")
-
-        parser.add_argument("--split_dir",
-                            help="the directory containing the train/tune/test split",
-                            type=str, default="data/rosetta_data/gb1_sample/splits/standard_tr0.8_tu0.1_te0.1_w3da7a2fd8b08_r11")
-        parser.add_argument("--train_name",
-                            help="name of the train set in the split dir",
-                            type=str, default="train")
-        parser.add_argument("--val_name",
-                            help="name of the validation set in the split dir",
-                            type=str, default="val")
-        parser.add_argument("--test_name",
-                            help="name of the test set in the split dir",
-                            type=str, default="test")
-
-        parser.add_argument("--target_names",
-                            help="names of rosetta energies to use as targets (overrides exclude)",
-                            type=str, nargs="+", default=None)
-        parser.add_argument("--target_names_exclude",
-                            help="names of rosetta energies to exclude",
-                            type=str, nargs="*", default=['filter_total_score', 'dslf_fa13', 'res_count_all',
-                                                          'linear_chainbreak', 'overlap_chainbreak'])
 
         parser.add_argument("--batch_size",
                             help="batch size for the data loader and optimizer",
@@ -63,19 +39,25 @@ class ESMDataModule(pl.LightningDataModule):
         return parser
 
 
-    def __init__(self, alphabet: "esm.data.Alphabet", *args, **kwargs):
+    def __init__(self, alphabet: "esm.data.Alphabet", 
+                 ds_fn: str,
+                 batch_size: int = 32,
+                 num_dataloader_workers: int = 4,
+                 *args, **kwargs):
 
         super().__init__()
         # ESM alphabet for encoding data
         self.alphabet = alphabet
-        self.aa_seq_len = 272
-        self.batch_size = 32
-        self.num_dataloader_workers = 4
-        self.train_name = "train"
-        self.val_name = "val"
-        self.test_name = "test"
+        self.batch_size = batch_size
+        self.num_dataloader_workers = num_dataloader_workers
+        self.ds_fn = ds_fn
 
         self.example_input_array = self._init_example_input_array(None)
+        self.aa_seq_len = len(self.example_input_array['x']['char_seqs'][0])
+        
+        self.train_name = 'train'
+        self.val_name = 'val'
+        self.test_name = 'test'
 
         # initialize DMSDataset that are used later in this module to load dataloaders, etc
         self.full_ds = self.get_ds(None)
@@ -97,7 +79,7 @@ class ESMDataModule(pl.LightningDataModule):
         return {"x": sample_batch}
 
     def get_ds(self, set_name: Optional[str]):
-        df = pd.read_csv("../../output/ordinal_Oct22_sequences_with_dca_score.csv")
+        df = pd.read_csv(self.ds_fn)
         variants = "s_" + df.parent + "_" + df.index.astype(str)
         char_seqs = df.sequence_aa_trim
         targets = df.response
