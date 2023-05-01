@@ -135,7 +135,7 @@ def create_model_inputs(df, add_dca=False, ):
 
 
 def create_target(df, activity_only=False):
-    return df.activty_num.to_numpy() if activity_only \
+    return df.activity_num.to_numpy() if activity_only \
         else df.category_num.to_numpy()
 
 
