@@ -43,7 +43,8 @@ fi
 # remove the enclosing folder with strip-components
 if [ -f "$CODE_FN" ]; then
   echo "Extracting $CODE_FN"
-  tar -xf $CODE_FN --strip-components=1
+  #tar -xf $CODE_FN --strip-components=1
+  tar -xf $CODE_FN -C code
   rm $CODE_FN
 fi
 
@@ -82,4 +83,6 @@ echo "Launching $RUN_SCRIPT"
 python3 -c "import torch; print('torch version : ' + torch.__version__)"
 python3 -c "import esm; print('esm version : ' + esm.__version__)"
 
+cd code
 python3 esm_model.py
+
