@@ -44,6 +44,7 @@ fi
 if [ -f "$CODE_FN" ]; then
   echo "Extracting $CODE_FN"
   #tar -xf $CODE_FN --strip-components=1
+  mkdir code
   tar -xf $CODE_FN -C code
   rm $CODE_FN
 fi
