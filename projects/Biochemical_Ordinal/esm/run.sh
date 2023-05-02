@@ -63,7 +63,7 @@ then
   for f in *.tar.gz;
   do
     echo "Extracting $f"
-    tar -xf "$f";
+    tar -zxf "$f";
     rm "$f"
   done
 fi
