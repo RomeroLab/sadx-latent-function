@@ -26,8 +26,8 @@ preserve_relative_paths = true
 requirements = (OpSysMajorVer == 7 || OpSysMajorVer == 8)
 
 
-request_cpus = 2
-request_memory = 2GB
+request_cpus = 4
+request_memory = 16GB
 request_disk = 20GB
 
 
