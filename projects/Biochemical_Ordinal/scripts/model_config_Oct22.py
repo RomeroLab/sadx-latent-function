@@ -13,6 +13,7 @@ class ModelConfig:
                  multilibrary=False, # whether we consider separate libraries
                  encoding="one-hot", # one-hot, esm, esmft
                  uuid=None,
+                 seed=100,
                  **model_params
                 ):
       
@@ -27,6 +28,8 @@ class ModelConfig:
 
         # add additional arguments
         self.model_params = model_params.copy()
+
+        self.seed = seed
 
         self.uuid = uuid
         if self.uuid is None:
