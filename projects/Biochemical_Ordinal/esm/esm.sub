@@ -12,6 +12,7 @@ output = run_output/condor_logs/job_$(Cluster)_$(cProcess).out
 # transfer over code, data, and arguments
 #transfer_input_files = run.sh, code.tar.gz, args/$(cProcess).txt, {transfer_input_files}
 transfer_input_files = run.sh, code.tar.gz, \
+  http://proxy.chtc.wisc.edu/SQUID/dcosta2/esm/hub.tar.gz, \
   http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/rtl.tar.gz.aa, \
   http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/rtl.tar.gz.ab, \
   http://proxy.chtc.wisc.edu/SQUID/dcosta2/py39/rtl.tar.gz.ac, \
@@ -26,7 +27,7 @@ preserve_relative_paths = true
 requirements = (OpSysMajorVer == 7 || OpSysMajorVer == 8)
 
 
-request_cpus = 4
+request_cpus = 8
 request_memory = 16GB
 request_disk = 20GB
 

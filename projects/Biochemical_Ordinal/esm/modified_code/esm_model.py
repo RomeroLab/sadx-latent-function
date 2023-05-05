@@ -176,7 +176,8 @@ class ESMTrainingTask(pl.LightningModule):
                                                         self.learning_rate,
                                                         self.lr_scheduler,
                                                         self.warmup_steps,
-                                                        self.phase2_lr_ratio)
+                                                        self.phase2_lr_ratio,
+                                                        max_epochs = 10) # added by SAMEER
 
         return optimizer_config.get_optimizer_config(trainable_parameters, self.trainer.estimated_stepping_batches)
 

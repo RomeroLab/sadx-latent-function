@@ -4,6 +4,7 @@
 
 CODE_FN=code.tar.gz
 ENV_FN=rtl.tar.gz
+HUB_FN=hub.tar.gz
 
 
 # create output directory for condor logs early
@@ -39,14 +40,15 @@ then
   done
 fi
 
-# the code tar file needs a special flag to un-tar properly
-# remove the enclosing folder with strip-components
 if [ -f "$CODE_FN" ]; then
   echo "Extracting $CODE_FN"
-  #tar -xf $CODE_FN --strip-components=1
   mkdir code
-  tar -xf $CODE_FN -C code
+  tar -zxf $CODE_FN -C code
   rm $CODE_FN
+  if [ -f "$HUB_FN" ]; then
+    echo "Extracting $HUB_FN"
+    tar -zxf "$HUB_FN" -C code
+  fi
 fi
 
 # the environment files need to be un-tarred into the "env" directory
@@ -54,7 +56,7 @@ fi
 if [ -f "$ENV_FN" ]; then
   echo "Extracting $ENV_FN"
   mkdir env
-  tar -xzf $ENV_FN -C env
+  tar -zxf $ENV_FN -C env
   rm $ENV_FN
 fi
 
