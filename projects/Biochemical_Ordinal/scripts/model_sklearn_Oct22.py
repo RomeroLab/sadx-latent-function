@@ -1,6 +1,7 @@
 import pathlib
 
 from sklearn.utils.extmath import softmax
+from scipy.special import expit
 
 import dataset_Oct22
 import model_config_Oct22
@@ -8,7 +9,7 @@ import model_config_Oct22
 from sklearn.linear_model import LogisticRegressionCV, RidgeClassifierCV
 
 
-model_names = ["SklearnRidgeRegression", "SklearnLogisticRegression"]
+model_names = ["SklearnRidgeClassifier", "SklearnLogisticRegression"]
 
 def add_common_arguments(parser, model_names = model_names):
     group = parser.add_argument_group("general")
@@ -32,7 +33,7 @@ def add_design_arguments(parser):
                        type=str)
     group.add_argument("-t", "--target", 
         help="target variable", default="multiclass", 
-                       choices=['multiclass", "binary'], type=str)
+                       choices=["multiclass", "binary"], type=str)
     group.add_argument("--dca", help="Add DCA score", action="store_true")
     return group
 
@@ -48,8 +49,9 @@ def create_model(model_config, cv=None):
         model = LogisticRegressionCV(
                     fit_intercept = model_config.design_matrix["intercept"],
                     random_state = model_config.seed,
+                    max_iter=1000,
                     cv=cv)
-    elif model_config.model_name == "SklearnRidgeRegression":
+    elif model_config.model_name == "SklearnRidgeClassifier":
         model = RidgeClassifierCV(
                     fit_intercept = model_config.design_matrix["intercept"],
                     cv = cv)
@@ -58,10 +60,11 @@ def create_model(model_config, cv=None):
     return model
 
 
-def get_model_data(model_config, 
-             dataset, 
-             data_type="train" # or test
-            ):
+def get_model_data(
+        model_config, 
+        dataset, 
+        # data type should be train or test
+        data_type="train" ):
     # get train or test data
     model_data = None
     if data_type == "train":
@@ -75,7 +78,6 @@ def get_model_data(model_config,
         add_dca=model_config.design_matrix["dca"])
     y = dataset_Oct22.create_target(model_data, 
         activity_only = True if model_config.target == "binary" else False)
-
     return X, y
 
 
@@ -124,5 +126,19 @@ if __name__ == "__main__":
     X_test, y_test = get_model_data(model_config=mc, dataset=ds, 
                                     data_type = "test")
 
-    print(model.score(X_test, y_test))
+    logging.info(f"model_score = {model.score(X_test, y_test)}")
+
+    # convert decision scores to probabilities
+    # we do this to look at AUC curves
+    des = model.decision_function(X_test)
+
+    probs = None
+    if mc.target == "binary":
+        assert(len(des.shape) == 1)
+        p = expit(des) # probablity of predicting 1.
+        probs = np.vstack([1-p, p])
+    elif mc.target == "multiclass":
+        assert(des.shape[1] == 4)
+    else:
+        raise ValueError(f"Got unknown value of mc.target={mc.target}")
 

@@ -5,6 +5,21 @@ import yaml
 class ModelConfig:
     """ Save some info about a model as a yaml file so that we can analyze
         results later"""
+
+
+    @classmethod
+    def create_from_yaml(cls, filename):
+        with open(filename, "r") as fh:
+            x = yaml.safe_load(fh)
+            # put the design matrix values at the top level
+            # as they are sent directly to the constructor of this class
+            dm = x.pop("design_matrix", {})
+            for k, v in dm.items():
+                x[k] = v
+            mp = x.pop("model_params", {})
+            for k, v in mp.items():
+                x[k] = v
+            return cls(**x)
   
     def __init__(self, model_name, 
                  target="multiclass", # binary or multiclass 
