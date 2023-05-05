@@ -278,7 +278,8 @@ if __name__ == "__main__":
     parser.add_argument("--esm_version",
                         help="torch hub string for the esm model to use",
                         type=str,
-                        default="esm2_t12_35M_UR50D")
+                        default="esm2_t6_8M_UR50D")
+                        #default="esm2_t12_35M_UR50D")
     parser.add_argument("--hub_dir",
                         help="cache directory for pre-trained models from torch hub",
                         type=str,
