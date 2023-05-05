@@ -88,5 +88,5 @@ python3 -c "import torch; print('torch version : ' + torch.__version__)"
 python3 -c "import esm; print('esm version : ' + esm.__version__)"
 
 cd code
-python3 esm_model.py
+python3 esm_model.py --max_epochs 1
 
