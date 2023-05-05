@@ -48,6 +48,7 @@ if [ -f "$CODE_FN" ]; then
   if [ -f "$HUB_FN" ]; then
     echo "Extracting $HUB_FN"
     tar -zxf "$HUB_FN" -C code
+    rm "$HUB_FN"
   fi
 fi
 

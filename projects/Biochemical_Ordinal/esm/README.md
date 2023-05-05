@@ -28,6 +28,8 @@ mkdir -p output/esm_pretrained_models/checkpoints
 pushd output/esm_pretrained_models
 wget "https://github.com/facebookresearch/esm/archive/main.zip"
 unzip main.zip
+mv esm-main facebookresearch_esm_main
+rm main.zip 
 popd
 
 pushd output/esm_pretrained_models/checkpoints 
