@@ -1,7 +1,7 @@
 """ Add new classes that help with ordinal regression """
 
 from argparse import ArgumentParser
-from typing import Optional, Union
+from typing import Optional, Sequence, Union, Literal
 
 import torch
 import torch.nn as nn
@@ -43,6 +43,7 @@ class ESMDataModule(pl.LightningDataModule):
     def __init__(self, alphabet: "esm.data.Alphabet", 
                  ds_fn: str,
                  batch_size: int = 32,
+                 predict_mode: Literal["all_sets", "train_set", "full_dataset"] = "all_sets",
                  num_dataloader_workers: int = 4,
                  *args, **kwargs):
 
@@ -50,9 +51,11 @@ class ESMDataModule(pl.LightningDataModule):
         # ESM alphabet for encoding data
         self.alphabet = alphabet
         self.batch_size = batch_size
+        self.predict_mode = predict_mode
         self.num_dataloader_workers = num_dataloader_workers
         self.ds = dataset_Oct22.Oct22DataSet(ds_fn)
 
+        self.has_val_set = True
         
         self.train_name = 'train'
         self.val_name = 'val'
@@ -81,13 +84,32 @@ class ESMDataModule(pl.LightningDataModule):
             df = self.test_df
         elif set_name == "val":
             df = self.val_df
+        variants = self.get_variants(set_name)
 
-        variants = "s_" + df.parent + "_" + df.index.astype(str)
         char_seqs = df.sequence_aa_trim
         targets = df.response
+        targets = self.get_targets(set_name)
         return ESMDataset(sequence_labels=variants,
                           sequence_strs=char_seqs,
-                          targets=None if targets is None else torch.from_numpy(targets.to_numpy()))
+                          targets=None if targets is None else torch.from_numpy(targets.to_numpy()).float())
+
+    def get_targets(self, set_name, *args, **kwargs):
+        df = self.train_df
+        if set_name == "test":
+            df = self.test_df
+        elif set_name == "val":
+            df = self.val_df
+        return df.response
+
+
+    def get_variants(self, set_name, *args, **kwargs):
+        df = self.train_df
+        if set_name == "test":
+            df = self.test_df
+        elif set_name == "val":
+            df = self.val_df
+        return "s_" + df.parent + "_" + df.index.astype(str)
+
 
     def _get_dataloader(self, ds):
         """ helper function for loading train, val, and test dataloaders """

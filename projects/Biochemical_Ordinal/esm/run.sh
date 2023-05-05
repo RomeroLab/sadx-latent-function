@@ -88,5 +88,7 @@ python3 -c "import torch; print('torch version : ' + torch.__version__)"
 python3 -c "import esm; print('esm version : ' + esm.__version__)"
 
 cd code
-python3 esm_model.py --max_epochs 1
+python3 esm_model.py --max_epochs 1 --delete_checkpoints
+
+tar zcf ../training_logs.tar.gz output/training_logs
 
