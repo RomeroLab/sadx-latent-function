@@ -14,6 +14,7 @@ import pandas as pd
 import pytorch_lightning as pl
 
 from esm_shared import ESMCollate, ESMDataset
+import dataset_Oct22
 
 class ESMDataModule(pl.LightningDataModule):
     """ Datamodule for loading DMS data encoded for ESM models """
@@ -50,25 +51,21 @@ class ESMDataModule(pl.LightningDataModule):
         self.alphabet = alphabet
         self.batch_size = batch_size
         self.num_dataloader_workers = num_dataloader_workers
-        self.ds_fn = ds_fn
+        self.ds = dataset_Oct22.Oct22DataSet(ds_fn)
 
-        self.example_input_array = self._init_example_input_array(None)
-        self.aa_seq_len = len(self.example_input_array['x']['char_seqs'][0])
         
         self.train_name = 'train'
         self.val_name = 'val'
         self.test_name = 'test'
 
         # initialize DMSDataset that are used later in this module to load dataloaders, etc
-        self.full_ds = self.get_ds(None)
-        N = len(self.full_ds)
-        # FIXME: for testing purposes only. Need to shuffle these and save?
-        train_size = int(N * 0.7)
-        val_size  = int(N * 0.15)
-        self.train_ds, self.val_df, self.test_ds = \
-                random_split(self.full_ds, [train_size, val_size, 
-                                N - train_size - val_size])
-        self.test_ds = self.full_ds[int(N*0.85):]
+        self.test_df = self.ds.get_test_dataset()
+        # split train into train and val using cv1
+        for self.train_df, self.val_df in self.ds.cv_iterator():
+            break
+
+        self.example_input_array = self._init_example_input_array(None)
+        self.aa_seq_len = len(self.example_input_array['x']['char_seqs'][0])
 
     def _init_example_input_array(self, sample_batch):
         # create an example input array using actual data
@@ -79,7 +76,12 @@ class ESMDataModule(pl.LightningDataModule):
         return {"x": sample_batch}
 
     def get_ds(self, set_name: Optional[str]):
-        df = pd.read_csv(self.ds_fn)
+        df = self.train_df
+        if set_name == "test":
+            df = self.test_df
+        elif set_name == "val":
+            df = self.val_df
+
         variants = "s_" + df.parent + "_" + df.index.astype(str)
         char_seqs = df.sequence_aa_trim
         targets = df.response
