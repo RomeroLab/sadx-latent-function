@@ -21,6 +21,8 @@ import utils
 from esm_shared import ESMSequenceRep
 from esm_shared_ordinal import ESMDataModule
 
+from coral_multiple_layer import CoralMultipleLayer
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
@@ -33,7 +35,8 @@ class ESMTransferModel(pl.LightningModule):
         # top net args
         p.add_argument("--dropout_after_backbone", action="store_true")
         p.add_argument("--dropout_after_backbone_rate", type=float, default=0.1)
-        p.add_argument("--top_net_type", type=str, default="linear", choices=["linear", "nonlinear"])
+        p.add_argument("--top_net_type", type=str, default="linear", 
+                            choices=["linear", "nonlinear", "ordinal"])
         p.add_argument("--top_net_hidden_nodes", type=int, default=256)
         p.add_argument("--top_net_use_batchnorm", action="store_true")
         p.add_argument("--top_net_use_dropout", action="store_true")
@@ -76,6 +79,11 @@ class ESMTransferModel(pl.LightningModule):
 
             pred_layer = nn.Linear(in_features=top_net_hidden_nodes, out_features=1)
             layers["prediction"] = nn.Sequential(fc_block, pred_layer)
+        elif top_net_type == "ordinal":
+            layers["prediction"] = coral_multiple_layer.CoralMultipleLayer(
+                                        size_in=esm_embedding_dim,
+                                        num_classes=4,
+                                        num_datasets=3)
         else:
             raise ValueError("Unexpected type of top net layer: {}".format(top_net_type))
 

@@ -121,6 +121,10 @@ class Oct22DataSet:
         # map activity to activity code (is_in_non_active_bin?)
         activity_map = {'N':0, 'L':1, "P":1, "H":1}
         df["activity_num"] = df["category"].map(activity_map)
+
+        dataset_map = {'1VH':0, '2L':1, '3VRL':2}
+        df["dataset_num"] = df["parent"].map(dataset_map)
+
         return df
 
 def create_model_inputs(df, add_dca=False, ):

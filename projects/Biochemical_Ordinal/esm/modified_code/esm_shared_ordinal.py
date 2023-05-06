@@ -5,6 +5,8 @@ from typing import Optional, Sequence, Union, Literal
 
 import torch
 import torch.nn as nn
+from torch import Tensor
+from torch.utils.data import Dataset
 import torch.utils.data as data_utils
 
 # FIXME remove random_split and do that somewhere else
@@ -15,6 +17,43 @@ import pytorch_lightning as pl
 
 from esm_shared import ESMCollate, ESMDataset
 import dataset_Oct22
+
+class ESMOrdinalDataset(Dataset):
+    """ This is for compatability with the ESM alphabet and batch_converter collate_fn
+        Allows us to optionally incorporate DMS target scores """
+
+    def __init__(self,
+                 sequence_labels: Union[list[str], tuple[str]],
+                 sequence_strs: Union[list[str], tuple[str]],
+                 dataset_num: Optional[Tensor],
+                 targets: Optional[Tensor]):
+
+        self.sequence_labels = list(sequence_labels)
+        self.sequence_strs = list(sequence_strs)
+        self.dataset_num = dataset_num
+        self.targets = targets
+
+    def __len__(self):
+        return len(self.sequence_labels)
+
+    def __getitem__(self, idx):
+        out = {"variants": self.sequence_labels[idx],
+               "char_seqs": self.sequence_strs[idx]}
+
+        if self.targets is None:
+            # handle the case where we don't have DMS targets
+            out["targets"] = None
+        else:
+            out["targets"] = self.targets[idx]
+
+        if self.dataset_num is None:
+            out["dataset_num"] = None
+        else:
+            out["dataset_num"] = self.dataset_num[idx]
+
+        return out
+
+
 
 class ESMDataModule(pl.LightningDataModule):
     """ Datamodule for loading DMS data encoded for ESM models """
@@ -87,10 +126,12 @@ class ESMDataModule(pl.LightningDataModule):
         variants = self.get_variants(set_name)
 
         char_seqs = df.sequence_aa_trim
+        dataset_num = torch.from_numpy(df.dataset_num.to_numpy())
         targets = df.response
         targets = self.get_targets(set_name)
-        return ESMDataset(sequence_labels=variants,
+        return ESMOrdinalDataset(sequence_labels=variants,
                           sequence_strs=char_seqs,
+                          dataset_num = dataset_num,
                           targets=None if targets is None else torch.from_numpy(targets.to_numpy()).float())
 
     def get_targets(self, set_name, *args, **kwargs):
