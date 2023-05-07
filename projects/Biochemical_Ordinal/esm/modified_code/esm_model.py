@@ -96,10 +96,17 @@ class ESMTransferModel(pl.LightningModule):
             raise ValueError("Unexpected type of top net layer: {}".format(top_net_type))
 
         self.top_net_type = top_net_type
+        self.layers = layers # saving this so that we can use it without using the next line
         self.model = nn.Sequential(layers)
 
     def forward(self, x):
-        return self.model(x)
+        ret = x
+        for layer_name, layer in self.layers.items():
+            if layer_name == "prediction" and (self.top_net_type == "ordinal"):
+                ret = layer(ret, x["dataset_nums"])
+            else: 
+                ret = layer(ret)
+        return ret
 
 
 class ESMTrainingTask(pl.LightningModule):

@@ -39,7 +39,7 @@ class CoralMultipleLayer(torch.nn.Module):
                 torch.zeros((num_classes - 1)*num_datasets)
                     .float()).reshape(num_datasets, num_classes-1)
 
-    def forward(self, x, dx=None):
+    def forward(self, x, dx):
         """
         Computes forward pass.
         Parameters
@@ -50,7 +50,6 @@ class CoralMultipleLayer(torch.nn.Module):
         -----------
         logits : torch.tensor, shape=(num_examples, num_classes-1)
         """
-        print(x)
         #print("x.shape=", x.shape, "dx.shape=", dx.shape)
         a = self.coral_weights(x) 
         #print("self.coral_bias.shape=",self.coral_bias.shape)
