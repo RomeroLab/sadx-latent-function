@@ -2,6 +2,9 @@
 submit: code.tar.gz
 	condor_submit esm.sub
 
+cpu: code.tar.gz
+	condor_submit DISABLE_GPU=1 esm.sub
+
 code.tar.gz:
 	tar zcf code.tar.gz -C modified_code --dereference .
 
@@ -10,4 +13,4 @@ clean:
 	rm -f run_output/condor_logs/*
 
 inter: code.tar.gz
-	condor_submit -i esm.sub 
+	condor_submit DISABLE_GPU=1 -i esm.sub 

@@ -26,6 +26,19 @@ preserve_relative_paths = true
 
 requirements = (OpSysMajorVer == 7 || OpSysMajorVer == 8)
 
+if ! defined DISABLE_GPU
+# condor_submit was run from the command line like 
+# condor_submit DISABLE_GPU=1 esm.sub 
+  request_gpus = 1
+  # We require a machine with a modern version of the CUDA driver
+  #Requirements = (Target.CUDADriverVersion >= 10.1) && (Target.CUDACapability >= 5) 
+  #require_gpus = (DriverVersion >= 11.1)
+
+  +WantGPULab = true
+  +GPUJobLength = "short"
+  +is_resumable = true
+endif
+
 
 request_cpus = 8
 request_memory = 16GB
