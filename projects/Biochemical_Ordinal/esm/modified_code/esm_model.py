@@ -182,8 +182,12 @@ class ESMTrainingTask(pl.LightningModule):
 
         # other metrics
         labels = data_batch["targets"]
-        self.test_pearson(torch.squeeze(outputs, dim=-1), torch.squeeze(labels, dim=-1))
-        self.test_spearman(torch.squeeze(outputs, dim=-1), torch.squeeze(labels, dim=-1))
+        if self.model.top_net_type == "ordinal":
+            self.test_pearson(torch.squeeze(outputs.argmax(dim=1), dim=-1).float(), torch.squeeze(labels, dim=-1))
+            self.test_spearman(torch.squeeze(outputs.argmax(dim=1), dim=-1).float(), torch.squeeze(labels, dim=-1))
+        else:
+            self.test_pearson(torch.squeeze(outputs, dim=-1), torch.squeeze(labels, dim=-1))
+            self.test_spearman(torch.squeeze(outputs, dim=-1), torch.squeeze(labels, dim=-1))
         self.log("test_pearson", self.test_pearson, on_step=False, on_epoch=True)
         self.log("test_spearman", self.test_spearman, on_step=False, on_epoch=True)
 
