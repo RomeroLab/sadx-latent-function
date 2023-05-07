@@ -22,6 +22,11 @@ from esm_shared import ESMSequenceRep
 from esm_shared_ordinal import ESMDataModule
 
 from coral_multiple_layer import CoralMultipleLayer
+from coral_pytorch.losses import coral_loss
+from coral_pytorch.dataset import levels_from_labelbatch, proba_to_label
+
+CORAL_NUM_CLASSES = 4
+CORAL_NUM_DATASETS = 3
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -61,6 +66,9 @@ class ESMTransferModel(pl.LightningModule):
         layers = collections.OrderedDict()
         layers["backbone"] = esm_sequence_rep_model
 
+        self.num_classes = CORAL_NUM_CLASSES
+        self.num_datasets = CORAL_NUM_DATASETS
+
         # add dropout after backbone if specified
         if dropout_after_backbone:
             layers["dropout"] = nn.Dropout(dropout_after_backbone_rate)
@@ -80,13 +88,14 @@ class ESMTransferModel(pl.LightningModule):
             pred_layer = nn.Linear(in_features=top_net_hidden_nodes, out_features=1)
             layers["prediction"] = nn.Sequential(fc_block, pred_layer)
         elif top_net_type == "ordinal":
-            layers["prediction"] = coral_multiple_layer.CoralMultipleLayer(
+            layers["prediction"] = CoralMultipleLayer(
                                         size_in=esm_embedding_dim,
-                                        num_classes=4,
-                                        num_datasets=3)
+                                        num_classes=self.num_classes,
+                                        num_datasets=self.num_datasets)
         else:
             raise ValueError("Unexpected type of top net layer: {}".format(top_net_type))
 
+        self.top_net_type = top_net_type
         self.model = nn.Sequential(layers)
 
     def forward(self, x):
@@ -139,7 +148,12 @@ class ESMTrainingTask(pl.LightningModule):
     def _shared_step(self, batch, batch_idx, compute_loss=True):
         outputs = self(batch)
         if compute_loss:
-            loss = self.custom_mse_loss(outputs, batch["targets"])
+            if self.model.top_net_type != "ordinal":
+                loss = self.custom_mse_loss(outputs, batch["targets"])
+            else:
+                levels = levels_from_labelbatch(batch["targets"].long(), 
+                            num_classes = self.model.num_classes)
+                loss = coral_loss(outputs, levels.type_as(outputs))
             return outputs, loss
         else:
             return outputs, None

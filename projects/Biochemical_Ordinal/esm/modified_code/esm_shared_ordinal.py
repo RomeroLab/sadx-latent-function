@@ -9,14 +9,12 @@ from torch import Tensor
 from torch.utils.data import Dataset
 import torch.utils.data as data_utils
 
-# FIXME remove random_split and do that somewhere else
-from torch.utils.data import random_split
-
 import pandas as pd
 import pytorch_lightning as pl
 
-from esm_shared import ESMCollate, ESMDataset
 import dataset_Oct22
+
+
 
 class ESMOrdinalDataset(Dataset):
     """ This is for compatability with the ESM alphabet and batch_converter collate_fn
@@ -25,12 +23,12 @@ class ESMOrdinalDataset(Dataset):
     def __init__(self,
                  sequence_labels: Union[list[str], tuple[str]],
                  sequence_strs: Union[list[str], tuple[str]],
-                 dataset_num: Optional[Tensor],
+                 dataset_nums: Optional[Tensor],
                  targets: Optional[Tensor]):
 
         self.sequence_labels = list(sequence_labels)
         self.sequence_strs = list(sequence_strs)
-        self.dataset_num = dataset_num
+        self.dataset_nums = dataset_nums
         self.targets = targets
 
     def __len__(self):
@@ -46,12 +44,49 @@ class ESMOrdinalDataset(Dataset):
         else:
             out["targets"] = self.targets[idx]
 
-        if self.dataset_num is None:
-            out["dataset_num"] = None
+        if self.dataset_nums is None:
+            out["dataset_nums"] = None
         else:
-            out["dataset_num"] = self.dataset_num[idx]
+            out["dataset_nums"] = self.dataset_nums[idx]
 
         return out
+
+class ESMCollate:
+    """ Returns a collate_fn that wraps ESM's batch_converter and additionally supports DMS targets """
+    def __init__(self, alphabet: "esm.data.Alphabet"):
+        self.alphabet = alphabet
+
+    def __call__(self, batch):
+        # batch is expected to be a dictionary of (variants, char_seqs, targets)
+        # targets can optionally be None if the dataset is being loaded without dms targets
+        # for example, if only doing inference, dms targets are optional...
+
+        variants = [d["variants"] for d in batch]
+        char_seqs = [d["char_seqs"] for d in batch]
+        targets = [d["targets"] for d in batch]
+        dataset_nums = [d["dataset_nums"] for d in batch]
+
+        # ESM batch_converter takes a sequence of tuples of variants and char_seqs
+        # and returns a tuple of (variants, char_seqs, encoded_data)
+        bc = self.alphabet.get_batch_converter()
+        variants, char_seqs, encoded_data = bc(list(zip(variants, char_seqs)))
+
+        # collate targets using the default collate
+        # default_collate does not support None types
+        # so first check for None and collate ourselves by collapsing down to single None value
+        if all(v is None for v in targets):
+            targets = None
+        elif any(v is None for v in targets):
+            raise ValueError("only some targets are 'None'...this shouldn't happen")
+        else:
+            targets = torch.utils.data.default_collate(targets)
+            dataset_nums = torch.utils.data.default_collate(dataset_nums)
+
+        return {"variants": variants,
+                "char_seqs": char_seqs,
+                "encoded_data": encoded_data,
+                "targets": targets,
+                "dataset_nums": dataset_nums}
 
 
 
@@ -126,12 +161,12 @@ class ESMDataModule(pl.LightningDataModule):
         variants = self.get_variants(set_name)
 
         char_seqs = df.sequence_aa_trim
-        dataset_num = torch.from_numpy(df.dataset_num.to_numpy())
-        targets = df.response
+        dataset_nums = torch.from_numpy(df.dataset_num.to_numpy())
+        #targets = df.response
         targets = self.get_targets(set_name)
         return ESMOrdinalDataset(sequence_labels=variants,
                           sequence_strs=char_seqs,
-                          dataset_num = dataset_num,
+                          dataset_nums = dataset_nums,
                           targets=None if targets is None else torch.from_numpy(targets.to_numpy()).float())
 
     def get_targets(self, set_name, *args, **kwargs):
