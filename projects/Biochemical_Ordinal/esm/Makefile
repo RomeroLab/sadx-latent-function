@@ -12,5 +12,8 @@ clean:
 	rm -f code.tar.gz
 	rm -f run_output/condor_logs/*
 
-inter: code.tar.gz
+intercpu: code.tar.gz
 	condor_submit DISABLE_GPU=1 -i esm.sub 
+
+intergpu: code.tar.gz
+	condor_submit -i esm.sub 

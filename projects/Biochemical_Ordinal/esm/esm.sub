@@ -37,10 +37,12 @@ if ! defined DISABLE_GPU
   +WantGPULab = true
   +GPUJobLength = "short"
   +is_resumable = true
+  request_cpus = 4
+else
+  request_cpus = 12
 endif
 
 
-request_cpus = 8
 request_memory = 16GB
 request_disk = 20GB
 
