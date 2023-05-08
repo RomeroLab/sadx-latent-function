@@ -2,3 +2,6 @@
 code
 code.tar.gz
 modified_code/output
+run_output
+tmp
+training_logs.tar.gz
