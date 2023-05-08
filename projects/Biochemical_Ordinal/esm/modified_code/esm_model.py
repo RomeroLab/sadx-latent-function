@@ -245,7 +245,7 @@ def init_esm_task_and_dm(args):
     return task, dm
 
 
-def main(args: argparse.Namespace):
+def main(args: argparse.Namespace, return_stuff=False):
 
     # set the torch hub cache directory
     torch.hub.set_dir(args.hub_dir)
@@ -307,6 +307,9 @@ def main(args: argparse.Namespace):
     if args.delete_checkpoints:
         shutil.rmtree(join(log_dir, "checkpoints"))
 
+
+    if ret:
+        return dm, trainer, raw_preds
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
@@ -373,5 +376,9 @@ if __name__ == "__main__":
     parser = ESMTrainingTask.add_model_specific_args(parser)
 
     parser = argparse.ArgumentParser(parents=[parser], fromfile_prefix_chars='@', add_help=False)
-    main(parser.parse_args())
+
+    return_stuff = True
+    ret = main(parser.parse_args(), return_stuff=return_stuff)
+    if ret:
+        dm, trainer, raw_preds = ret
 
