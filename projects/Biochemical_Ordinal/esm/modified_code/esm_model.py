@@ -195,6 +195,8 @@ class ESMTrainingTask(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         outputs, _ = self._shared_step(batch, batch_idx, compute_loss=False)
+        if self.model.top_net_type == "ordinal":
+            outputs = outputs.argmax(dim=1)
         return outputs
 
     def forward(self, x):
