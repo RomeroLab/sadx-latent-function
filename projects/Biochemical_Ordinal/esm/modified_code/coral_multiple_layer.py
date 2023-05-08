@@ -29,15 +29,18 @@ class CoralMultipleLayer(torch.nn.Module):
         #FIXME: CHECK the shapes of these arrays that they are reshaped
         # correctly
         if preinit_bias:
-            self.coral_bias = torch.nn.Parameter(
+            coral_bias = (
                 torch.arange(num_classes - 1, 0, -1)
                     .float()
                     .unsqueeze(1)
                     .repeat(1, num_datasets) / (num_classes - 1))
         else:
-            self.coral_bias = torch.nn.Parameter(
+            coral_bias = (
                 torch.zeros((num_classes - 1)*num_datasets)
                     .float()).reshape(num_datasets, num_classes-1)
+        # register parameter this way since we are running an old version of pytorch
+        self.register_parameter(name='coral_bias', param=torch.nn.Parameter(coral_bias))
+
 
     def forward(self, x, dx):
         """
