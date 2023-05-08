@@ -308,7 +308,7 @@ def main(args: argparse.Namespace, return_stuff=False):
         shutil.rmtree(join(log_dir, "checkpoints"))
 
 
-    if ret:
+    if return_stuff:
         return dm, trainer, raw_preds
 
 if __name__ == "__main__":
