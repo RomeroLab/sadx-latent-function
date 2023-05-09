@@ -1,7 +1,7 @@
 universe = vanilla
 
 # the script that will be run when the job starts
-executable = run.sh
+executable = run.sh $(Cluster)_$(cProcess)
 
 # include the cluster id and process id that are set at runtime
 log = run_output/condor_logs/job_$(Cluster)_$(cProcess).log
@@ -50,6 +50,7 @@ request_disk = 20GB
 +WantFlocking = true
 +is_resumable = true
 
+requirements = TARGET.Machine =!= "vetsigian0000.chtc.wisc.edu"
 
 cProcess = 1
 

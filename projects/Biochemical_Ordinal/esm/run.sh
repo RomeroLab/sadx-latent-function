@@ -2,6 +2,8 @@
 
 # copied from https://github.com/samgelman/RosettaTL/blob/master/htcondor/templates/run.sh 
 
+EXT=$1
+
 CODE_FN=code.tar.gz
 ENV_FN=rtl.tar.gz
 HUB_FN=hub.tar.gz
@@ -89,10 +91,10 @@ python3 -c "import esm; print('esm version : ' + esm.__version__)"
 
 cd code
 
-MAX_EPOCHS=1
-# MAX_EPOCHS=100
+#MAX_EPOCHS=1
+MAX_EPOCHS=300
 python3 esm_model.py --max_epochs ${MAX_EPOCHS} --delete_checkpoints --top_net_type ordinal
 
 
-tar zcf ../training_logs.tar.gz output/training_logs
+tar zcf "../training_logs_${EXT}.tar.gz" output/training_logs
 
