@@ -1,5 +1,6 @@
 import pathlib
 
+import numpy as np
 from sklearn.utils.extmath import softmax
 from scipy.special import expit
 
@@ -129,16 +130,31 @@ if __name__ == "__main__":
     logging.info(f"model_score = {model.score(X_test, y_test)}")
 
     # convert decision scores to probabilities
-    # we do this to look at AUC curves
+    # we do this to look at AUC curves for the binary targets
     des = model.decision_function(X_test)
 
     probs = None
+    argmax_axis = 0
     if mc.target == "binary":
         assert(len(des.shape) == 1)
         p = expit(des) # probablity of predicting 1.
         probs = np.vstack([1-p, p])
+        argmax_axis = 0
     elif mc.target == "multiclass":
         assert(des.shape[1] == 4)
+        probs = softmax(des)
+        argmax_axis = 1
     else:
         raise ValueError(f"Got unknown value of mc.target={mc.target}")
+    
+    logging.info(f"Saving probabilities")
+    np.savetxt(args.output_dir / f"{mc.uuid}.probs.txt", probs)
 
+    model_test_predictions = model.predict(X_test)
+    np.savetxt(args.output_dir / f"{mc.uuid}.preds.txt", model_test_predictions)
+    if len(np.unique(model_test_predictions)) == 1:
+        logging.warning(f"~~ ALERT! all identical predictions on test set !! ~~")
+
+    # check that the maximum probability is the same as a predict
+    assert((probs.argmax(axis=argmax_axis) == model_test_predictions).all())
+     
