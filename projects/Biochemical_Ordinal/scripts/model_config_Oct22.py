@@ -20,7 +20,16 @@ class ModelConfig:
             for k, v in mp.items():
                 x[k] = v
             return cls(**x)
-  
+
+    @classmethod
+    def create_from_args(cls, args):
+        return cls(
+                model_name = args.model_name,
+                target = args.target,
+                intercept = args.intercept,
+                dca = args.dca,
+                encoding = args.encoding)
+   
     def __init__(self, model_name, 
                  target="multiclass", # binary or multiclass 
                  intercept=False, # whether the design matrix has an intercept or not
