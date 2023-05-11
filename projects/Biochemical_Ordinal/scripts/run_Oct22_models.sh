@@ -10,5 +10,5 @@ python3 model_sklearn_Oct22.py -m SklearnRidgeClassifier -t multiclass --interce
 # Logistic Regression
 python3 model_sklearn_Oct22.py -m SklearnLogisticRegression -t binary
 python3 model_sklearn_Oct22.py -m SklearnLogisticRegression -t binary --intercept
-python3 model_sklearn_Oct22.py -m SklearnLogisticRegression -t binary
-python3 model_sklearn_Oct22.py -m SklearnLogisticRegression -t binary --intercept
+python3 model_sklearn_Oct22.py -m SklearnLogisticRegression -t multiclass
+python3 model_sklearn_Oct22.py -m SklearnLogisticRegression -t multiclass --intercept

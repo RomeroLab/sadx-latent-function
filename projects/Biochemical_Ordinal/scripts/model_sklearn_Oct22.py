@@ -9,9 +9,10 @@ import model_config_Oct22
 
 from sklearn.linear_model import LogisticRegressionCV, RidgeClassifierCV
 
-from model_shared_Oct22 import model_names, \
+from model_shared_Oct22 import  \
         add_common_arguments, add_design_arguments, get_model_data
 
+model_names = ["SklearnRidgeClassifier", "SklearnLogisticRegression"]
 
 
 def add_sklearn_design_arguments(group):
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     import logging
 
     parser = argparse.ArgumentParser()
-    group = add_common_arguments(parser)
+    group = add_common_arguments(parser, model_names = model_names)
     group = add_design_arguments(parser)
     group = add_sklearn_design_arguments(parser)
     args = parser.parse_args()

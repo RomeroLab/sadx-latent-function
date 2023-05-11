@@ -4,9 +4,9 @@ import argparse
 
 import dataset_Oct22
 
-model_names = ["SklearnRidgeClassifier", "SklearnLogisticRegression"]
+GENERIC_MODEL_NAMES = ["model"]
 
-def add_common_arguments(parser, model_names = model_names):
+def add_common_arguments(parser, model_names = GENERIC_MODEL_NAMES):
     group = parser.add_argument_group("general")
     group.add_argument("-m", "--model_name",
         help="Model name", default=model_names[0], choices=model_names)
