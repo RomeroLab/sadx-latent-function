@@ -17,10 +17,11 @@ from model_shared_Oct22 import \
 
 model_names = ["Pytorch"]
 
-def add_pytorch_design_arguments(group):
+def add_pytorch_arguments(parser):
+    group = parser.add_argument_group("pytorch")
     group.add_argument("--batch_size", help="Batch Size", default=32, type=int)
     group.add_argument("--num_workers", help="Num workers", default=4, type=int)
-
+    group.add_argument("--lambda", help="Regularization param", default=1e-8, type=float)
     return group
 
 class Pytorch_Oct22DataSet(Dataset):
@@ -94,7 +95,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     group = add_common_arguments(parser, model_names = model_names)
     group = add_design_arguments(parser)
-    group = add_pytorch_design_arguments(group)
+    group = add_pytorch_arguments(parser)
     group = add_data_arguments(parser)
     args = parser.parse_args()
 
