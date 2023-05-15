@@ -27,6 +27,9 @@ def one_hot_encode_list(l):
     return np.eye(q)[int_seqs].reshape(int_seqs.shape[0], -1)
 
 
+def one_hot_encode_single(x):
+    return one_hot_encode_list([x]).squeeze()
+
 class Oct22DataSet:
     
     """ Wrapper for the sequences dataset
@@ -69,7 +72,33 @@ class Oct22DataSet:
     
     def get_test_dataset(self):
         return self.df.iloc[self.test_indices]
-    
+
+    def get_train_cv_dataset(self, train_cv_name):
+        assert(train_cv_name.starts_with("train_cv"))
+        cv_idx = int(train_cv_name[-1]) - 1
+        assert(cv_idx < self.num_cv_splits)
+        return self.df.iloc[self.train_cv_splits[i]]
+
+    def get_val_cv_dataset(self, val_cv_name):
+        assert(self.val_cv_name.starts_with("val_cv"))
+        cv_idx = int(val_cv_name[-1]) - 1
+        assert(cv_idx < self.num_cv_splits)
+        return self.df.iloc[self.val_cv_splits[i]]
+
+    def get_dataset_by_name(self, name):
+        ret = None
+        if name == "train":
+            ret = self.get_train_dataset()
+        elif name == "test":
+            ret = self.get_test_dataset()
+        elif name.starts_with("train_cv"): #train_cv1 ... train_cv5
+            ret = self.get_train_cv_dataset(name)
+        elif name.starts_with("val_cv"): # val_cv1 ... val_cv5
+            ret = self.get_val_cv_dataset(name)
+        else:
+            raise ValueError(f"Unknown dataset name: {name}")
+        return ret
+
     def cv_iterator(self):
         """ Return training data split"""
         for i in range(self.num_cv_splits):

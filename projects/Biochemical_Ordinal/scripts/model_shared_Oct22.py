@@ -28,16 +28,36 @@ def add_design_arguments(parser):
                        type=str)
     group.add_argument("-t", "--target", 
         help="target variable", default="multiclass", 
-                       choices=["multiclass", "binary"], type=str)
+        choices=["multiclass", "binary"], type=str)
     group.add_argument("--dca", help="Add DCA score", action="store_true")
     return group
+
+def add_data_arguments(parser):
+    group = parser.add_argument_group("data")
+    # only one-hot supported for sklearn models
+    group.add_argument("--train_name",
+        help="Training dataset", default="train", 
+        choices=['train'] + [f'train_cv{i+1}' for i in range(5)],
+        type=str)
+    group.add_argument("--val_name", 
+        help="Validation dataset", default="", 
+        choices=[""] + [f'val_cv{i+1}' for i in range(5)], 
+        type=str)
+    group.add_argument("--test_name", 
+        help="Test dataset", default="test", 
+        choices=["test"] + [f'val_cv{i+1}' for i in range(5)], 
+        type=str)
+    return group
+
+# train_cv[1-5] or val_cv[1-5] are also accepted
+
 
 def get_model_data(
         model_config, 
         dataset, 
         # data type should be train or test
         data_type="train" ):
-    # get train or test data
+    """ get train or test data as numpy matrices """
     model_data = None
     if data_type == "train":
         model_data = dataset.get_train_dataset()
