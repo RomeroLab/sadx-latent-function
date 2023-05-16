@@ -20,6 +20,9 @@ protein_letters = 'ACDEFGHIKLMNPQRSTVWY'
 aa_map = {a:i for i, a in enumerate(protein_letters)}
 q = len(protein_letters)
 
+NUM_CLASSES = 4
+NUM_DATASETS = 3 # should be called NUM_LIBRARIES
+
 prot_to_list = lambda x: [aa_map[xi] for xi in x]
 
 def one_hot_encode_list(l):

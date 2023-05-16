@@ -18,12 +18,15 @@ class ModelConfig:
             return cls(**x)
 
     @classmethod
-    def create_from_args(cls, args):
-        kwargs = {}
+    def create_from_args(cls, args, **kwargs):
+        kwargs = kwargs.copy()
+        # these should all be different dictionaries so
+        # let the initializer sort it out
         for key in ['train_name', 'val_name', 'test_name',
-                    'intercept']:
-            if key in kwargs:
-                kwargs[key] = args[key]
+                    'intercept', "batch_size", "num_workers", 
+                    "num_epochs", "lambda_h"]:
+            if key in args and key not in kwargs:
+                kwargs[key] = getattr(args, key)
         return cls(
                 model_name = args.model_name,
                 target = args.target,
@@ -42,6 +45,10 @@ class ModelConfig:
                  train_name='train',
                  val_name='',
                  test_name='test',
+                 num_workers = 4,
+                 batch_size = 32,
+                 num_epochs = 100,
+                 learning_rate = 0.01,
                  **model_params
                 ):
       
@@ -58,6 +65,11 @@ class ModelConfig:
                              'multilibrary':multilibrary,
                              'encoding':encoding}
 
+        self.training_params = {'num_workers': num_workers,
+                                'batch_size' : batch_size,
+                                'num_epochs' : num_epochs,
+                                'learning_rate' : learning_rate}
+                                
         # add additional arguments
         self.model_params = model_params.copy()
 
@@ -73,7 +85,8 @@ class ModelConfig:
                'target':self.target,
                'design_matrix':self.design_matrix, 
                'model_params':self.model_params,
-               'dataset_params':self.dataset_params
+               'dataset_params':self.dataset_params,
+               'training_params':self.training_params
                }      
         if with_uuid:
             ret["uuid"] = self.uuid

@@ -3,9 +3,14 @@ import pathlib
 import numpy as np
 
 import torch
+import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 import pytorch_lightning as pl
+
+from coral_multiple_layer import CoralMultipleLayer
+from coral_pytorch.losses import coral_loss
+from coral_pytorch.dataset import levels_from_labelbatch, proba_to_label
 
 import dataset_Oct22
 import model_config_Oct22
@@ -20,8 +25,13 @@ model_names = ["Pytorch"]
 def add_pytorch_arguments(parser):
     group = parser.add_argument_group("pytorch")
     group.add_argument("--batch_size", help="Batch Size", default=32, type=int)
+    group.add_argument("--num_epochs", help="Num Epochs", default=50, type=int)
     group.add_argument("--num_workers", help="Num workers", default=4, type=int)
-    group.add_argument("--lambda", help="Regularization param", default=1e-8, type=float)
+    group.add_argument("--lambda_h", help="Regularization param", default=1e-8, type=float)
+    group.add_argument("--learning_rate", help="Learning Rate", default=1e-4, type=float)
+    group.add_argument("--weight_decay", 
+                        help="Weight decay (conflicts with lambda_h)", 
+                        default=1e-6 , type=float)
     return group
 
 class Pytorch_Oct22DataSet(Dataset):
@@ -36,8 +46,10 @@ class Pytorch_Oct22DataSet(Dataset):
                 )
    
     def __init__(self, data_csv_fn, dataset_name="train", 
-                 encoding="one-hot", target="multiclass"):
+                 encoding="one-hot", target="multiclass", **kwargs):
         ds = dataset_Oct22.Oct22DataSet(data_csv_fn=data_csv_fn)
+        self.L = ds.L
+        self.q = dataset_Oct22.q
         self.data = ds.get_dataset_by_name(dataset_name).copy().reset_index()
         self.encoding_func = lambda x: x
         if encoding == "one-hot":
@@ -46,6 +58,7 @@ class Pytorch_Oct22DataSet(Dataset):
             self.encoding_func = dataset_Oct22.one_hot_encode_single
         assert(target in ["multiclass", "binary"])
         self.target = target
+        self.__dict__.update(kwargs)
 
     def __len__(self):
         return len(self.data)
@@ -63,10 +76,56 @@ class Pytorch_Oct22DataSet(Dataset):
         dx["target"] = target
         return dx
 
-class PytorchOrdinalRegression:
 
-    def __init__(self, *args, **kwargs):
+class PytorchTrainingTask:
+
+    @classmethod
+    def create_from_args(cls, args):
+        return cls()
+
+    def __init__(self, batch_size=32, num_workers=4, num_epochs=50):
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.num_epochs = num_epochs
+
+class PytorchRegression(pl.LightningModule):
+
+    @classmethod
+    def create_from_args(cls, args):
+        raise NotImplementedError
+        return cls(
+                )
+ 
+    def __init__(self, 
+            lambda_h = 1e-8, lambda_dca = 1e-8,
+            random_state=100, 
+            L = 272, q = 20, encoding = "one-hot", 
+            target = "multiclass", dca=False, multilibrary = False,
+            **kwargs):
+        super().__init__()
+
+        self.lambda_h = lambda_h
+        self.lambda_dca = lambda_dca
+        self.random_state = random_state
+        self.L = L
+        self.q = q
+        self.encoding = encoding
+        self.target = target
+        self.dca = dca
+        self.multilibrary = multilibrary
+
+
+        additional_features = 0
+        if self.dca:
+            additional_features += 1
+        if self.target == "multiclass":
+            pass
+        self.l1 = nn.Linear(self.L * self.q + additional_features, 1)
+
+    def forward(self, x):
         pass
+        #return torch.relu(self.l1(x.view(x.size(0), -1)))
+
 
     def fit(self, *args, **kwargs):
         pass
@@ -79,7 +138,8 @@ def create_model(model_config):
     """
     model = None
     if model_config.model_name == "Pytorch":
-        model = PytorchOrdinalRegression(
+        model = PytorchRegression(
+                    lambda_h = model_config.model_params["lambda_h"],
                     random_state = model_config.seed,
                     )
     else:
@@ -111,8 +171,6 @@ if __name__ == "__main__":
     logging.info("model_config : " + str(mc).replace("\n", ", "))
     mc.save_yaml(directory=args.output_dir)
 
-    # the dataset object can be used as cv as it iterates over the 
-    # split training indices
     model = create_model(model_config = mc)
 
     # get the training data
