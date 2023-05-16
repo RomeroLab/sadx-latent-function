@@ -113,15 +113,28 @@ class PytorchRegression(pl.LightningModule):
         self.target = target
         self.dca = dca
         self.multilibrary = multilibrary
-
+        self.num_classes = dataset_Oct22.NUM_CLASSES
+        self.num_datasets = dataset_Oct22.NUM_DATASETS
 
         additional_features = 0
         if self.dca:
             additional_features += 1
-        if self.target == "multiclass":
-            pass
-        self.l1 = nn.Linear(self.L * self.q + additional_features, 1)
+        size_in = self.L*self.q + additional_features
 
+        if not self.multilibrary:
+            self.num_datasets = 1
+
+        if self.target == "multiclass":
+            self.output_layer = CoralMultipleLayer(
+                        size_in=size_in,
+                        num_classes=self.num_classes, 
+                        num_datasets=self.num_datasets)
+        elif self.target == "binary":
+            self.num_classes = 2
+            self.output_layer = torch.nn.Linear(size_in, 1)
+
+        self.model = self.output_layer
+ 
     def forward(self, x):
         pass
         #return torch.relu(self.l1(x.view(x.size(0), -1)))
