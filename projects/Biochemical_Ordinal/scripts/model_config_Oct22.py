@@ -24,7 +24,8 @@ class ModelConfig:
         # let the initializer sort it out
         for key in ['train_name', 'val_name', 'test_name',
                     'intercept', "batch_size", "num_workers", 
-                    "num_epochs", "lambda_h"]:
+                    "num_epochs", 
+                    "lambda_h", "lambda_dca", "weight_decay"]:
             if key in args and key not in kwargs:
                 kwargs[key] = getattr(args, key)
         return cls(
@@ -48,7 +49,8 @@ class ModelConfig:
                  num_workers = 4,
                  batch_size = 32,
                  num_epochs = 100,
-                 learning_rate = 0.01,
+                 learning_rate = 1e-4,
+                 weight_decay = 1e-6,
                  **model_params
                 ):
       
@@ -68,7 +70,8 @@ class ModelConfig:
         self.training_params = {'num_workers': num_workers,
                                 'batch_size' : batch_size,
                                 'num_epochs' : num_epochs,
-                                'learning_rate' : learning_rate}
+                                'learning_rate' : learning_rate,
+                                'weight_decay' : weight_decay}
                                 
         # add additional arguments
         self.model_params = model_params.copy()

@@ -104,6 +104,7 @@ class PytorchRegression(pl.LightningModule):
     def __init__(self, 
             lambda_h = 1e-4, lambda_dca = 1e-8,
             learning_rate = 1e-4,
+            weight_decay = 1e-6,
             random_state=100, 
             L = 272, q = dataset_Oct22.q, encoding = "one-hot", 
             target = "multiclass", dca=False, multilibrary = False,
@@ -114,6 +115,7 @@ class PytorchRegression(pl.LightningModule):
         self.lambda_dca = lambda_dca
         self.random_state = random_state
         self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
         self.L = L
         self.q = q
         self.encoding = encoding
@@ -212,12 +214,19 @@ def create_model(model_config):
         
         Note: Unlike sklearn models, Pytorch models do not do automatic CV
     """
+    mc = model_config
     model = None
     if model_config.model_name == "Pytorch":
         model = PytorchRegression(
-                    lambda_h = model_config.model_params["lambda_h"],
-                    random_state = model_config.seed,
-                    )
+                    lambda_h = mc.model_params["lambda_h"],
+                    lambda_dca = mc.model_params["lambda_h"],
+                    learning_rate = mc.training_params["learning_rate"],
+                    weight_decay = mc.training_params["weight_decay"],
+                    random_state = mc.seed,
+                    dca = mc.design_matrix["dca"], 
+                    target = mc.target,
+                    encoding = mc.design_matrix["encoding"],
+                    multilibrary = mc.design_matrix["multilibrary"])
     else:
         raise ValueError(f"{model_name} must be one of {model_names}")
     return model
