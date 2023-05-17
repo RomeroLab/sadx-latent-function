@@ -68,16 +68,16 @@ class Pytorch_Oct22DataSet(Dataset):
     def __getitem__(self, idx):
         dx = {}
         data_row = self.data.iloc[idx]
-        dx['encoding'] = self.encoding_func(data_row.sequence_aa_trim)
-        dx['dca'] = data_row.dca_score.item()
+        dx['encoding'] = self.encoding_func(data_row.sequence_aa_trim).astype(np.float32)
+        dx['dca'] = data_row.dca_score.astype(np.float32)
         if self.multilibrary:
-            dx['dataset_num'] = data_row.dataset_num.item()
+            dx['dataset_num'] = data_row.dataset_num.to_numpy().astype(np.int)
         else:
-            dx['dataset_num'] = 0
+            dx['dataset_num'] = np.int64(0)
         if self.target == "multiclass":
-            target = data_row.activity_num.item()
+            target = data_row.activity_num.astype(np.int64)
         else:
-            target = data_row.category_num.item()
+            target = data_row.category_num.astype(np.int64)
         dx["target"] = target
         return dx
 
@@ -102,7 +102,8 @@ class PytorchRegression(pl.LightningModule):
                 )
  
     def __init__(self, 
-            lambda_h = 1e-8, lambda_dca = 1e-8,
+            lambda_h = 1e-4, lambda_dca = 1e-8,
+            learning_rate = 1e-4,
             random_state=100, 
             L = 272, q = dataset_Oct22.q, encoding = "one-hot", 
             target = "multiclass", dca=False, multilibrary = False,
@@ -112,6 +113,7 @@ class PytorchRegression(pl.LightningModule):
         self.lambda_h = lambda_h
         self.lambda_dca = lambda_dca
         self.random_state = random_state
+        self.learning_rate = learning_rate
         self.L = L
         self.q = q
         self.encoding = encoding
@@ -147,6 +149,8 @@ class PytorchRegression(pl.LightningModule):
             self.num_classes = 2
             self.output_layer = torch.nn.Linear(size_in, 1)
 
+        self.mse_loss = torch.nn.MSELoss(reduction="mean")
+
  
     def forward(self, x, dx):
         x = self.model(x)
@@ -160,18 +164,18 @@ class PytorchRegression(pl.LightningModule):
         """
             Initialize MLP layers. Override this function to make a custom NN 
         """
-        return [torch.nn.Identity()]
+        return torch.nn.Identity()
 
-    def _shared_step(self, batch, batch_idx):
+    def shared_step(self, batch, batch_idx):
         x, dx, true_labels = batch["encoding"], batch["dataset_num"], batch["target"]
         if self.dca: # add dca as the last value
             x = torch.hstack((x, batch["dca"].unsqueeze(1)))
-        logits = self(x)
+        logits = self(x, dx)
         loss = None
         if self.target == "multiclass":
             # Convert class labels for CORAL ------------------------
             levels = levels_from_labelbatch(
-                true_labels, num_classes=self.model.num_classes)
+                true_labels, num_classes=self.num_classes)
             # -------------------------------------------------------
 
             # CORAL Loss --------------------------------------------
@@ -182,10 +186,22 @@ class PytorchRegression(pl.LightningModule):
             loss = torch.nn.functional.cross_entropy(logits, true_labels)
 
         # add regularization
+        if self.lambda_h:
+            for name, p in self.output_layer.named_parameters():
+                print(name, p.shape)
+            #loss += self.lambda_h * self.mse_loss(self.output_layer.parameters)
+
+        if self.dca and self.lambda_dca:
+            print("TODO")
+
+
+    def training_step(self, batch, batch_idx):
+        loss = self.shared_step(batch, batch_idx)
         return loss
 
 
-
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def fit(self, *args, **kwargs):
         pass
@@ -244,7 +260,9 @@ if __name__ == "__main__":
     logging.info(f"Batch Encoding Shape : {x['encoding'].shape}")
 
     # train the model
-    #clf = model.fit(X_train, y_train)
+    trainer = pl.Trainer(max_epochs=1)
+    trainer.fit(model, train_dataloaders=train_dl)
+
 
     # get testing data
     test_ds = Pytorch_Oct22DataSet.create_from_args(

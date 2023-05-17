@@ -28,6 +28,7 @@ class CoralMultipleLayer(torch.nn.Module):
         self.coral_weights = torch.nn.Linear(self.size_in, 1, bias=False)
         #FIXME: CHECK the shapes of these arrays that they are reshaped
         # correctly
+        #self.coral_bias = torch.nn.Identity()
         if preinit_bias:
             self.coral_bias = torch.nn.Parameter(
                 torch.arange(num_classes - 1, 0, -1)
