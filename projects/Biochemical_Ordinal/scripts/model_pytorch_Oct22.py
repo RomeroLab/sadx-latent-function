@@ -46,10 +46,12 @@ class Pytorch_Oct22DataSet(Dataset):
                 )
    
     def __init__(self, data_csv_fn, dataset_name="train", 
-                 encoding="one-hot", target="multiclass", **kwargs):
+                 encoding="one-hot", target="multiclass", multilibrary=False, 
+                 **kwargs):
         ds = dataset_Oct22.Oct22DataSet(data_csv_fn=data_csv_fn)
         self.L = ds.L
         self.q = dataset_Oct22.q
+        self.multilibrary = multilibrary
         self.data = ds.get_dataset_by_name(dataset_name).copy().reset_index()
         self.encoding_func = lambda x: x
         if encoding == "one-hot":
@@ -68,7 +70,10 @@ class Pytorch_Oct22DataSet(Dataset):
         data_row = self.data.iloc[idx]
         dx['encoding'] = self.encoding_func(data_row.sequence_aa_trim)
         dx['dca'] = data_row.dca_score.item()
-        dx['dataset_num'] = data_row.dataset_num.item()
+        if self.multilibrary:
+            dx['dataset_num'] = data_row.dataset_num.item()
+        else:
+            dx['dataset_num'] = 0
         if self.target == "multiclass":
             target = data_row.activity_num.item()
         else:
@@ -99,7 +104,7 @@ class PytorchRegression(pl.LightningModule):
     def __init__(self, 
             lambda_h = 1e-8, lambda_dca = 1e-8,
             random_state=100, 
-            L = 272, q = 20, encoding = "one-hot", 
+            L = 272, q = dataset_Oct22.q, encoding = "one-hot", 
             target = "multiclass", dca=False, multilibrary = False,
             **kwargs):
         super().__init__()
@@ -116,14 +121,23 @@ class PytorchRegression(pl.LightningModule):
         self.num_classes = dataset_Oct22.NUM_CLASSES
         self.num_datasets = dataset_Oct22.NUM_DATASETS
 
+        size_in = 0
+        if encoding == "one-hot":
+            size_in = self.L*self.q 
+        else:
+            raise NotImplementedError("Only one-hot encoding for now")
+
         additional_features = 0
         if self.dca:
             additional_features += 1
-        size_in = self.L*self.q + additional_features
+        size_in += additional_features
+
+        self.model = self._build_layers(None, None)
 
         if not self.multilibrary:
             self.num_datasets = 1
 
+        self.output_layer = None
         if self.target == "multiclass":
             self.output_layer = CoralMultipleLayer(
                         size_in=size_in,
@@ -133,11 +147,44 @@ class PytorchRegression(pl.LightningModule):
             self.num_classes = 2
             self.output_layer = torch.nn.Linear(size_in, 1)
 
-        self.model = self.output_layer
  
-    def forward(self, x):
-        pass
-        #return torch.relu(self.l1(x.view(x.size(0), -1)))
+    def forward(self, x, dx):
+        x = self.model(x)
+        if self.target == "multiclass":
+            x = self.output_layer(x, dx)
+        else: # target is binary
+            x = self.output_layer(x)
+        return x
+
+    def _build_layers(self, input_size, hidden_units):
+        """
+            Initialize MLP layers. Override this function to make a custom NN 
+        """
+        return [torch.nn.Identity()]
+
+    def _shared_step(self, batch, batch_idx):
+        x, dx, true_labels = batch["encoding"], batch["dataset_num"], batch["target"]
+        if self.dca: # add dca as the last value
+            x = torch.hstack((x, batch["dca"].unsqueeze(1)))
+        logits = self(x)
+        loss = None
+        if self.target == "multiclass":
+            # Convert class labels for CORAL ------------------------
+            levels = levels_from_labelbatch(
+                true_labels, num_classes=self.model.num_classes)
+            # -------------------------------------------------------
+
+            # CORAL Loss --------------------------------------------
+            # A regular classifier uses:
+            loss = coral_loss(logits, levels.type_as(logits))
+            # -------------------------------------------------------
+        else:
+            loss = torch.nn.functional.cross_entropy(logits, true_labels)
+
+        # add regularization
+        return loss
+
+
 
 
     def fit(self, *args, **kwargs):
