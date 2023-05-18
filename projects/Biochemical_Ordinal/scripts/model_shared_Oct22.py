@@ -30,6 +30,8 @@ def add_design_arguments(parser):
         help="target variable", default="multiclass", 
         choices=["multiclass", "binary"], type=str)
     group.add_argument("--dca", help="Add DCA score", action="store_true")
+    group.add_argument("--multilibrary", help="Add library data (specify parent)", 
+            action="store_true")
     return group
 
 def add_data_arguments(parser):

@@ -1,12 +1,14 @@
 import pathlib
 
 import numpy as np
+import pandas as pd
 
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import TensorBoardLogger
 
 from coral_multiple_layer import CoralMultipleLayer
 from coral_pytorch.losses import coral_loss
@@ -27,7 +29,8 @@ def add_pytorch_arguments(parser):
     group.add_argument("--batch_size", help="Batch Size", default=32, type=int)
     group.add_argument("--num_epochs", help="Num Epochs", default=50, type=int)
     group.add_argument("--num_workers", help="Num workers", default=4, type=int)
-    group.add_argument("--lambda_h", help="Regularization param", default=1e-8, type=float)
+    group.add_argument("--lambda_h", help="Regularization param", default=1e-4, type=float)
+    group.add_argument("--lambda_dca", help="DCA Regularization param", default=1e-8, type=float)
     group.add_argument("--learning_rate", help="Learning Rate", default=1e-4, type=float)
     group.add_argument("--weight_decay", 
                         help="Weight decay (conflicts with lambda_h)", 
@@ -43,6 +46,7 @@ class Pytorch_Oct22DataSet(Dataset):
                 dataset_name = dataset_name,
                 target = args.target,
                 encoding = args.encoding,
+                multilibrary = args.multilibrary
                 )
    
     def __init__(self, data_csv_fn, dataset_name="train", 
@@ -71,13 +75,13 @@ class Pytorch_Oct22DataSet(Dataset):
         dx['encoding'] = self.encoding_func(data_row.sequence_aa_trim).astype(np.float32)
         dx['dca'] = data_row.dca_score.astype(np.float32)
         if self.multilibrary:
-            dx['dataset_num'] = data_row.dataset_num.to_numpy().astype(np.int)
+            dx['dataset_num'] = np.int64(data_row.dataset_num)
         else:
             dx['dataset_num'] = np.int64(0)
         if self.target == "multiclass":
             target = data_row.activity_num.astype(np.int64)
         else:
-            target = data_row.category_num.astype(np.int64)
+            target = (data_row.category_num != 0).astype(np.int64)
         dx["target"] = target
         return dx
 
@@ -151,8 +155,6 @@ class PytorchRegression(pl.LightningModule):
             self.num_classes = 2
             self.output_layer = torch.nn.Linear(size_in, 1)
 
-        self.mse_loss = torch.nn.MSELoss(reduction="mean")
-
  
     def forward(self, x, dx):
         x = self.model(x)
@@ -185,25 +187,55 @@ class PytorchRegression(pl.LightningModule):
             loss = coral_loss(logits, levels.type_as(logits))
             # -------------------------------------------------------
         else:
-            loss = torch.nn.functional.cross_entropy(logits, true_labels)
+            loss = torch.nn.functional.binary_cross_entropy_with_logits(logits.squeeze(), 
+                    true_labels.squeeze().type_as(logits))
 
         # add regularization
         if self.lambda_h:
-            for name, p in self.output_layer.named_parameters():
-                print(name, p.shape)
-            #loss += self.lambda_h * self.mse_loss(self.output_layer.parameters)
-
-        if self.dca and self.lambda_dca:
-            print("TODO")
-
+            last_weights = None
+            last_bias = None
+            if self.target == "multiclass":
+                last_weights = self.output_layer.coral_weights.weight
+                last_bias = self.output_layer.coral_bias
+            else: #target is binary and the output layer is linear
+                last_weights = self.output_layer.weight
+                last_bias = self.output_layer.bias
+            dca_param = None
+            if self.dca:
+                last_weights = last_weights[:, :-1]
+                # dca score is the last param
+                dca_param = last_weights[:, -1]
+            loss += self.lambda_h * ((last_weights * last_weights).sum()
+                                      + (last_bias * last_bias).sum())
+            if self.dca:
+                loss += self.lambda_dca * (dca_param * dca_param).sum()
+        return loss
 
     def training_step(self, batch, batch_idx):
         loss = self.shared_step(batch, batch_idx)
+        self.log("train_loss", loss, on_step=True, on_epoch=True)
         return loss
 
+    def validation_step(self, batch, batch_idx):
+        loss = self.shared_step(batch, batch_idx)
+        self.log("validation_loss", loss, on_step=True, on_epoch=True)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        loss = self.shared_step(batch, batch_idx)
+        self.log("test_loss", loss, on_epoch=True)
+        return loss
+    
+    def predict_step(self, batch, batch_idx, dataloader_idx=0):
+        x, dx, true_labels = batch["encoding"], batch["dataset_num"], batch["target"]
+        if self.dca: # add dca as the last value
+            x = torch.hstack((x, batch["dca"].unsqueeze(1)))
+        logits = self(x, dx)
+        return logits # return the logits
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return torch.optim.Adam(self.parameters(), lr=self.learning_rate, 
+                weight_decay=self.weight_decay)
 
     def fit(self, *args, **kwargs):
         pass
@@ -219,7 +251,7 @@ def create_model(model_config):
     if model_config.model_name == "Pytorch":
         model = PytorchRegression(
                     lambda_h = mc.model_params["lambda_h"],
-                    lambda_dca = mc.model_params["lambda_h"],
+                    lambda_dca = mc.model_params["lambda_dca"],
                     learning_rate = mc.training_params["learning_rate"],
                     weight_decay = mc.training_params["weight_decay"],
                     random_state = mc.seed,
@@ -231,6 +263,36 @@ def create_model(model_config):
         raise ValueError(f"{model_name} must be one of {model_names}")
     return model
 
+
+
+class MetricTracker(pl.Callback):
+
+    def __init__(self):
+        self.train_losses = []
+        self.validation_losses = []
+
+    def on_train_epoch_end(self, trainer, module):
+        elogs = trainer.logged_metrics # access it here
+        self.train_losses.append(elogs["train_loss_epoch"].item())
+
+    def on_validation_epoch_end(self, trainer, module):
+        elogs = trainer.logged_metrics # access it here
+        self.validation_losses.append(elogs["validation_loss_epoch"].item())
+
+    def get_df(self):
+        df = pd.DataFrame({'train_losses': np.array(self.train_losses)})
+        df['epoch'] = np.arange(len(df)) + 1
+        if len(self.train_losses) == len(self.validation_losses) - 1:
+            df_val = pd.DataFrame(
+                    {"validation_losses": np.array(self.validation_losses)})
+            df_val["epoch"] = np.arange(len(df_val))
+            df = pd.merge(df_val, df, how="outer")
+        return df
+
+    def save_losses_plot(self, filename):
+        df = self.get_df()
+        df.plot.line(y=[c for c in df.columns if c.endswith("_losses")], x="epoch",
+                        figsize=(10,6)).get_figure().savefig(filename)
 
 if __name__ == "__main__":
     import sys
@@ -268,15 +330,35 @@ if __name__ == "__main__":
     for x in train_dl: break
     logging.info(f"Batch Encoding Shape : {x['encoding'].shape}")
 
+    # get the validation data
+    val_dl = None
+    if args.val_name:
+        val_ds = Pytorch_Oct22DataSet.create_from_args(
+                    args=args, dataset_name=args.val_name)
+        logging.info(f"len(train_ds) : {len(train_ds)}")
+
+        val_dl = DataLoader(val_ds, batch_size=args.batch_size, 
+                                num_workers=args.num_workers)
+
     # train the model
-    trainer = pl.Trainer(max_epochs=1)
-    trainer.fit(model, train_dataloaders=train_dl)
+    cb = MetricTracker()
+    trainer = pl.Trainer(max_epochs=args.num_epochs, log_every_n_steps=10, callbacks=[cb])
+    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=val_dl)
+    
+    cb.save_losses_plot(args.output_dir / f"{mc.uuid}.losses.png")
 
 
     # get testing data
     test_ds = Pytorch_Oct22DataSet.create_from_args(
                 args=args, dataset_name=args.test_name)
+    test_dl = DataLoader(test_ds, batch_size=args.batch_size, 
+                            num_workers=args.num_workers)
     logging.info(f"len(test_ds) : {len(test_ds)}")
+    scores = trainer.predict(model, test_dl)
+    scores = torch.vstack(scores)
+
+    probas = torch.sigmoid(scores)
+    predicted_labels = proba_to_label(probas)
 
     ## convert decision scores to probabilities
     ## we do this to look at AUC curves for the binary targets
