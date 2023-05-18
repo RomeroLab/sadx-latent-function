@@ -421,6 +421,22 @@ def create_model(model_config):
         raise ValueError(f"{model_name} must be one of {model_names}")
     return model
 
+def get_metrics_df(csv_filename):
+    metrics = pd.read_csv(csv_filename)
+    aggreg_metrics = []
+    agg_col = "epoch"
+    for i, dfg in metrics.groupby(agg_col):
+        agg = dict(dfg.mean())
+        agg[agg_col] = i
+        aggreg_metrics.append(agg)
+    return df_metrics
+
+def plot_metrics_df(df_metrics, png_filename):
+    df_metrics.plot.line(
+            x="epoch", 
+            y=[c for c in df_metrics.columns if (
+                    c.endswith("_loss") or c.endswith("_mae"))],
+            figsize=(10,6)).get_figure().savefig(png_filename)
 
 
 if __name__ == "__main__":
@@ -456,9 +472,10 @@ if __name__ == "__main__":
     if args.dca:
         additional_features += 1
     pytorch_model = BaseCoralModule(
-        input_size=272*20 + additional_features,
+        input_size=ds.L*dataset_Oct22.q + additional_features,
         hidden_units=(100, 20),
-        num_classes=4, num_datasets=3)
+        num_classes=dataset_Oct22.NUM_CLASSES, 
+        num_datasets=dataset_Oct22.NUM_DATASETS)
     model = LightningMLP(
         model=pytorch_model,
         learning_rate=args.learning_rate,
@@ -491,22 +508,8 @@ if __name__ == "__main__":
     trainer = pl.Trainer(max_epochs=args.num_epochs, log_every_n_steps=10, logger=logger)
     trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=val_dl)
 
-    
-    metrics = pd.read_csv(f"{trainer.logger.log_dir}/metrics.csv")
-    aggreg_metrics = []
-    agg_col = "epoch"
-    for i, dfg in metrics.groupby(agg_col):
-        agg = dict(dfg.mean())
-        agg[agg_col] = i
-        aggreg_metrics.append(agg)
-
-    df_metrics = pd.DataFrame(aggreg_metrics)
-    df_metrics.plot.line(
-            x="epoch", 
-            y=[c for c in df_metrics.columns if (
-                    c.endswith("_loss") or c.endswith("_mae"))],
-            figsize=(10,6)).get_figure().savefig(args.output_dir / f"{mc.uuid}.losses.png")
-
+    df_metrics  = get_metrics_df(f"{trainer.logger.log_dir}/metrics.csv")
+    plot_metrics_df(df_metrics, png_filename=args.output_dir / f"{mc.uuid}.losses.png")
 
     # get testing data
     test_ds = Pytorch_Oct22DataSet.create_from_args(
@@ -514,13 +517,9 @@ if __name__ == "__main__":
     test_dl = DataLoader(test_ds, batch_size=args.batch_size, 
                             num_workers=args.num_workers)
     logging.info(f"len(test_ds) : {len(test_ds)}")
-    #scores = trainer.predict(model, test_dl)
-    #scores = torch.vstack(scores)
-
-    #probas = torch.sigmoid(scores)
-    #predicted_labels = proba_to_label(probas)
     predicted_labels = trainer.predict(model, test_dl)
-
+    np.savetxt(args.output_dir / f"{mc.uuid}.preds.txt", 
+            torch.hstack(predicted_labels).numpy())
     ## convert decision scores to probabilities
     ## we do this to look at AUC curves for the binary targets
     #des = model.decision_function(X_test)
