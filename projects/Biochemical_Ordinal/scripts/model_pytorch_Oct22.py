@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
+import torchmetrics
 
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -57,6 +58,7 @@ class Pytorch_Oct22DataSet(Dataset):
         self.q = dataset_Oct22.q
         self.multilibrary = multilibrary
         self.data = ds.get_dataset_by_name(dataset_name).copy().reset_index()
+        #self.data[self.data.parent == "1VH"].copy().reset_index()
         self.encoding_func = lambda x: x
         if encoding == "one-hot":
             # one_hot_encode_list takes a list of sequences and one-hot encodes them
@@ -79,23 +81,11 @@ class Pytorch_Oct22DataSet(Dataset):
         else:
             dx['dataset_num'] = np.int64(0)
         if self.target == "multiclass":
-            target = data_row.activity_num.astype(np.int64)
+            target = data_row.category_num.astype(np.int64)
         else:
-            target = (data_row.category_num != 0).astype(np.int64)
+            target = data_row.activity_num.astype(np.int64)
         dx["target"] = target
         return dx
-
-
-class PytorchTrainingTask:
-
-    @classmethod
-    def create_from_args(cls, args):
-        return cls()
-
-    def __init__(self, batch_size=32, num_workers=4, num_epochs=50):
-        self.batch_size = batch_size
-        self.num_workers = num_workers
-        self.num_epochs = num_epochs
 
 class PytorchRegression(pl.LightningModule):
 
@@ -155,9 +145,12 @@ class PytorchRegression(pl.LightningModule):
             self.num_classes = 2
             self.output_layer = torch.nn.Linear(size_in, 1)
 
- 
+        self.train_mae = torchmetrics.MeanAbsoluteError()
+        self.valid_mae = torchmetrics.MeanAbsoluteError()
+        self.test_mae = torchmetrics.MeanAbsoluteError()
+  
     def forward(self, x, dx):
-        x = self.model(x)
+        #x = self.model(x) # FIXME
         if self.target == "multiclass":
             x = self.output_layer(x, dx)
         else: # target is binary
@@ -170,12 +163,25 @@ class PytorchRegression(pl.LightningModule):
         """
         return torch.nn.Identity()
 
+    def xavier_init(self):
+        for name, param in self.named_parameters():
+            print (name, param.shape)
+            if name.endswith(".bias"): 
+                # does not include coral_bias as it does not end with .bias
+                # coral_bias is initialized by itself
+                param.data.fill_(0)
+            else:
+                bound = (np.sqrt(6) / np.sqrt(param.shape[0] + param.shape[1])).item()
+                param.data.uniform_(-bound, bound)
+
     def shared_step(self, batch, batch_idx):
         x, dx, true_labels = batch["encoding"], batch["dataset_num"], batch["target"]
         if self.dca: # add dca as the last value
             x = torch.hstack((x, batch["dca"].unsqueeze(1)))
         logits = self(x, dx)
         loss = None
+        probas = None
+        predicted_labels = None
         if self.target == "multiclass":
             # Convert class labels for CORAL ------------------------
             levels = levels_from_labelbatch(
@@ -186,20 +192,34 @@ class PytorchRegression(pl.LightningModule):
             # A regular classifier uses:
             loss = coral_loss(logits, levels.type_as(logits))
             # -------------------------------------------------------
+
+            # CORAL Prediction to label -----------------------------
+            # A regular classifier uses:
+            # predicted_labels = torch.argmax(logits, dim=1)
+            probas = torch.sigmoid(logits)
+            predicted_labels = proba_to_label(probas)
+            # -------------------------------------------------------
+
         else:
             loss = torch.nn.functional.binary_cross_entropy_with_logits(logits.squeeze(), 
                     true_labels.squeeze().type_as(logits))
-
+            probas = torch.sigmoid(logits)
+            predicted_labels = (probas > 0.5).squeeze().long()
         # add regularization
         if self.lambda_h:
+            print("Doing some regularization")
             last_weights = None
             last_bias = None
+
+            # get the weights and biases from the last layer
             if self.target == "multiclass":
                 last_weights = self.output_layer.coral_weights.weight
                 last_bias = self.output_layer.coral_bias
             else: #target is binary and the output layer is linear
                 last_weights = self.output_layer.weight
                 last_bias = self.output_layer.bias
+
+            # Separate out the dca parameter if there is one
             dca_param = None
             if self.dca:
                 last_weights = last_weights[:, :-1]
@@ -207,26 +227,28 @@ class PytorchRegression(pl.LightningModule):
                 dca_param = last_weights[:, -1]
             loss += self.lambda_h * ((last_weights * last_weights).sum()
                                       + (last_bias * last_bias).sum())
-            if self.dca:
+            if self.dca and self.lambda_dca:
                 loss += self.lambda_dca * (dca_param * dca_param).sum()
-        return loss
+        return loss, true_labels, predicted_labels
 
     def training_step(self, batch, batch_idx):
-        loss = self.shared_step(batch, batch_idx)
+        loss, true_labels, predicted_labels = self.shared_step(batch, batch_idx)
         self.log("train_loss", loss, on_step=True, on_epoch=True)
+        self.train_mae(predicted_labels, true_labels)
+        self.log("train_mae", self.train_mae, on_epoch=True, on_step=False)
+        #print(loss, true_labels, predicted_labels)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        loss = self.shared_step(batch, batch_idx)
+        loss, true_labels, predicted_labels = self.shared_step(batch, batch_idx)
         self.log("validation_loss", loss, on_step=True, on_epoch=True)
-        return loss
 
     def test_step(self, batch, batch_idx):
-        loss = self.shared_step(batch, batch_idx)
+        loss, true_labels, predicted_labels = self.shared_step(batch, batch_idx)
         self.log("test_loss", loss, on_epoch=True)
-        return loss
     
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
+        #loss, true_labels, predicted_labels = self.shared_step(batch, batch_idx)
         x, dx, true_labels = batch["encoding"], batch["dataset_num"], batch["target"]
         if self.dca: # add dca as the last value
             x = torch.hstack((x, batch["dca"].unsqueeze(1)))
@@ -269,11 +291,13 @@ class MetricTracker(pl.Callback):
 
     def __init__(self):
         self.train_losses = []
+        self.train_mae = []
         self.validation_losses = []
 
     def on_train_epoch_end(self, trainer, module):
         elogs = trainer.logged_metrics # access it here
         self.train_losses.append(elogs["train_loss_epoch"].item())
+        self.train_losses.append(elogs["train_mae"].item())
 
     def on_validation_epoch_end(self, trainer, module):
         elogs = trainer.logged_metrics # access it here
@@ -319,6 +343,10 @@ if __name__ == "__main__":
     mc.save_yaml(directory=args.output_dir)
 
     model = create_model(model_config = mc)
+    model.xavier_init()
+
+    for p in model.named_parameters():
+        print(p)
 
     # get the training data
     train_ds = Pytorch_Oct22DataSet.create_from_args(

@@ -77,16 +77,16 @@ class Oct22DataSet:
         return self.df.iloc[self.test_indices]
 
     def get_train_cv_dataset(self, train_cv_name):
-        assert(train_cv_name.starts_with("train_cv"))
+        assert(train_cv_name.startswith("train_cv"))
         cv_idx = int(train_cv_name[-1]) - 1
         assert(cv_idx < self.num_cv_splits)
-        return self.df.iloc[self.train_cv_splits[i]]
+        return self.df.iloc[self.train_cv_splits[cv_idx]]
 
     def get_val_cv_dataset(self, val_cv_name):
-        assert(self.val_cv_name.starts_with("val_cv"))
+        assert(val_cv_name.startswith("val_cv"))
         cv_idx = int(val_cv_name[-1]) - 1
         assert(cv_idx < self.num_cv_splits)
-        return self.df.iloc[self.val_cv_splits[i]]
+        return self.df.iloc[self.val_cv_splits[cv_idx]]
 
     def get_dataset_by_name(self, name):
         ret = None
@@ -94,9 +94,9 @@ class Oct22DataSet:
             ret = self.get_train_dataset()
         elif name == "test":
             ret = self.get_test_dataset()
-        elif name.starts_with("train_cv"): #train_cv1 ... train_cv5
+        elif name.startswith("train_cv"): #train_cv1 ... train_cv5
             ret = self.get_train_cv_dataset(name)
-        elif name.starts_with("val_cv"): # val_cv1 ... val_cv5
+        elif name.startswith("val_cv"): # val_cv1 ... val_cv5
             ret = self.get_val_cv_dataset(name)
         else:
             raise ValueError(f"Unknown dataset name: {name}")
