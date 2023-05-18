@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 import torchmetrics
 
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.loggers import CSVLogger
 
 from coral_multiple_layer import CoralMultipleLayer
 from coral_pytorch.losses import coral_loss
@@ -263,6 +263,142 @@ class PytorchRegression(pl.LightningModule):
         pass
 
 
+# Regular PyTorch Module
+class BaseCoralModule(torch.nn.Module):
+
+    def __init__(self, input_size, hidden_units, num_classes, num_datasets):
+
+        super().__init__()
+
+        # num_classes is used by the CORAL loss function
+        self.num_classes = num_classes
+        self.num_datasets = num_datasets
+        
+        all_layers = self._build_layers(input_size, hidden_units)
+
+        # CORAL: output layer -------------------------------------------
+        # Regular classifier would use the following output layer:
+        # output_layer = torch.nn.Linear(hidden_units[-1], num_classes)
+        
+        # We replace it by the CORAL layer:
+        self.output_layer = CoralMultipleLayer(size_in=hidden_units[-1],
+                                  num_classes=num_classes, 
+                                  num_datasets=num_datasets)
+        # ----------------------------------------------------------------
+        
+        # do not add outputlayer to all layers because
+        # we send extra data (dataset information) to it in the forward
+        # function
+        #all_layers.append(self.output_layer)
+        self.model = torch.nn.Sequential(*all_layers)
+
+    def _build_layers(self, input_size, hidden_units):
+        """
+            Initialize MLP layers. Override this function to make a custom NN 
+        """
+        all_layers = []
+        for hidden_unit in hidden_units:
+            layer = torch.nn.Linear(input_size, hidden_unit)
+            #all_layers.append(torch.nn.Dropout(0.2))
+            all_layers.append(layer)
+            all_layers.append(torch.nn.ReLU())
+            input_size = hidden_unit
+        return all_layers
+
+    def forward(self, x, dx):
+        x = self.model(x)
+        x = self.output_layer(x, dx)
+        return x
+
+    def predict(self, x, dx=None):
+        with torch.no_grad():
+            # FIXME: this only predicts for a single x and not a batch
+            return self.output_layer(self.model(x), torch.LongTensor([0])) 
+
+
+# LightningModule that receives a PyTorch model as input
+class LightningMLP(pl.LightningModule):
+    def __init__(self, model, learning_rate, weight_decay, dca=False):
+        super().__init__()
+
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        # The inherited PyTorch module
+        self.model = model
+        self.dca = dca
+
+        # Save settings and hyperparameters to the log directory
+        # but skip the model parameters
+        self.save_hyperparameters(ignore=['model'])
+
+        # Set up attributes for computing the MAE
+        self.train_mae = torchmetrics.MeanAbsoluteError()
+        self.valid_mae = torchmetrics.MeanAbsoluteError()
+        self.test_mae = torchmetrics.MeanAbsoluteError()
+        
+    # Defining the forward method is only necessary 
+    # if you want to use a Trainer's .predict() method (optional)
+    def forward(self, x, dx):
+        return self.model(x, dx)
+        
+    # A common forward step to compute the loss and labels
+    # this is used for training, validation, and testing below
+    def _shared_step(self, batch):
+        features, datasets, true_labels = batch["encoding"], batch["dataset_num"], batch["target"]
+
+        if self.dca:
+            features = torch.hstack((features, batch["dca"].unsqueeze(1)))
+        
+        # Convert class labels for CORAL ------------------------
+        levels = levels_from_labelbatch(
+            true_labels, num_classes=self.model.num_classes)
+        # -------------------------------------------------------
+
+        logits = self(features, datasets)
+
+        # CORAL Loss --------------------------------------------
+        # A regular classifier uses:
+        # loss = torch.nn.functional.cross_entropy(logits, true_labels)
+        loss = coral_loss(logits, levels.type_as(logits))
+        # -------------------------------------------------------
+
+        # CORAL Prediction to label -----------------------------
+        # A regular classifier uses:
+        # predicted_labels = torch.argmax(logits, dim=1)
+        probas = torch.sigmoid(logits)
+        predicted_labels = proba_to_label(probas)
+        # -------------------------------------------------------
+        return loss, true_labels, predicted_labels
+
+    def training_step(self, batch, batch_idx):
+        loss, true_labels, predicted_labels = self._shared_step(batch)
+        self.log("train_loss", loss)
+        self.train_mae(predicted_labels, true_labels)
+        self.log("train_mae", self.train_mae, on_epoch=True, on_step=False)
+        return loss  # this is passed to the optimzer for training
+
+    def validation_step(self, batch, batch_idx):
+        loss, true_labels, predicted_labels = self._shared_step(batch)
+        self.log("valid_loss", loss)
+        self.valid_mae(predicted_labels, true_labels)
+        self.log("valid_mae", self.valid_mae,
+                 on_epoch=True, on_step=False, prog_bar=True)
+
+    def test_step(self, batch, batch_idx):
+        _, true_labels, predicted_labels = self._shared_step(batch)
+        self.test_mae(predicted_labels, true_labels)
+        self.log("test_mae", self.test_mae, on_epoch=True, on_step=False)
+
+    def predict_step(self, batch, batch_idx, *args, **kwargs):
+        _, true_labels, predicted_labels = self._shared_step(batch)
+        return predicted_labels
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        return optimizer
+
+
+
 def create_model(model_config):
     """ Takes a model config object and returns a model that can run.
         
@@ -286,37 +422,6 @@ def create_model(model_config):
     return model
 
 
-
-class MetricTracker(pl.Callback):
-
-    def __init__(self):
-        self.train_losses = []
-        self.train_mae = []
-        self.validation_losses = []
-
-    def on_train_epoch_end(self, trainer, module):
-        elogs = trainer.logged_metrics # access it here
-        self.train_losses.append(elogs["train_loss_epoch"].item())
-        self.train_losses.append(elogs["train_mae"].item())
-
-    def on_validation_epoch_end(self, trainer, module):
-        elogs = trainer.logged_metrics # access it here
-        self.validation_losses.append(elogs["validation_loss_epoch"].item())
-
-    def get_df(self):
-        df = pd.DataFrame({'train_losses': np.array(self.train_losses)})
-        df['epoch'] = np.arange(len(df)) + 1
-        if len(self.train_losses) == len(self.validation_losses) - 1:
-            df_val = pd.DataFrame(
-                    {"validation_losses": np.array(self.validation_losses)})
-            df_val["epoch"] = np.arange(len(df_val))
-            df = pd.merge(df_val, df, how="outer")
-        return df
-
-    def save_losses_plot(self, filename):
-        df = self.get_df()
-        df.plot.line(y=[c for c in df.columns if c.endswith("_losses")], x="epoch",
-                        figsize=(10,6)).get_figure().savefig(filename)
 
 if __name__ == "__main__":
     import sys
@@ -342,11 +447,23 @@ if __name__ == "__main__":
     logging.info("model_config : " + str(mc).replace("\n", ", "))
     mc.save_yaml(directory=args.output_dir)
 
-    model = create_model(model_config = mc)
-    model.xavier_init()
+    #model = create_model(model_config = mc)
+    #model.xavier_init()
+    #for p in model.named_parameters():
+    #    print(p)
 
-    for p in model.named_parameters():
-        print(p)
+    additional_features = 0
+    if args.dca:
+        additional_features += 1
+    pytorch_model = BaseCoralModule(
+        input_size=272*20 + additional_features,
+        hidden_units=(100, 20),
+        num_classes=4, num_datasets=3)
+    model = LightningMLP(
+        model=pytorch_model,
+        learning_rate=args.learning_rate,
+        weight_decay=args.weight_decay,
+        dca = args.dca)
 
     # get the training data
     train_ds = Pytorch_Oct22DataSet.create_from_args(
@@ -369,11 +486,26 @@ if __name__ == "__main__":
                                 num_workers=args.num_workers)
 
     # train the model
-    cb = MetricTracker()
-    trainer = pl.Trainer(max_epochs=args.num_epochs, log_every_n_steps=10, callbacks=[cb])
+
+    logger = CSVLogger(save_dir="logs/", name="mlp-lightning")
+    trainer = pl.Trainer(max_epochs=args.num_epochs, log_every_n_steps=10, logger=logger)
     trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=val_dl)
+
     
-    cb.save_losses_plot(args.output_dir / f"{mc.uuid}.losses.png")
+    metrics = pd.read_csv(f"{trainer.logger.log_dir}/metrics.csv")
+    aggreg_metrics = []
+    agg_col = "epoch"
+    for i, dfg in metrics.groupby(agg_col):
+        agg = dict(dfg.mean())
+        agg[agg_col] = i
+        aggreg_metrics.append(agg)
+
+    df_metrics = pd.DataFrame(aggreg_metrics)
+    df_metrics.plot.line(
+            x="epoch", 
+            y=[c for c in df_metrics.columns if (
+                    c.endswith("_loss") or c.endswith("_mae"))],
+            figsize=(10,6)).get_figure().savefig(args.output_dir / f"{mc.uuid}.losses.png")
 
 
     # get testing data
@@ -382,11 +514,12 @@ if __name__ == "__main__":
     test_dl = DataLoader(test_ds, batch_size=args.batch_size, 
                             num_workers=args.num_workers)
     logging.info(f"len(test_ds) : {len(test_ds)}")
-    scores = trainer.predict(model, test_dl)
-    scores = torch.vstack(scores)
+    #scores = trainer.predict(model, test_dl)
+    #scores = torch.vstack(scores)
 
-    probas = torch.sigmoid(scores)
-    predicted_labels = proba_to_label(probas)
+    #probas = torch.sigmoid(scores)
+    #predicted_labels = proba_to_label(probas)
+    predicted_labels = trainer.predict(model, test_dl)
 
     ## convert decision scores to probabilities
     ## we do this to look at AUC curves for the binary targets
