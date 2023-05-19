@@ -23,8 +23,8 @@ class ModelConfig:
         # these should all be different dictionaries so
         # let the initializer sort it out
         for key in ['train_name', 'val_name', 'test_name',
-                    'intercept', "batch_size", "num_workers", 
-                    "num_epochs", "multilibrary",
+                    'intercept', "batch_size", "num_workers", "seed",
+                    "num_epochs", "multilibrary", "learning_rate",
                     "lambda_h", "lambda_dca", "weight_decay"]:
             if key in args and key not in kwargs:
                 kwargs[key] = getattr(args, key)

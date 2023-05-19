@@ -23,7 +23,7 @@ from model_shared_Oct22 import \
         add_design_arguments, \
         add_data_arguments
 
-model_names = ["Pytorch"]
+model_names = ["MLPLightning", "PytorchRegression"]
 
 def add_pytorch_arguments(parser):
     group = parser.add_argument_group("pytorch")
@@ -140,7 +140,7 @@ class PytorchRegression(pl.LightningModule):
             self.output_layer = CoralMultipleLayer(
                         size_in=size_in,
                         num_classes=self.num_classes, 
-                        num_datasets=self.num_datasets)
+                        num_datasets=self.num_datasets, preinit_bias=True)
         elif self.target == "binary":
             self.num_classes = 2
             self.output_layer = torch.nn.Linear(size_in, 1)
@@ -310,10 +310,8 @@ class BaseCoralModule(torch.nn.Module):
         x = self.output_layer(x, dx)
         return x
 
-    def predict(self, x, dx=None):
-        with torch.no_grad():
-            # FIXME: this only predicts for a single x and not a batch
-            return self.output_layer(self.model(x), torch.LongTensor([0])) 
+    def predict(self, x, dx):
+        pass
 
 
 # LightningModule that receives a PyTorch model as input
@@ -335,7 +333,19 @@ class LightningMLP(pl.LightningModule):
         self.train_mae = torchmetrics.MeanAbsoluteError()
         self.valid_mae = torchmetrics.MeanAbsoluteError()
         self.test_mae = torchmetrics.MeanAbsoluteError()
-        
+
+    def xavier_init(self):
+        for name, param in self.named_parameters():
+            print (name, param.shape)
+            if name.endswith(".bias"): 
+                # does not include coral_bias as it does not end with .bias
+                # coral_bias is initialized by itself
+                param.data.fill_(0)
+            else:
+                bound = (np.sqrt(6) / np.sqrt(param.shape[0] + param.shape[1])).item()
+                param.data.uniform_(-bound, bound)
+
+  
     # Defining the forward method is only necessary 
     # if you want to use a Trainer's .predict() method (optional)
     def forward(self, x, dx):
@@ -390,8 +400,18 @@ class LightningMLP(pl.LightningModule):
         self.log("test_mae", self.test_mae, on_epoch=True, on_step=False)
 
     def predict_step(self, batch, batch_idx, *args, **kwargs):
-        _, true_labels, predicted_labels = self._shared_step(batch)
-        return predicted_labels
+        #_, true_labels, predicted_labels = self._shared_step(batch)
+        features, datasets, true_labels = \
+                batch["encoding"], batch["dataset_num"], batch["target"]
+        if self.dca:
+            features = torch.hstack((features, batch["dca"].unsqueeze(1)))
+
+        with torch.no_grad():
+            logits = self(features, datasets)
+            probas = torch.sigmoid(logits)
+            predicted_labels = proba_to_label(probas)
+        #probas = torch.empty(predicted_labels.shape[0], 3)
+        return probas, true_labels, predicted_labels
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
@@ -406,7 +426,7 @@ def create_model(model_config):
     """
     mc = model_config
     model = None
-    if model_config.model_name == "Pytorch":
+    if model_config.model_name == "PytorchRegression":
         model = PytorchRegression(
                     lambda_h = mc.model_params["lambda_h"],
                     lambda_dca = mc.model_params["lambda_dca"],
@@ -417,6 +437,8 @@ def create_model(model_config):
                     target = mc.target,
                     encoding = mc.design_matrix["encoding"],
                     multilibrary = mc.design_matrix["multilibrary"])
+    elif model_config.model_name == "MLPLightning":
+        raise NotImplementedError
     else:
         raise ValueError(f"{model_name} must be one of {model_names}")
     return model
@@ -429,7 +451,7 @@ def get_metrics_df(csv_filename):
         agg = dict(dfg.mean())
         agg[agg_col] = i
         aggreg_metrics.append(agg)
-    return df_metrics
+    return pd.DataFrame(aggreg_metrics)
 
 def plot_metrics_df(df_metrics, png_filename):
     df_metrics.plot.line(
@@ -469,18 +491,19 @@ if __name__ == "__main__":
     #    print(p)
 
     additional_features = 0
-    if args.dca:
+    if mc.design_matrix["dca"]:
         additional_features += 1
     pytorch_model = BaseCoralModule(
         input_size=ds.L*dataset_Oct22.q + additional_features,
-        hidden_units=(100, 20),
+        hidden_units=(100, 50),
         num_classes=dataset_Oct22.NUM_CLASSES, 
         num_datasets=dataset_Oct22.NUM_DATASETS)
     model = LightningMLP(
         model=pytorch_model,
-        learning_rate=args.learning_rate,
-        weight_decay=args.weight_decay,
-        dca = args.dca)
+        learning_rate=mc.training_params["learning_rate"],
+        weight_decay=mc.training_params["weight_decay"],
+        dca = mc.design_matrix["dca"])
+    #model.xavier_init()
 
     # get the training data
     train_ds = Pytorch_Oct22DataSet.create_from_args(
@@ -517,9 +540,23 @@ if __name__ == "__main__":
     test_dl = DataLoader(test_ds, batch_size=args.batch_size, 
                             num_workers=args.num_workers)
     logging.info(f"len(test_ds) : {len(test_ds)}")
-    predicted_labels = trainer.predict(model, test_dl)
+    probas, true_labels, predicted_labels = list(zip(*trainer.predict(model, test_dl)))
+    probas = torch.cat(probas, dim=0)
+    true_labels = torch.hstack(true_labels)
+    predicted_labels = torch.hstack(predicted_labels)
+    print(predicted_labels)
+    print("Test set MAE=", 
+            torchmetrics.MeanAbsoluteError()(predicted_labels, true_labels))
+    print("All ones MAE=",
+            torchmetrics.MeanAbsoluteError()(torch.ones(true_labels.shape), true_labels))
     np.savetxt(args.output_dir / f"{mc.uuid}.preds.txt", 
-            torch.hstack(predicted_labels).numpy())
+            predicted_labels)
+    cum_probs = np.hstack([
+                    np.ones((probas.shape[0], 1)), 
+                    probas, 
+                    np.zeros((probas.shape[0], 1))])
+    probs = -np.diff(cum_probs)
+    np.savetxt(args.output_dir / f"{mc.uuid}.probs.txt", probs)
     ## convert decision scores to probabilities
     ## we do this to look at AUC curves for the binary targets
     #des = model.decision_function(X_test)
