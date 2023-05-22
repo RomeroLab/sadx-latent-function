@@ -29,6 +29,8 @@ def one_hot_encode_list(l):
     int_seqs = np.array([prot_to_list(x) for x in l], dtype=int)
     return np.eye(q)[int_seqs].reshape(int_seqs.shape[0], -1)
 
+def one_hot_encode_single_np(x):
+    return np.eye(q)[x].flatten()
 
 def one_hot_encode_single(x):
     return one_hot_encode_list([x]).squeeze()
