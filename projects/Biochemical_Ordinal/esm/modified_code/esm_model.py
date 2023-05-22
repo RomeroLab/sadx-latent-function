@@ -197,6 +197,7 @@ class ESMTrainingTask(pl.LightningModule):
         outputs, _ = self._shared_step(batch, batch_idx, compute_loss=False)
         ret = outputs
         if self.model.top_net_type == "ordinal":
+            logits = outputs
             probas = torch.sigmoid(logits)
             predicted_labels = proba_to_label(probas)
             ret = probas, predicted_labels
@@ -303,11 +304,10 @@ def main(args: argparse.Namespace, return_stuff=False):
     # save predictions, scatterplots, and custom metrics. plot train loss vs. val loss
     raw_preds = trainer.predict(ckpt_path="best", datamodule=dm, return_predictions=True)
     if trainer.model.model.top_net_type == 'ordinal':
-        probs = torch.softmax(raw_preds)
-        raw_preds = proba_to_label(probs)
-
-    # log end of training metrics
-    log_metrics(raw_preds, dm, log_dir, trainer, args)
+        pass
+    else:
+        # log end of training metrics
+        log_metrics(raw_preds, dm, log_dir, trainer, args)
 
     # delete the checkpoints folder if asked
     if args.delete_checkpoints:
@@ -387,7 +387,7 @@ if __name__ == "__main__":
     ret = main(parser.parse_args(), return_stuff=return_stuff)
     if ret:
         dm, trainer, raw_preds = ret
-        probas, predicted_labels = list(zip(*trainer.predict(trainer.model, test_dl)))
+        probas, predicted_labels = list(zip(*raw_preds[-1]))
         probas = torch.cat(probas, dim=0)
         predicted_labels = torch.hstack(predicted_labels)
         import numpy as np

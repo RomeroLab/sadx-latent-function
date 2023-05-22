@@ -92,7 +92,8 @@ python3 -c "import esm; print('esm version : ' + esm.__version__)"
 cd code
 
 #MAX_EPOCHS=1
-MAX_EPOCHS=300
+#MAX_EPOCHS=300
+MAX_EPOCHS=60 # where the validation set and training losess diverge
 python3 esm_model.py --max_epochs ${MAX_EPOCHS} --delete_checkpoints --top_net_type ordinal
 
 
