@@ -33,6 +33,7 @@ def add_pytorch_arguments(parser):
     group.add_argument("--lambda_h", help="Regularization param", default=1e-4, type=float)
     group.add_argument("--lambda_dca", help="DCA Regularization param", default=1e-8, type=float)
     group.add_argument("--learning_rate", help="Learning Rate", default=1e-4, type=float)
+    group.add_argument("--save_model", help="Save checkpoint", action="store_true")
     group.add_argument("--weight_decay", 
                         help="Weight decay (conflicts with lambda_h)", 
                         default=1e-6 , type=float)
@@ -557,32 +558,7 @@ if __name__ == "__main__":
                     np.zeros((probas.shape[0], 1))])
     probs = -np.diff(cum_probs)
     np.savetxt(args.output_dir / f"{mc.uuid}.probs.txt", probs)
-    ## convert decision scores to probabilities
-    ## we do this to look at AUC curves for the binary targets
-    #des = model.decision_function(X_test)
+    if args.save_model:
+        trainer.save_checkpoint(args.output_dir / f"{mc.uuid}.ckpt")
 
-    #probs = None
-    #argmax_axis = 0
-    #if mc.target == "binary":
-    #    assert(len(des.shape) == 1)
-    #    p = expit(des) # probablity of predicting 1.
-    #    probs = np.vstack([1-p, p])
-    #    argmax_axis = 0
-    #elif mc.target == "multiclass":
-    #    assert(des.shape[1] == 4)
-    #    probs = softmax(des)
-    #    argmax_axis = 1
-    #else:
-    #    raise ValueError(f"Got unknown value of mc.target={mc.target}")
-    #
-    #logging.info(f"Saving probabilities")
-    #np.savetxt(args.output_dir / f"{mc.uuid}.probs.txt", probs)
 
-    #model_test_predictions = model.predict(X_test)
-    #np.savetxt(args.output_dir / f"{mc.uuid}.preds.txt", model_test_predictions)
-    #if len(np.unique(model_test_predictions)) == 1:
-    #    logging.warning(f"~~ ALERT! all identical predictions on test set !! ~~")
-
-    ## check that the maximum probability is the same as a predict
-    #assert((probs.argmax(axis=argmax_axis) == model_test_predictions).all())
-    # 
