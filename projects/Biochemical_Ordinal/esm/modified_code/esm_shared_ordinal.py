@@ -132,14 +132,13 @@ class ESMDataModule(pl.LightningDataModule):
         self.has_val_set = True
         
         self.train_name = 'train'
-        self.val_name = 'val'
+        self.val_name = 'val_cv1'
         self.test_name = 'test'
 
         # initialize DMSDataset that are used later in this module to load dataloaders, etc
-        self.test_df = self.ds.get_test_dataset()
-        # split train into train and val using cv1
-        for self.train_df, self.val_df in self.ds.cv_iterator():
-            break
+        self.test_df = self.ds.get_dataset_by_name(self.test_name)
+        self.train_df = self.ds.get_dataset_by_name(self.train_name)
+        self.val_df = self.ds.get_dataset_by_name(self.val_name)
 
         self.example_input_array = self._init_example_input_array(None)
         self.aa_seq_len = len(self.example_input_array['x']['char_seqs'][0])
