@@ -23,7 +23,6 @@ from protein_utils.sequences.encoding import DEFAULT_NO_GAP_ENCODER
 from protein_utils.energy.potts import energy_calc_single_mutants, create_single_mutant
 
 
-
 class SingleMutant_Oct22DataSet(Dataset):
 
     def __init__(self, 
@@ -118,6 +117,7 @@ if __name__ == "__main__":
         dca = mc.design_matrix["dca"])
     #model.xavier_init()
 
+    # FIXME: train on whole dataset
     trained_model = LightningMLP.load_from_checkpoint(checkpoint_path=
             saved_model_stub.with_suffix(".ckpt"), model=pytorch_model)
 

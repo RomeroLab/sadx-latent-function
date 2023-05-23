@@ -65,8 +65,10 @@ def get_model_data(
         model_data = dataset.get_train_dataset()
     elif data_type == "test":
         model_data = dataset.get_test_dataset()
+    elif data_type == "all":
+        model_data = dataset.get_all_dataset()
     else:
-        raise ValueError("data_type should be 'train' or 'test'")
+        raise ValueError("data_type should be 'train' or 'test' or 'all'")
 
     X = dataset_Oct22.create_model_inputs(model_data, 
         add_dca=model_config.design_matrix["dca"])

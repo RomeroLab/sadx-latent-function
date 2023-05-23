@@ -78,6 +78,9 @@ class Oct22DataSet:
     def get_test_dataset(self):
         return self.df.iloc[self.test_indices]
 
+    def get_all_dataset(self):
+        return self.df
+
     def get_train_cv_dataset(self, train_cv_name):
         assert(train_cv_name.startswith("train_cv"))
         cv_idx = int(train_cv_name[-1]) - 1
@@ -100,6 +103,8 @@ class Oct22DataSet:
             ret = self.get_train_cv_dataset(name)
         elif name.startswith("val_cv"): # val_cv1 ... val_cv5
             ret = self.get_val_cv_dataset(name)
+        elif name == "all":
+            ret = self.get_all_dataset()
         else:
             raise ValueError(f"Unknown dataset name: {name}")
         return ret
