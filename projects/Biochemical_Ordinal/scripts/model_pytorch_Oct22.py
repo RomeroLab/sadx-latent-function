@@ -15,6 +15,8 @@ from coral_multiple_layer import CoralMultipleLayer
 from coral_pytorch.losses import coral_loss
 from coral_pytorch.dataset import levels_from_labelbatch, proba_to_label
 
+from multi_coral_pytorch import DataModule, load_synthetic_data, MyDataset
+
 import dataset_Oct22
 import model_config_Oct22
 
@@ -87,6 +89,55 @@ class Pytorch_Oct22DataSet(Dataset):
             target = data_row.activity_num.astype(np.int64)
         dx["target"] = target
         return dx
+
+
+class SyntheticDataset(Dataset):
+
+    def __init__(self, ds):
+        self.ds = ds # take a MyDataset and return data in a format like Pytorch_Oct22DataSet
+    
+    def __getitem__(self, index):
+        inputs, dataset, label  = self.ds[index]
+        dx = {}
+        dx["encoding"] = inputs
+        dx["dataset_num"] = dataset
+        dx["target"] = label
+        return dx
+
+
+        return inputs, dataset, label
+
+    def __len__(self):
+        return len(self.ds)
+
+
+class Oct22SyntheticDataModule(DataModule):
+
+    def __init__(self, size=1000, round_nums = (1,2,3), 
+                 encoding="one-hot", target="multiclass", multilibrary=False, 
+                        batch_size=None, num_workers=None ):
+        msas, labels, dataset_labels = load_synthetic_data(size, round_nums)
+        self.L = msas.shape[1]
+        self.q = dataset_Oct22.q
+        self.multilibrary = multilibrary
+        self.target = target
+        assert(self.target == "multiclass")
+        kwargs = {}
+        if batch_size is not None: kwargs['batch_size'] = batch_size
+        if num_workers is not None: kwargs['num_workers'] = batch_size
+        super().__init__(syn_data=msas, syn_labels=labels, 
+                syn_datasets=dataset_labels, **kwargs)
+
+    def setup(self, stage=None):
+        super().setup(stage)
+        # now replace MyDataset with a Dataset 
+        self.train = SyntheticDataset(self.train)
+        self.valid = SyntheticDataset(self.valid)
+        self.test = SyntheticDataset(self.test)
+
+    def predict_dataloader(self):
+        return self.test_dataloader()
+
 
 class PytorchRegression(pl.LightningModule):
 
@@ -491,6 +542,8 @@ if __name__ == "__main__":
     #for p in model.named_parameters():
     #    print(p)
 
+    SYNTHETIC_DATA = True
+
     additional_features = 0
     if mc.design_matrix["dca"]:
         additional_features += 1
@@ -505,6 +558,14 @@ if __name__ == "__main__":
         weight_decay=mc.training_params["weight_decay"],
         dca = mc.design_matrix["dca"])
     #model.xavier_init()
+    
+    dm = None
+    if SYNTHETIC_DATA:
+        dm = Oct22SyntheticDataModule(size=1000, round_nums=(1,2,3))
+    #dm.setup()
+    #dl = dm.train_dataloader()
+    #print(len(dl))
+    #x = next(iter(dl))
 
     # get the training data
     train_ds = Pytorch_Oct22DataSet.create_from_args(
@@ -530,17 +591,25 @@ if __name__ == "__main__":
 
     logger = CSVLogger(save_dir="logs/", name="mlp-lightning")
     trainer = pl.Trainer(max_epochs=args.num_epochs, log_every_n_steps=10, logger=logger)
-    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=val_dl)
+    if dm is None:
+        trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=val_dl)
+    else:
+        trainer.fit(model, datamodule=dm)
+
 
     df_metrics  = get_metrics_df(f"{trainer.logger.log_dir}/metrics.csv")
     plot_metrics_df(df_metrics, png_filename=args.output_dir / f"{mc.uuid}.losses.png")
 
     # get testing data
-    test_ds = Pytorch_Oct22DataSet.create_from_args(
-                args=args, dataset_name=args.test_name)
-    test_dl = DataLoader(test_ds, batch_size=args.batch_size, 
-                            num_workers=args.num_workers)
-    logging.info(f"len(test_ds) : {len(test_ds)}")
+    test_dl = None
+    if dm is None:
+        test_ds = Pytorch_Oct22DataSet.create_from_args(
+                    args=args, dataset_name=args.test_name)
+        test_dl = DataLoader(test_ds, batch_size=args.batch_size, 
+                                num_workers=args.num_workers)
+        logging.info(f"len(test_ds) : {len(test_ds)}")
+    else:
+        test_dl = dm.predict_dataloader()
     probas, true_labels, predicted_labels = list(zip(*trainer.predict(model, test_dl)))
     probas = torch.cat(probas, dim=0)
     true_labels = torch.hstack(true_labels)
@@ -560,5 +629,4 @@ if __name__ == "__main__":
     np.savetxt(args.output_dir / f"{mc.uuid}.probs.txt", probs)
     if args.save_model:
         trainer.save_checkpoint(args.output_dir / f"{mc.uuid}.ckpt")
-
 
