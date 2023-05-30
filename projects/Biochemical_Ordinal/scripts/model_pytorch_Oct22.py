@@ -351,7 +351,7 @@ class BaseCoralModule(torch.nn.Module):
         all_layers = []
         for hidden_unit in hidden_units:
             layer = torch.nn.Linear(input_size, hidden_unit)
-            #all_layers.append(torch.nn.Dropout(0.2))
+            all_layers.append(torch.nn.Dropout(0.2))
             all_layers.append(layer)
             all_layers.append(torch.nn.ReLU())
             input_size = hidden_unit

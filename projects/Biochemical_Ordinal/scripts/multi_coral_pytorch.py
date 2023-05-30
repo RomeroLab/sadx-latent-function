@@ -232,6 +232,7 @@ class DataModule(pl.LightningDataModule):
 
     def train_dataloader(self):
         return DataLoader(self.train, batch_size=self.batch_size,
+                          shuffle=True,
                           num_workers=self.num_workers,
                           drop_last=True)
 
