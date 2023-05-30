@@ -523,6 +523,7 @@ if __name__ == "__main__":
     group = add_design_arguments(parser)
     group = add_pytorch_arguments(parser)
     group = add_data_arguments(parser)
+    group.add_argument("--synthetic", help="Synthetic dataset", action="store_true")
     args = parser.parse_args()
 
     logging.basicConfig(stream=sys.stdout,
@@ -542,8 +543,6 @@ if __name__ == "__main__":
     #for p in model.named_parameters():
     #    print(p)
 
-    SYNTHETIC_DATA = True
-
     additional_features = 0
     if mc.design_matrix["dca"]:
         additional_features += 1
@@ -560,7 +559,7 @@ if __name__ == "__main__":
     #model.xavier_init()
     
     dm = None
-    if SYNTHETIC_DATA:
+    if args.synthetic:
         dm = Oct22SyntheticDataModule(size=1000, round_nums=(1,2,3))
     #dm.setup()
     #dl = dm.train_dataloader()
@@ -619,6 +618,8 @@ if __name__ == "__main__":
             torchmetrics.MeanAbsoluteError()(predicted_labels, true_labels))
     print("All ones MAE=",
             torchmetrics.MeanAbsoluteError()(torch.ones(true_labels.shape), true_labels))
+    print("All zeros MAE=",
+            torchmetrics.MeanAbsoluteError()(torch.zeros(true_labels.shape), true_labels))
     np.savetxt(args.output_dir / f"{mc.uuid}.preds.txt", 
             predicted_labels)
     cum_probs = np.hstack([
@@ -627,6 +628,8 @@ if __name__ == "__main__":
                     np.zeros((probas.shape[0], 1))])
     probs = -np.diff(cum_probs)
     np.savetxt(args.output_dir / f"{mc.uuid}.probs.txt", probs)
+    print(f"Percentage of H bin probabilities that are unique:  " 
+            f"{len(np.unique(probs[:, -1])) / probs.shape[0] * 100:.2f}%")
     if args.save_model:
         trainer.save_checkpoint(args.output_dir / f"{mc.uuid}.ckpt")
 

@@ -39,7 +39,8 @@ def add_data_arguments(parser):
     # only one-hot supported for sklearn models
     group.add_argument("--train_name",
         help="Training dataset", default="train", 
-        choices=['train'] + [f'train_cv{i+1}' for i in range(5)],
+        choices=['train'] + [f'train_cv{i+1}' for i in range(5)] 
+                    + ["all"],
         type=str)
     group.add_argument("--val_name", 
         help="Validation dataset", default="", 
