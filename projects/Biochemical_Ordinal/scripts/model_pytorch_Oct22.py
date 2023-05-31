@@ -537,6 +537,7 @@ if __name__ == "__main__":
 
     logging.info("model_config : " + str(mc).replace("\n", ", "))
     mc.save_yaml(directory=args.output_dir)
+    pl.seed_everything(mc.seed)
 
     #model = create_model(model_config = mc)
     #model.xavier_init()
@@ -556,7 +557,7 @@ if __name__ == "__main__":
         learning_rate=mc.training_params["learning_rate"],
         weight_decay=mc.training_params["weight_decay"],
         dca = mc.design_matrix["dca"])
-    #model.xavier_init()
+    model.xavier_init()
     
     dm = None
     if args.synthetic:
@@ -592,9 +593,8 @@ if __name__ == "__main__":
     trainer = pl.Trainer(max_epochs=args.num_epochs, log_every_n_steps=10, logger=logger)
     if dm is None:
         trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=val_dl)
-    else:
+    else: # only for synthetic dataset which splits its own data
         trainer.fit(model, datamodule=dm)
-
 
     df_metrics  = get_metrics_df(f"{trainer.logger.log_dir}/metrics.csv")
     plot_metrics_df(df_metrics, png_filename=args.output_dir / f"{mc.uuid}.losses.png")
@@ -607,7 +607,7 @@ if __name__ == "__main__":
         test_dl = DataLoader(test_ds, batch_size=args.batch_size, 
                                 num_workers=args.num_workers)
         logging.info(f"len(test_ds) : {len(test_ds)}")
-    else:
+    else: # synthetic data
         test_dl = dm.predict_dataloader()
     probas, true_labels, predicted_labels = list(zip(*trainer.predict(model, test_dl)))
     probas = torch.cat(probas, dim=0)
