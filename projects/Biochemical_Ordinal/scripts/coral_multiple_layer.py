@@ -26,18 +26,16 @@ class CoralMultipleLayer(torch.nn.Module):
         self.num_classes = num_classes
 
         self.coral_weights = torch.nn.Linear(self.size_in, 1, bias=False)
-        #FIXME: CHECK the shapes of these arrays that they are reshaped
-        # correctly
+        # each row has the bias terms for a given dataset
+        # the bias matrix has shape (num_datasets, num_classes - 1)
         if preinit_bias:
             self.coral_bias = torch.nn.Parameter(
                 torch.arange(num_classes - 1, 0, -1)
                     .float()
-                    .unsqueeze(1)
-                    .repeat(1, num_datasets) / (num_classes - 1))
+                    .repeat(num_datasets, 1) / (num_classes - 1))
         else:
             self.coral_bias = torch.nn.Parameter(
-                torch.zeros((num_classes - 1)*num_datasets)
-                    .float().reshape(num_datasets, num_classes-1))
+                torch.zeros(num_datasets, num_classes - 1).float())
 
     def forward(self, x, dx):
         """

@@ -310,9 +310,9 @@ class PytorchRegression(pl.LightningModule):
         return logits # return the logits
 
     def configure_optimizers(self):
-        #return torch.optim.Adam(self.parameters(), lr=self.learning_rate, 
-        #        weight_decay=self.weight_decay)
-        return torch.optim.SGD(self.parameters(), lr=self.learning_rate )
+        return torch.optim.Adam(self.parameters(), lr=self.learning_rate,
+                weight_decay=self.weight_decay)
+        #return torch.optim.SGD(self.parameters(), lr=self.learning_rate )
 
     def fit(self, *args, **kwargs):
         pass
