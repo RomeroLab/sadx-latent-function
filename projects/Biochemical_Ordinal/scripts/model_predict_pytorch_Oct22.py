@@ -77,6 +77,16 @@ class SingleMutant_Oct22DataSet(Dataset):
         dx["target"] = target
         return dx
 
+    def get_single_mutants_as_pd(self):
+        """ Return dataframe of single mutants """
+        # get the no-gap list of single mutants
+        rec = self.sm[self.no_gap_sm_list]
+        df = pd.DataFrame({'i':rec.i, 'a':rec.a})
+        df["wt_aa"] = df.i.map(lambda x: self.wt[x])
+        df["pos"] = df.i + 2
+        df["aa"] = df.a.map(DEFAULT_NO_GAP_ENCODER.int_to_alpha_dict)
+        df["feature"] = df["wt_aa"] + df.pos.astype(str) + df.aa
+        return df
 
 if __name__ == "__main__":
     import sys
@@ -97,14 +107,15 @@ if __name__ == "__main__":
 
 
     saved_model_stub = pathlib.Path(
-            "../output/ordinal_Oct22_models/saved_models/5a7103a1")
+            "../output/ordinal_Oct22_models/saved_models/6eeae50e")
     mc = model_config_Oct22.ModelConfig.create_from_yaml(
          saved_model_stub.with_suffix(".yml"))
     logging.info("dataset : " + str(mc).replace("\n", ", "))
 
 
     dca = True
-    additional_features = 1
+    additional_features = 0
+    if dca: additional_features = 1
     pytorch_model = BaseCoralModule(
         input_size=ds.L*dataset_Oct22.q + additional_features,
         hidden_units=(100, 50),
@@ -130,12 +141,19 @@ if __name__ == "__main__":
     probas, true_labels, predicted_labels = list(zip(*trainer.predict(model, predict_dl)))
     probas = torch.cat(probas, dim=0)
     predicted_labels = torch.hstack(predicted_labels)
-    print(predicted_labels)
+    print(np.unique(predicted_labels, return_counts=True))
     cum_probs = np.hstack([
                     np.ones((probas.shape[0], 1)), 
                     probas, 
                     np.zeros((probas.shape[0], 1))])
     probs = -np.diff(cum_probs)
-    #np.savetxt(args.output_dir / f"{mc.uuid}.probs.txt", probs)
+    df = ds.get_single_mutants_as_pd()
+    df["Hbin_probs"] = probs[:, -1]
+    df_sort = df.sort_values(by="Hbin_probs", ascending=False)
+    print(df_sort.head())
+    print(df_sort.tail())
+    df_sort[["feature", "Hbin_probs"]].to_csv(
+            saved_model_stub.with_suffix(".Hbin_probs.tsv"), sep="\t", index=False)
+    np.savetxt(saved_model_stub.with_suffix(f".probs.txt"), probs)
 
 

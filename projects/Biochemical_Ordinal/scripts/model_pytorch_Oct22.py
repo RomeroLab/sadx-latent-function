@@ -218,11 +218,13 @@ class PytorchRegression(pl.LightningModule):
     def xavier_init(self):
         for name, param in self.named_parameters():
             print (name, param.shape)
+            if name.endswith(".coral_bias"):
+                continue
             if name.endswith(".bias"): 
                 # does not include coral_bias as it does not end with .bias
                 # coral_bias is initialized by itself
                 param.data.fill_(0)
-            else:
+            else: 
                 bound = (np.sqrt(6) / np.sqrt(param.shape[0] + param.shape[1])).item()
                 param.data.uniform_(-bound, bound)
 
@@ -308,8 +310,9 @@ class PytorchRegression(pl.LightningModule):
         return logits # return the logits
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.learning_rate, 
-                weight_decay=self.weight_decay)
+        #return torch.optim.Adam(self.parameters(), lr=self.learning_rate, 
+        #        weight_decay=self.weight_decay)
+        return torch.optim.SGD(self.parameters(), lr=self.learning_rate )
 
     def fit(self, *args, **kwargs):
         pass
@@ -335,7 +338,7 @@ class BaseCoralModule(torch.nn.Module):
         # We replace it by the CORAL layer:
         self.output_layer = CoralMultipleLayer(size_in=hidden_units[-1],
                                   num_classes=num_classes, 
-                                  num_datasets=num_datasets)
+                                  num_datasets=num_datasets, preinit_bias=True)
         # ----------------------------------------------------------------
         
         # do not add outputlayer to all layers because
@@ -389,6 +392,8 @@ class LightningMLP(pl.LightningModule):
     def xavier_init(self):
         for name, param in self.named_parameters():
             print (name, param.shape)
+            if name.endswith("coral_bias"):
+                continue
             if name.endswith(".bias"): 
                 # does not include coral_bias as it does not end with .bias
                 # coral_bias is initialized by itself
@@ -466,7 +471,9 @@ class LightningMLP(pl.LightningModule):
         return probas, true_labels, predicted_labels
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, 
+                                weight_decay=self.weight_decay)
+        #optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate)
         return optimizer
 
 
@@ -550,6 +557,7 @@ if __name__ == "__main__":
     pytorch_model = BaseCoralModule(
         input_size=ds.L*dataset_Oct22.q + additional_features,
         hidden_units=(100, 50),
+        #hidden_units=(1, ),
         num_classes=dataset_Oct22.NUM_CLASSES, 
         num_datasets=dataset_Oct22.NUM_DATASETS)
     model = LightningMLP(
@@ -557,7 +565,9 @@ if __name__ == "__main__":
         learning_rate=mc.training_params["learning_rate"],
         weight_decay=mc.training_params["weight_decay"],
         dca = mc.design_matrix["dca"])
+
     model.xavier_init()
+
     
     dm = None
     if args.synthetic:
@@ -573,7 +583,7 @@ if __name__ == "__main__":
     logging.info(f"len(train_ds) : {len(train_ds)}")
 
     train_dl = DataLoader(train_ds, batch_size=args.batch_size, 
-                            num_workers=args.num_workers)
+                            num_workers=args.num_workers, shuffle=True)
     for x in train_dl: break
     logging.info(f"Batch Encoding Shape : {x['encoding'].shape}")
 
