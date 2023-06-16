@@ -92,10 +92,18 @@ python3 -c "import esm; print('esm version : ' + esm.__version__)"
 cd code
 
 #MAX_EPOCHS=1
-#MAX_EPOCHS=300
-MAX_EPOCHS=60 # where the validation set and training losess diverge
-python3 esm_model.py --max_epochs ${MAX_EPOCHS} --delete_checkpoints --top_net_type ordinal
+MAX_EPOCHS=400
+#MAX_EPOCHS=60 # where the validation set and training losess diverge
 
+#python3 esm_model.py --max_epochs ${MAX_EPOCHS} --delete_checkpoints --top_net_type ordinal
+
+
+WANDB_API_KEY=992703d31e683f05f305104a86a1c28badc777ea python esm_model.py \
+    --max_epochs ${MAX_EPOCHS} \
+    --wandb_project "esmft-sadA" --wandb_online \
+    --learning_rate 0.0001 \
+    --top_net_type ordinal \
+    --delete_checkpoints
 
 tar zcf "../training_logs_${EXT}.tar.gz" output/training_logs
 
