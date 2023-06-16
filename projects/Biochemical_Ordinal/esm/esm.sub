@@ -1,7 +1,8 @@
 universe = vanilla
 
 # the script that will be run when the job starts
-executable = run.sh $(Cluster)_$(cProcess)
+executable = run.sh 
+arguments = $(Cluster)_$(cProcess)
 
 # include the cluster id and process id that are set at runtime
 log = run_output/condor_logs/job_$(Cluster)_$(cProcess).log
