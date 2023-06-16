@@ -265,10 +265,18 @@ def main(args: argparse.Namespace, return_stuff=False):
     utils.save_args(vars(args), join(log_dir, "args.txt"), ignore=["cluster", "process"])
 
     # set up logger callbacks for training
-    loggers = shared_model.init_loggers(log_dir, my_uuid, args.wandb_online, args.wandb_project)
+    loggers = shared_model.init_loggers(log_dir, my_uuid, args.wandb_online, 
+            args.wandb_project)
     ## ** Commented out by Sameer ** ##
     ## log some config parameters for wandb to make exploring runs easier
     #log_config(loggers, args)
+    config = {"train_name": "train_cv1",
+              "val_name": "val_cv1",
+              "seed": args.seed}
+
+    wandb_logger = loggers[0]
+    wandb_logger.experiment.config.update(config, allow_val_change=True)
+
 
     # load the ESM task and datamodule
     task, dm = init_esm_task_and_dm(args)

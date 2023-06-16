@@ -586,7 +586,7 @@ def init_loggers(log_dir, my_uuid, wandb_online, wandb_project) -> list[WandbLog
         name=my_uuid,
         offline=not wandb_online,
         project=wandb_project,
-        entity="sgelman",
+        entity="romerolab1",
         settings=wandb.Settings(symlink=False)
     )
     csv_logger = CSVLogger(

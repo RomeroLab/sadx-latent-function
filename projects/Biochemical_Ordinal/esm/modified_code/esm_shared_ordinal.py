@@ -131,7 +131,7 @@ class ESMDataModule(pl.LightningDataModule):
 
         self.has_val_set = True
         
-        self.train_name = 'train'
+        self.train_name = 'train_cv1'
         self.val_name = 'val_cv1'
         self.test_name = 'test'
 
