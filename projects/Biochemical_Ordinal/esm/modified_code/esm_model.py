@@ -265,7 +265,7 @@ def main(args: argparse.Namespace, return_stuff=False):
     utils.save_args(vars(args), join(log_dir, "args.txt"), ignore=["cluster", "process"])
 
     # set up logger callbacks for training
-    loggers = shared_model.init_loggers(log_dir, my_uuid, args.wandb_online, 
+    loggers = shared_model.init_loggers(log_dir, my_uuid, args.wandb_online,
             args.wandb_project)
     ## ** Commented out by Sameer ** ##
     ## log some config parameters for wandb to make exploring runs easier

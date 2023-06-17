@@ -153,9 +153,9 @@ class ESMDataModule(pl.LightningDataModule):
 
     def get_ds(self, set_name: Optional[str]):
         df = self.train_df
-        if set_name == "test":
+        if set_name == self.test_name:
             df = self.test_df
-        elif set_name == "val":
+        elif set_name == self.val_name:
             df = self.val_df
         variants = self.get_variants(set_name)
 
@@ -170,18 +170,18 @@ class ESMDataModule(pl.LightningDataModule):
 
     def get_targets(self, set_name, *args, **kwargs):
         df = self.train_df
-        if set_name == "test":
+        if set_name == self.test_name:
             df = self.test_df
-        elif set_name == "val":
+        elif set_name == self.val_name:
             df = self.val_df
         return df.response
 
 
     def get_variants(self, set_name, *args, **kwargs):
         df = self.train_df
-        if set_name == "test":
+        if set_name == self.test_name:
             df = self.test_df
-        elif set_name == "val":
+        elif set_name == self.val_name:
             df = self.val_df
         return "s_" + df.parent + "_" + df.index.astype(str)
 
@@ -197,6 +197,7 @@ class ESMDataModule(pl.LightningDataModule):
                                          batch_size=self.batch_size,
                                          num_workers=self.num_dataloader_workers,
                                          collate_fn=ESMCollate(self.alphabet),
+                                         shuffle=True,
                                          persistent_workers=True if self.num_dataloader_workers > 0 else False)
 
 
