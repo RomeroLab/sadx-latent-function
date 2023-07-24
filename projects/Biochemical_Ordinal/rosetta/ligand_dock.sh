@@ -86,6 +86,7 @@ mkdir -p relaxed_structures # for Rosetta relax output
 mkdir -p docked_structures # for Rosetta relax output
 mkdir -p output # for output returned from chtc
 mkdir -p grid_cache_dir # for storing grid scores
+mkdir -p rmsd # for calculating rmsd 
 
 if [ -z "$NUM_STRUCTS" ]; then
     echo "Error: Number of structs $NUM_STRUCTS not specified"
@@ -95,7 +96,7 @@ fi
 echo "Copying relaxed structure and scores to output directory"
 OUTPUT_YAML=output/info.yaml
 echo "starting_struct: " ${START_STRUCT_BASE}  > ${OUTPUT_YAML}
-echo "Variant: " "$VARIANT" >> ${OUTPUT_YAML}
+echo "variant: " "$VARIANT" >> ${OUTPUT_YAML}
 
 echo "Making the mutations"
 # Make the mutations 
@@ -133,20 +134,45 @@ ROSETTA3_DB="${DATABASE_PATH}" \
     @options_dock.txt \
     -nstruct ${NUM_STRUCTS} 
 
-echo "Done for now"
-exit
+#echo "copying the best structure and scores to output directory"
+## identify and copy the best structure
+#sort -n -k2 Relax_commandline/score.sc > Relax_commandline/sorted_score.sc
+## last field of the first row in the sorted score file
+#best_struct=`awk  'NR==1{print $NF}' Relax_commandline/sorted_score.sc`
+#cp Relax_commandline/"${best_struct}.pdb" output/variant_docked.pdb
+#
+## copy the first two lines of the score file
+#head -2 Relax_commandline/score.sc > output/variant_docked_score.sc
+## copy the scores of the best structure
+#head -1 Relax_commandline/sorted_score.sc >> output/variant_docked_score.sc 
 
-echo "copying the best structure and scores to output directory"
-# identify and copy the best structure
-sort -n -k2 Relax_commandline/score.sc > Relax_commandline/sorted_score.sc
-# last field of the first row in the sorted score file
-best_struct=`awk  'NR==1{print $NF}' Relax_commandline/sorted_score.sc`
-cp Relax_commandline/"${best_struct}.pdb" output/variant_docked.pdb
+# sorting docked structures based on `interface_delta_X`
+ls docked_structures/*.pdb > list_of_docked_structures.txt
+best_struct_info=`sort -nk 48 docked_structures/score.sc | awk '{print $2, $48, $NF}' | head -1`
+IFS=" " read -r best_struct_total_energy \
+        best_struct_interface_delta_X \
+        best_struct <<< ${best_struct_info}
 
-# copy the first two lines of the score file
-head -2 Relax_commandline/score.sc > output/variant_docked_score.sc
-# copy the scores of the best structure
-head -1 Relax_commandline/sorted_score.sc >> output/variant_docked_score.sc 
+# copy best structure and all scores to output directory
+cp docked_structures/"${best_struct}.pdb" output/
+cp docked_structures/score.sc output/docked_score.sc
+
+# calculating rmsd vs energy to best structure
+sed "s|NATIVE_COMPARISON_PDB_FILE|./docked_structures/${best_struct}.pdb|g" \
+        calculate_rmsd_to_best_model.template.xml > \
+        calculate_rmsd_to_best_model.xml
+
+echo "results:" >> ${OUTPUT_YAML}
+echo "  best_struct: " ${best_struct} >> ${OUTPUT_YAML}
+echo "  best_struct_interface_delta_X: " ${best_struct_interface_delta_X} >> ${OUTPUT_YAML}
+echo "  best_struct_total_energy: " ${best_struct_total_energy} >> ${OUTPUT_YAML}
+
+ROSETTA3_DB="${DATABASE_PATH}" \
+	"${ROSETTA_SCRIPTS_BIN}" \
+    @options_calculate_rmsd_to_best_model.txt
+
+cp rmsd/rmsd_to_best_model.sc output/
+
 
 echo "tar up output directory"
 # tar the output file in the parent directory (above working directory)

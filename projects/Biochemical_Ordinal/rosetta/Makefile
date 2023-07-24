@@ -7,6 +7,7 @@ clean:
 	rm -rf working
 	rm -f inputs.tar.gz
 	rm -f logs/*
+	rm -f SadA_X*_rosetta.tar.gz
 
 
 inputs.tar.gz: *.pdb *.xml *.params options_*.txt
