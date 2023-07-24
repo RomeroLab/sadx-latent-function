@@ -81,8 +81,9 @@ echo "Making working directories"
 # Now let's move to the working directory
 cd working
 # make output directory for structures
-mkdir -p Models # for output of rosetta scripts
-mkdir -p Relax_commandline # for Rosetta relax output
+mkdir -p mutated_structures # for output of rosetta scripts
+mkdir -p relaxed_structures # for Rosetta relax output
+mkdir -p docked_structures # for Rosetta relax output
 mkdir -p output # for output returned from chtc
 mkdir -p grid_cache_dir # for storing grid scores
 
@@ -90,6 +91,11 @@ if [ -z "$NUM_STRUCTS" ]; then
     echo "Error: Number of structs $NUM_STRUCTS not specified"
     exit 1
 fi
+
+echo "Copying relaxed structure and scores to output directory"
+OUTPUT_YAML=output/info.yaml
+echo "starting_struct: " ${START_STRUCT_BASE}  > ${OUTPUT_YAML}
+echo "Variant: " "$VARIANT" >> ${OUTPUT_YAML}
 
 echo "Making the mutations"
 # Make the mutations 
@@ -99,39 +105,36 @@ ROSETTA3_DB="${DATABASE_PATH}" \
     @options_mutate.txt  \
 	-nstruct 1
 
-echo "Done for now"
 
-exit
+# we are not relaxing the structure for now
+#echo "Relaxing the mutation pdb"
+## relax the mutated file
+#ROSETTA3_DB="${DATABASE_PATH}" \
+#	"${ROSETTA_RELAX_BIN}" \
+#	-in:file:s Models/"${START_STRUCT_BASE}"_0001.pdb \
+#	-in:file:extra_res_fa NEU.params \
+#	-in:file:extra_res_fa AKG.params  \
+#	-relax:constrain_relax_to_start_coords \
+#	-relax:fast \
+#	-out:path:all Relax_commandline
+#
+#
+#echo "Copying files to output directory" 
+#cp Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
+#	output/variant_relaxed.pdb
+#mv Relax_commandline/score.sc output/variant_relaxed_score.sc
 
-echo "Relaxing the mutation pdb"
-# relax the mutated file
-ROSETTA3_DB="${DATABASE_PATH}" \
-	"${ROSETTA_RELAX_BIN}" \
-	-in:file:s Models/"${START_STRUCT_BASE}"_0001.pdb \
-	-in:file:extra_res_fa NEU.params \
-	-in:file:extra_res_fa AKG.params  \
-	-relax:constrain_relax_to_start_coords \
-	-relax:fast \
-	-out:path:all Relax_commandline
-
-echo "Copying relaxed structure and scores to output directory"
-OUTPUT_YAML=output/info.yaml
-echo "starting_struct: " ${START_STRUCT_BASE}  > ${OUTPUT_YAML}
-echo "Variant: " "$VARIANT" >> ${OUTPUT_YAML}
-
-echo "Copying files to output directory" 
-cp Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
-	output/variant_relaxed.pdb
-mv Relax_commandline/score.sc output/variant_relaxed_score.sc
 
 echo "Docking relaxed structure"
 # dock
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
-    -in:file:s Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
+    -in:file:s mutated_structures/${START_STRUCT_BASE}_0001.pdb \
     @options_dock.txt \
-#    -qsar:grid_dir grid_cache_dir \
     -nstruct ${NUM_STRUCTS} 
+
+echo "Done for now"
+exit
 
 echo "copying the best structure and scores to output directory"
 # identify and copy the best structure

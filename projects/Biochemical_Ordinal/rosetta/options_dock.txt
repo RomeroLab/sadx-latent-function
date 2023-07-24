@@ -5,12 +5,12 @@
 
 -in
 	-file
-		-s Mutant_directories/Mutants1/temp.pdb
+#		-s Mutant_directories/Mutants1/temp.pdb
 		-extra_res_fa AKG.params
 		-extra_res_fa NEU.params
 -out
 	-path
-		-all Output
+		-all docked_structures
 
 #the packing options allow Rosetta to sample additional rotamers for
 #protein sidechain angles chi 1 (ex1) and chi 2 (ex2)
@@ -29,7 +29,7 @@
 #parser:protocol locates the XML file for RosettaScripts
 
 -parser
-	-protocol dock.xml
+	-protocol SadA_mutant_dock.xml
 
 #overwrite allows Rosetta to write over previous structures and scores
 

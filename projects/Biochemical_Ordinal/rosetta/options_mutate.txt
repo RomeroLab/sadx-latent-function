@@ -10,7 +10,7 @@
 		-extra_res_fa NEU.params
 -out
 	-path
-		-all Models
+		-all mutated_structures
 
 
 #the packing options allow Rosetta to sample additional rotamers for
