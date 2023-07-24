@@ -5,12 +5,12 @@
 
 -in
 	-file
-		-s SadA_NSLeu_Corrected_3701_best_structure_0044.pdb
+#		-s SadA_NSLeu_Corrected_3701_best_structure_0044.pdb
 		-extra_res_fa AKG.params
 		-extra_res_fa NEU.params
 -out
 	-path
-		-all Mutant_directories/Mutants1
+		-all Models
 
 
 #the packing options allow Rosetta to sample additional rotamers for
@@ -30,7 +30,7 @@
 #parser:protocol locates the XML file for RosettaScripts
 
 -parser
-	-protocol tmp_mut_file.xml
+	-protocol SadA_mutate.xml
 
 #overwrite allows Rosetta to write over previous structures and scores
 -overwrite
