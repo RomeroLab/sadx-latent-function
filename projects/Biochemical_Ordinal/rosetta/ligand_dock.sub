@@ -23,7 +23,7 @@ transfer_input_files = inputs.tar.gz,\
 request_cpus = 1
 #request_memory = 4GB
 request_memory = 5GB
-request_disk = 5GB
+request_disk = 6GB
 
 # Tell HTCondor to run some instances of our job:
 queue variant from $(VARIANT_LIST_FILE)

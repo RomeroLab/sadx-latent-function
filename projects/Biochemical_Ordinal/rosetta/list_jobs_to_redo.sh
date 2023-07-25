@@ -7,5 +7,5 @@
 # Then we print out which files are unique to the original variant list
 
 comm <(sort SadA_NSLeu_Corrected_3701_best_structure_0044.single_mutants.txt) \
-     <(ls -sk SadA_*.tar.gz | awk '{if ($1 > 1000) print $2 }' | cut -d_ -f2 | sort) \
+     <(ls -sk SadA_*.tar.gz results/SadA_*.tar.gz | awk '{if ($1 > 1000) print $2 }' | cut -d_ -f2 | sort) \
      -3  
