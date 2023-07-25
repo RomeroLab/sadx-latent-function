@@ -1,3 +1,4 @@
+logs/
 working/
 inputs.tar.gz
 *.single_mutants.txt

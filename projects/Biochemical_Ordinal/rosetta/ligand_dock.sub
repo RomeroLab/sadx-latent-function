@@ -4,7 +4,7 @@ log = logs/ligand_dock_$(Cluster).log
 error = logs/ligand_dock_$(Cluster)_$(Process).err 
 output = logs/ligand_dock_$(Cluster)_$(Process).out
 
-requirements = (OpSysMajorVer >= 7) && (has_avx == true)
+requirements = (OpSysMajorVer >= 7) && (has_avx == true) && (has_avx2 == true)
 
 executable = ligand_dock.sh
 arguments = $(Process) $(START_STRUCT) $(variant) $(NSTRUCT)
@@ -21,7 +21,8 @@ transfer_input_files = inputs.tar.gz,\
 
 
 request_cpus = 1
-request_memory = 4GB
+#request_memory = 4GB
+request_memory = 5GB
 request_disk = 5GB
 
 # Tell HTCondor to run some instances of our job:
