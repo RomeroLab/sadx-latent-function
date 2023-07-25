@@ -10,6 +10,11 @@ START_STRUCT=$2
 VARIANT=$3
 NUM_STRUCTS=$4
 
+echo "PROCESS_NUM :" $PROCESS_NUM
+echo "START_STRUCT :" $START_STRUCT
+echo "VARIANT :" $VARIANT
+echo "NUM_STRUCTS :" $NUM_STRUCTS
+
 CHAIN="A"
 
 function reportError() {
@@ -104,7 +109,7 @@ ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
     -in:file:s "${START_STRUCT}" \
     @options_mutate.txt  \
-	-nstruct 1
+	-nstruct 1 >> rosetta_output.txt
 
 
 # we are not relaxing the structure for now
@@ -132,7 +137,7 @@ ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
     -in:file:s mutated_structures/${START_STRUCT_BASE}_0001.pdb \
     @options_dock.txt \
-    -nstruct ${NUM_STRUCTS} 
+    -nstruct ${NUM_STRUCTS}  >> rosetta_output.txt
 
 #echo "copying the best structure and scores to output directory"
 ## identify and copy the best structure
@@ -169,7 +174,7 @@ echo "  best_struct_total_energy: " ${best_struct_total_energy} >> ${OUTPUT_YAML
 
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
-    @options_calculate_rmsd_to_best_model.txt
+    @options_calculate_rmsd_to_best_model.txt >> rosetta_output.txt
 
 cp rmsd/rmsd_to_best_model.sc output/
 
