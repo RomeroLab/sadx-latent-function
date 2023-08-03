@@ -22,8 +22,13 @@ transfer_input_files = inputs.tar.gz,\
 
 request_cpus = 1
 #request_memory = 4GB
-request_memory = 6GB
-request_disk = 7GB
+request_memory = 10GB
+# need more disk space as we are running 5000 structures
+request_disk = 10GB
+
+
++WantFlocking = true
+#+WantGlideIn = true
 
 # Tell HTCondor to run some instances of our job:
 queue variant from $(VARIANT_LIST_FILE)

@@ -24,7 +24,7 @@
 			<ClassicGrid grid_name="classic" weight="1.0"/>
 		</SCORINGGRIDS>
 		<MOVERS>
-			<Transform name="transform" chain="X" box_size="3.0" move_distance="0" angle="0" cycles="100" repeats="1" temperature="5" />
+			<Transform name="transform" chain="X" box_size="7.0" move_distance="0.2" angle="20" cycles="500" repeats="1" temperature="5" />
 			<HighResDocker name="high_res_docker" cycles="6" repack_every_Nth="3" scorefxn="ligand_soft_rep" movemap_builder="docking"/>
 			<FinalMinimizer name="final" scorefxn="hard_rep" movemap_builder="final"/>
 			<InterfaceScoreCalculator name="add_scores" chains="X" scorefxn="hard_rep"/> 
