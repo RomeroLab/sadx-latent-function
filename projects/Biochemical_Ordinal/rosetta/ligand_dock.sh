@@ -17,6 +17,9 @@ echo "NUM_STRUCTS :" $NUM_STRUCTS
 
 CHAIN="A"
 
+
+ERROR_SMALL_TAR_GZ=11
+
 function reportError() {
   if [ $1 -ne 0 ]; then
     echo $2
@@ -182,9 +185,24 @@ cp rmsd/rmsd_to_best_model.sc output/
 echo "tar up output directory"
 # tar the output file in the parent directory (above working directory)
 # This .tar.gz file will be returned by chtc
-tar zcf "../SadA_${VARIANT}_rosetta.tar.gz" -C output .
+OUTPUT_TAR_GZ="../SadA_${VARIANT}_rosetta.tar.gz"
+tar zcf "${OUTPUT_TAR_GZ}" -C output .
 
-echo "Done!"
+RETVAL=0
+if [ -n "$(find "$OUTPUT_TAR_GZ" -prune -size +10000c)" ]; then
+    echo "OUTPUT_TAR_GZ File size is larger than 10k"
+    echo "Done!"
+else
+    echo "ERROR: OUTPUT_TAR_GZ File size is smaller than 10k"
+    echo "Sleeping for 2 minutes"
+    sleep 2m
+    RETVAL=${ERROR_SMALL_TAR_GZ}
+fi
+
+exit ${RETVAL}
+
+
+
 
 
 
