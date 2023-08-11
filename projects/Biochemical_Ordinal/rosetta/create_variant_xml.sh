@@ -22,18 +22,32 @@ read -r -d '' OUTPUT_START << 'EOF'
 
 		<SCOREFXNS>
 		</SCOREFXNS>
+		<RESIDUE_SELECTORS>
 EOF
 
 read -r -d '' OUTPUT_MIDDLE_TOP << 'EOF'
+			<Not name="rest" selector="surrounding"/>
+		</RESIDUE_SELECTORS>
+		<TASKOPERATIONS>
+			<OperateOnResidueSubset name="repack_res" selector="surrounding" >
+				<RestrictToRepackingRLT/>
+			</OperateOnResidueSubset>
+			<OperateOnResidueSubset name="no_repack" selector="rest" >
+				<PreventRepackingRLT/>
+			</OperateOnResidueSubset>
+		</TASKOPERATIONS>
 		<MOVERS>
 EOF
 
 read -r -d '' OUTPUT_MIDDLE_BOTTOM << 'EOF'
+			<FastRelax name="relax" scorefxn="REF2015" task_operations="repack_res,no_repack" min_type="lbfgs_armijo_nonmonotone">
+			</FastRelax>
 		</MOVERS>
 		<PROTOCOLS>
 EOF
 
 read -r -d '' OUTPUT_END << 'EOF'
+			<Add mover_name="relax"/>
 		</PROTOCOLS>
 
 
@@ -108,6 +122,7 @@ awk -v variant="$VARIANT" \
          sep = ","
        }
        printf output_start
+       print "\t\t\t" "<Neighborhood name=\"surrounding\" resnums=\"" joined_idxs "\" distance=\"10.0\"/>"
        printf output_middle_top
        for (i=1; i <= nvar; i++) {
          print "\t\t\t" "<MutateResidue name=\"mutant" i "\" target=\"" vidx_arr[i] chain "\" new_res=\"" vnewaa_full_arr[i] "\"/>"

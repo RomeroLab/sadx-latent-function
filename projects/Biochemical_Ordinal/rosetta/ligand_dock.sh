@@ -16,6 +16,7 @@ echo "VARIANT :" $VARIANT
 echo "NUM_STRUCTS :" $NUM_STRUCTS
 
 CHAIN="A"
+DEBUG=1
 
 
 ERROR_SMALL_TAR_GZ=11
@@ -115,30 +116,29 @@ ROSETTA3_DB="${DATABASE_PATH}" \
 	-nstruct 1 >> rosetta_output.txt
 
 
-# we are not relaxing the structure for now
 #echo "Relaxing the mutation pdb"
-## relax the mutated file
-#ROSETTA3_DB="${DATABASE_PATH}" \
-#	"${ROSETTA_RELAX_BIN}" \
-#	-in:file:s Models/"${START_STRUCT_BASE}"_0001.pdb \
-#	-in:file:extra_res_fa NEU.params \
-#	-in:file:extra_res_fa AKG.params  \
-#	-relax:constrain_relax_to_start_coords \
-#	-relax:fast \
-#	-out:path:all Relax_commandline
-#
-#
+# relax the mutated file
+ROSETTA3_DB="${DATABASE_PATH}" \
+	"${ROSETTA_RELAX_BIN}" \
+	-in:file:s mutated_structures/"${START_STRUCT_BASE}"_0001.pdb \
+	-in:file:extra_res_fa NEU.params \
+	-in:file:extra_res_fa AKG.params  \
+	-relax:constrain_relax_to_start_coords \
+	-relax:fast \
+	-out:path:all relaxed_structures
+
+
 #echo "Copying files to output directory" 
-#cp Relax_commandline/${START_STRUCT_BASE}_0001_0001.pdb \
-#	output/variant_relaxed.pdb
-#mv Relax_commandline/score.sc output/variant_relaxed_score.sc
+cp relaxed_structures/${START_STRUCT_BASE}_0001_0001.pdb \
+	output/variant_relaxed.pdb
+mv relaxed_structures/score.sc output/variant_relaxed_score.sc
 
 
 echo "Docking relaxed structure"
 # dock
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
-    -in:file:s mutated_structures/${START_STRUCT_BASE}_0001.pdb \
+    -in:file:s relaxed_structures/${START_STRUCT_BASE}_0001_0001.pdb \
     @options_dock.txt \
     -nstruct ${NUM_STRUCTS}  >> rosetta_output.txt
 
@@ -193,6 +193,7 @@ if [ -n "$(find "$OUTPUT_TAR_GZ" -prune -size +10000c)" ]; then
     echo "OUTPUT_TAR_GZ File size is larger than 10k"
     echo "Done!"
 else
+    # FIXME: Use reportError function
     echo "ERROR: OUTPUT_TAR_GZ File size is smaller than 10k"
     echo "Sleeping for 2 minutes"
     sleep 2m
