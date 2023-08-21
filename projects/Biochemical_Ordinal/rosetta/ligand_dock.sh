@@ -125,7 +125,7 @@ ROSETTA3_DB="${DATABASE_PATH}" \
 	-in:file:extra_res_fa AKG.params  \
 	-relax:constrain_relax_to_start_coords \
 	-relax:fast \
-	-out:path:all relaxed_structures
+	-out:path:all relaxed_structures >> rosetta_output.txt
 
 
 #echo "Copying files to output directory" 

@@ -26,6 +26,8 @@ request_memory = 10GB
 # need more disk space as we are running 5000 structures
 request_disk = 10GB
 
+num_retries = 5
+
 
 +WantFlocking = true
 #+WantGlideIn = true
