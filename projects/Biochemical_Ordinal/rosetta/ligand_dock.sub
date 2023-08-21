@@ -6,6 +6,9 @@ output = logs/ligand_dock_$(Cluster)_$(Process).out
 
 requirements = (OpSysMajorVer >= 7) && (has_avx == true) && (has_avx2 == true)
 
+# run outside CHTC only
+#Requirements = (OpSysMajorVer >= 7)  && (has_avx == true) && (has_avx2 == true) && (Poolname =!= "CHTC")
+
 executable = ligand_dock.sh
 arguments = $(Process) $(START_STRUCT) $(variant) $(NSTRUCT)
 
@@ -31,7 +34,7 @@ request_disk = 10GB
 
 
 +WantFlocking = true
-#+WantGlideIn = true
++WantGlideIn = true
 
 # Tell HTCondor to run some instances of our job:
 queue variant from $(VARIANT_LIST_FILE)
