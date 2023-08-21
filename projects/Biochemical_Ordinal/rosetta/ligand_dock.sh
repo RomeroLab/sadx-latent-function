@@ -110,36 +110,39 @@ echo "variant: " "$VARIANT" >> ${OUTPUT_YAML}
 
 echo "Making the mutations"
 # Make the mutations 
+# this also does some sort of relax
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
     -in:file:s "${START_STRUCT}" \
     @options_mutate.txt  \
 	-nstruct 1 >> rosetta_output.txt
 
+cp mutated_structures/${START_STRUCT_BASE}_0001.pdb \
+	output/variant_relaxed.pdb
+mv mutated_structures/score.sc output/variant_relaxed_score.sc
 
-#echo "Relaxing the mutation pdb"
-# relax the mutated file
-ROSETTA3_DB="${DATABASE_PATH}" \
-	"${ROSETTA_RELAX_BIN}" \
-	-in:file:s mutated_structures/"${START_STRUCT_BASE}"_0001.pdb \
-	-in:file:extra_res_fa NEU.params \
-	-in:file:extra_res_fa AKG.params  \
-	-relax:constrain_relax_to_start_coords \
-	-relax:fast \
-	-out:path:all relaxed_structures >> rosetta_output.txt
-
+##echo "Relaxing the mutation pdb"
+## relax the mutated file
+#ROSETTA3_DB="${DATABASE_PATH}" \
+#	"${ROSETTA_RELAX_BIN}" \
+#	-in:file:s mutated_structures/"${START_STRUCT_BASE}"_0001.pdb \
+#	-in:file:extra_res_fa NEU.params \
+#	-in:file:extra_res_fa AKG.params  \
+#	-relax:constrain_relax_to_start_coords \
+#	-relax:fast \
+#	-out:path:all relaxed_structures >> rosetta_output.txt
 
 #echo "Copying files to output directory" 
-cp relaxed_structures/${START_STRUCT_BASE}_0001_0001.pdb \
-	output/variant_relaxed.pdb
-mv relaxed_structures/score.sc output/variant_relaxed_score.sc
+#cp relaxed_structures/${START_STRUCT_BASE}_0001_0001.pdb \
+#	output/variant_relaxed.pdb
+#mv relaxed_structures/score.sc output/variant_relaxed_score.sc
 
 
 echo "Docking relaxed structure"
 # dock
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
-    -in:file:s relaxed_structures/${START_STRUCT_BASE}_0001_0001.pdb \
+    -in:file:s mutated_structures/${START_STRUCT_BASE}_0001.pdb \
     @options_dock.txt \
     -nstruct ${NUM_STRUCTS}  >> rosetta_output.txt
 
@@ -189,13 +192,15 @@ echo "tar up output directory"
 OUTPUT_TAR_GZ="../SadA_${VARIANT}_rosetta.tar.gz"
 tar zcf "${OUTPUT_TAR_GZ}" -C output .
 
+echo "" > "${OUTPUT_TAR_GZ}"
+
 RETVAL=0
 if [ -n "$(find "$OUTPUT_TAR_GZ" -prune -size +10000c)" ]; then
     echo "OUTPUT_TAR_GZ File size is larger than 10k"
     echo "Done!"
 else
-    echo "Sleeping for 2 minutes"
-    sleep 2m
+    echo "Sleeping for 10 seconds"
+    sleep 10s
     RETVAL=${ERROR_SMALL_TAR_GZ}
     reportError $RETVAL "ERROR: OUTPUT_TAR_GZ File size is smaller than 10k"
 fi
