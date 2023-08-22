@@ -197,8 +197,8 @@ if [ -n "$(find "$OUTPUT_TAR_GZ" -prune -size +10000c)" ]; then
     echo "OUTPUT_TAR_GZ File size is larger than 10k"
     echo "Done!"
 else
-    echo "Sleeping for 1 hour"
-    sleep 3600s
+    echo "Sleeping for 10 minutes"
+    sleep 600s
     echo "Archiving output and logs for analysis"
     tar zcf "${OUTPUT_LOGS_TAR_GZ}" \
             $(ls rosetta_output.txt ROSETTA_CRASH.log 2> /dev/null)
