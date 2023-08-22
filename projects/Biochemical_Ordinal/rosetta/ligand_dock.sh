@@ -56,10 +56,10 @@ else
   echo "Running on CHTC"
   # piece together database files and untar
   # this goes into a database directory and not working dir
-  cat db.tar.bz2.part* | tar -jx 
+  cat db.tar.gz.part* | tar -zx 
   
   # clean up database fragments
-  rm -f db.tar.bz2.part*
+  rm -f db.tar.gz.part*
 
 fi
 
