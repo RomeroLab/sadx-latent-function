@@ -4,7 +4,7 @@ log = logs/ligand_dock_$(Cluster).log
 error = logs/ligand_dock_$(Cluster)_$(Process).err 
 output = logs/ligand_dock_$(Cluster)_$(Process).out
 
-requirements = (OpSysMajorVer >= 7) && (has_avx == true) && (has_avx2 == true)
+requirements = (OpSysMajorVer >= 7) && (has_avx == true) && (has_avx2 == true) && (Machine =!= LastRemoteHost)
 
 # run outside CHTC only
 #Requirements = (OpSysMajorVer >= 7)  && (has_avx == true) && (has_avx2 == true) && (Poolname =!= "CHTC")
@@ -29,8 +29,10 @@ request_memory = 10GB
 # need more disk space as we are running 5000 structures
 request_disk = 10GB
 
-# This does not work
-#num_retries = 5
+max_retries = 5
+# exit code 11 is when our output is smaller than 10kB
+on_exit_remove = (ExitBySignal == False) && (ExitCode != 11)
+
 
 
 +WantFlocking = true

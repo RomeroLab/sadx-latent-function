@@ -11,7 +11,11 @@ clean:
 deepclean: clean
 	rm -f *.tar.gz
 
+deepdeepclean: deepclean
+	rm -f results/*
+
 tidy:
+	rm -f SadA_*_logs_rosetta.tar.gz
 	mv -f SadA_*_rosetta.tar.gz results/
 	rm -f logs/*.err
 	rm -f logs/*.out 
