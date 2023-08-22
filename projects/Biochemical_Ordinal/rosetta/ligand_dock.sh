@@ -67,18 +67,18 @@ fi
 tar -zxf inputs.tar.gz --directory ${WORKING_DIR}
 
 ROSETTA_SCRIPTS_BIN="${ROSETTA_PATH}/${ROSETTA_SCRIPTS_EXEC}"
-ROSETTA_RELAX_BIN="${ROSETTA_PATH}/${ROSETTA_RELAX_EXEC}"
+#ROSETTA_RELAX_BIN="${ROSETTA_PATH}/${ROSETTA_RELAX_EXEC}"
 if [ ! -f "$ROSETTA_SCRIPTS_BIN" ]; then
     echo "Error: Rosetta scripts binary $ROSETTA_SCRIPTS_BIN not found"
     exit 1
 fi
 chmod +x ${ROSETTA_SCRIPTS_BIN}
 
-if [ ! -f "$ROSETTA_RELAX_BIN" ]; then
-    echo "Error: Rosetta relax binary $ROSETTA_RELAX_BIN not found"
-    exit 1
-fi
-chmod +x ${ROSETTA_RELAX_BIN}
+#if [ ! -f "$ROSETTA_RELAX_BIN" ]; then
+#    echo "Error: Rosetta relax binary $ROSETTA_RELAX_BIN not found"
+#    exit 1
+#fi
+#chmod +x ${ROSETTA_RELAX_BIN}
 
 echo "Creating Variant XML file"
 # create the variant file to mutate

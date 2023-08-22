@@ -18,10 +18,8 @@ when_to_transfer_output = ON_EXIT
 transfer_input_files = inputs.tar.gz,\
     create_variant_xml.sh, \
     http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/rosetta_scripts.static.linuxgccrelease,\
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/relax.static.linuxgccrelease,\
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/db.tar.bz2.partaa,\
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/db.tar.bz2.partab
-
+    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/db.tar.gz.partaa,\
+    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/db.tar.gz.partab
 
 request_cpus = 1
 #request_memory = 4GB
