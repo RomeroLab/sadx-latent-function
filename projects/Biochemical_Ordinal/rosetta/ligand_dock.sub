@@ -4,7 +4,11 @@ log = logs/ligand_dock_$(Cluster).log
 error = logs/ligand_dock_$(Cluster)_$(Process).err 
 output = logs/ligand_dock_$(Cluster)_$(Process).out
 
-requirements = (OpSysMajorVer >= 7) && (has_avx == true) && (has_avx2 == true) && (Machine =!= LastRemoteHost)
+requirements = OpSysMajorVer >= 7 && \
+               has_avx == true && \
+               has_avx2 == true && \
+               Machine =!= LastRemoteHost && \
+               TARGET.UidDomain  =!= "cluster.com"
 
 # run outside CHTC only
 #Requirements = (OpSysMajorVer >= 7)  && (has_avx == true) && (has_avx2 == true) && (Poolname =!= "CHTC")
