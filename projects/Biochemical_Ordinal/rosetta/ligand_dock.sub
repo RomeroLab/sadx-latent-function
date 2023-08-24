@@ -11,7 +11,7 @@ requirements = OpSysMajorVer >= 7 && \
                TARGET.UidDomain  =!= "cluster.com"
 
 # run outside CHTC only
-#Requirements = (OpSysMajorVer >= 7)  && (has_avx == true) && (has_avx2 == true) && (Poolname =!= "CHTC")
+# && (Poolname =!= "CHTC")
 
 executable = ligand_dock.sh
 arguments = $(Process) $(START_STRUCT) $(variant) $(NSTRUCT)
@@ -21,9 +21,10 @@ when_to_transfer_output = ON_EXIT
 
 transfer_input_files = inputs.tar.gz,\
     create_variant_xml.sh, \
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/rosetta_scripts.static.linuxgccrelease,\
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/db.tar.gz.partaa,\
-    http://proxy.chtc.wisc.edu/SQUID/dcosta2/2021_38/db.tar.gz.partab
+    osdf:///chtc/staging/dcosta2/2021_38/rosetta_scripts.static.linuxgccrelease,\
+    osdf:///chtc/staging/dcosta2/2021_38/relax.static.linuxgccrelease,\
+    osdf:///chtc/staging/dcosta2/2021_38/db.tar.gz.partaa,\
+    osdf:///chtc/staging/dcosta2/2021_38/db.tar.gz.partab
 
 request_cpus = 1
 #request_memory = 4GB
