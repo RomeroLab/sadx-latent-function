@@ -74,11 +74,11 @@ if [ ! -f "$ROSETTA_SCRIPTS_BIN" ]; then
 fi
 chmod +x ${ROSETTA_SCRIPTS_BIN}
 
-if [ ! -f "$ROSETTA_RELAX_BIN" ]; then
-    echo "Error: Rosetta relax binary $ROSETTA_RELAX_BIN not found"
-    exit 1
-fi
-chmod +x ${ROSETTA_RELAX_BIN}
+#if [ ! -f "$ROSETTA_RELAX_BIN" ]; then
+#    echo "Error: Rosetta relax binary $ROSETTA_RELAX_BIN not found"
+#    exit 1
+#fi
+#chmod +x ${ROSETTA_RELAX_BIN}
 
 echo "Creating Variant XML file"
 # create the variant file to mutate
@@ -120,28 +120,28 @@ cp mutated_structures/${START_STRUCT_BASE}_0001.pdb \
 	output/variant_relaxed.pdb
 mv mutated_structures/score.sc output/variant_relaxed_score.sc
 
-#echo "Relaxing the mutation pdb"
-# relax the mutated file
-ROSETTA3_DB="${DATABASE_PATH}" \
-	"${ROSETTA_RELAX_BIN}" \
-	-in:file:s mutated_structures/"${START_STRUCT_BASE}"_0001.pdb \
-	-in:file:extra_res_fa NEU.params \
-	-in:file:extra_res_fa AKG.params  \
-	-relax:constrain_relax_to_start_coords \
-	-relax:fast \
-	-out:path:all relaxed_structures >> rosetta_output.txt
+##echo "Relaxing the mutation pdb"
+## relax the mutated file
+#ROSETTA3_DB="${DATABASE_PATH}" \
+#	"${ROSETTA_RELAX_BIN}" \
+#	-in:file:s mutated_structures/"${START_STRUCT_BASE}"_0001.pdb \
+#	-in:file:extra_res_fa NEU.params \
+#	-in:file:extra_res_fa AKG.params  \
+#	-relax:constrain_relax_to_start_coords \
+#	-relax:fast \
+#	-out:path:all relaxed_structures >> rosetta_output.txt
 
-echo "Copying files to output directory" 
-cp relaxed_structures/${START_STRUCT_BASE}_0001_0001.pdb \
-	output/variant_relaxed.pdb
-mv relaxed_structures/score.sc output/variant_relaxed_score.sc
+#echo "Copying files to output directory" 
+#cp relaxed_structures/${START_STRUCT_BASE}_0001_0001.pdb \
+#	output/variant_relaxed.pdb
+#mv relaxed_structures/score.sc output/variant_relaxed_score.sc
 
 
 echo "Docking relaxed structure"
 # dock
 ROSETTA3_DB="${DATABASE_PATH}" \
 	"${ROSETTA_SCRIPTS_BIN}" \
-    -in:file:s relaxed_structures/${START_STRUCT_BASE}_0001_0001.pdb \
+    -in:file:s mutated_structures/${START_STRUCT_BASE}_0001.pdb \
     @options_dock.txt \
     -nstruct ${NUM_STRUCTS}  >> rosetta_output.txt
 

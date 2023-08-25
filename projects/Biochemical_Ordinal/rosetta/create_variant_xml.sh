@@ -122,7 +122,7 @@ awk -v variant="$VARIANT" \
          sep = ","
        }
        printf output_start
-       print "\t\t\t" "<Neighborhood name=\"surrounding\" resnums=\"" joined_idxs "\" distance=\"100.0\"/>"
+       print "\t\t\t" "<Neighborhood name=\"surrounding\" resnums=\"" joined_idxs "\" distance=\"10.0\"/>"
        printf output_middle_top
        for (i=1; i <= nvar; i++) {
          print "\t\t\t" "<MutateResidue name=\"mutant" i "\" target=\"" vidx_arr[i] chain "\" new_res=\"" vnewaa_full_arr[i] "\"/>"
