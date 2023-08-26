@@ -1,4 +1,4 @@
-upload_tag="andres_temp_5_onerelax1000_rep_1"
+upload_tag="andres_temp_5_onerelax200_rep_1"
 smbclient -k //research.drive.wisc.edu/promero2 <<SMBCLIENTCOMMANDS
 prompt
 cd General/Sameer/SadA_azidation/rosetta/

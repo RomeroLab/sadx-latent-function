@@ -1,2 +1,3 @@
 *.fa.gz
+continous_release_output.txt
 esm/wandb

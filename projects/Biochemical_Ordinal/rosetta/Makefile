@@ -45,7 +45,7 @@ submit_andres: inputs.tar.gz
 	condor_submit \
 		START_STRUCT=SadA_NSLeu_Corrected_3701_best_structure_0044.pdb \
 		VARIANT_LIST_FILE=SadA_NSLeu_Corrected_3701_best_structure_0044.single_mutants.txt\
-		NSTRUCT=1000 \
+		NSTRUCT=200 \
 		ligand_dock.sub
 
 
