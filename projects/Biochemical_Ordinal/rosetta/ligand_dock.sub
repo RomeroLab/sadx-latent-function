@@ -8,7 +8,8 @@ requirements = OpSysMajorVer >= 7 && \
                has_avx == true && \
                has_avx2 == true && \
                Machine =!= LastRemoteHost && \
-               TARGET.UidDomain  =!= "cluster.com"
+               (GlideIn_Site != "VU-AUGIE")
+
 
 # run outside CHTC only
 # && (Poolname =!= "CHTC")
@@ -22,9 +23,10 @@ when_to_transfer_output = ON_EXIT
 transfer_input_files = inputs.tar.gz,\
     create_variant_xml.sh, \
     osdf:///chtc/staging/dcosta2/2021_38/rosetta_scripts.static.linuxgccrelease,\
-    osdf:///chtc/staging/dcosta2/2021_38/relax.static.linuxgccrelease,\
     osdf:///chtc/staging/dcosta2/2021_38/db.tar.gz.partaa,\
     osdf:///chtc/staging/dcosta2/2021_38/db.tar.gz.partab
+
+#    osdf:///chtc/staging/dcosta2/2021_38/relax.static.linuxgccrelease,\
 
 request_cpus = 1
 #request_memory = 4GB
