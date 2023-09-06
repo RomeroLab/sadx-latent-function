@@ -33,5 +33,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     wt_seq = wt_seq_from_pdb(args.pdb)
+    # let's include the WT sequence as the first variant
+    # This is useful to compare other energies to
+    print(f"X1{wt_seq[0]}")
     for variant in generate_single_mutants(wt_seq):
         print(variant)

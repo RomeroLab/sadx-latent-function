@@ -21,7 +21,6 @@ should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
 transfer_input_files = inputs.tar.gz,\
-    create_variant_xml.sh, \
     osdf:///chtc/staging/dcosta2/2021_38/rosetta_scripts.static.linuxgccrelease,\
     osdf:///chtc/staging/dcosta2/2021_38/db.tar.gz.partaa,\
     osdf:///chtc/staging/dcosta2/2021_38/db.tar.gz.partab

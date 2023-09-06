@@ -3,3 +3,4 @@ working*/
 inputs.tar.gz
 *.single_mutants.txt
 *_rosetta.tar.gz
+test.xml

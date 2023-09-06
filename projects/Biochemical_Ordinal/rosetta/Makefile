@@ -21,8 +21,8 @@ tidy:
 	rm -f logs/*.out 
 
 
-inputs.tar.gz: *.pdb *.xml *.params options_*.txt
-		tar zcf inputs.tar.gz *.pdb *.xml *.params options_*.txt
+inputs.tar.gz: *.pdb *.xml *.params options_*.txt create_variant_xml.sh
+		tar zcf inputs.tar.gz *.pdb *.xml *.params options_*.txt create_variant_xml.sh
 
 test_gs: inputs.tar.gz
 		./ligand_dock.sh 0  SadA_NSLeu_Corrected_3701_best_structure_0044.pdb "X1A" 10

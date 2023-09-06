@@ -88,7 +88,7 @@ reportError $? "Create Variant XML script failed"
 
 echo "Making working directories"
 # Now let's move to the working directory
-cd working
+cd ${WORKING_DIR}
 # make output directory for structures
 mkdir -p mutated_structures # for output of rosetta scripts
 mkdir -p relaxed_structures # for Rosetta relax output
