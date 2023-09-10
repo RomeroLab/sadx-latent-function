@@ -63,6 +63,12 @@ if ! [ -x "$(command -v rm)" ]; then
   sleep 600s
   exit $ERROR_SMALL_TAR_GZ
 fi
+if ! [ -x "$(command -v chmod)" ]; then
+  echo 'Error: chmod is not installed.' 
+  sleep 600s
+  exit $ERROR_SMALL_TAR_GZ
+fi
+
 
 
 
