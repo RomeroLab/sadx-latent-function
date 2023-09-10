@@ -189,8 +189,8 @@ cp rmsd/rmsd_to_best_model.sc output/
 echo "tar up output directory"
 # tar the output file in the parent directory (above working directory)
 # This .tar.gz file will be returned by chtc
-OUTPUT_TAR_GZ="../SadA_${VARIANT}_rosetta.tar.gz"
-OUTPUT_LOGS_TAR_GZ="../SadA_${VARIANT}_logs_rosetta.tar.gz"
+OUTPUT_TAR_GZ="../${START_STRUCT_BASE}_${VARIANT}_rosetta.tar.gz"
+OUTPUT_LOGS_TAR_GZ="../${START_STRUCT_BASE}_${VARIANT}_logs_rosetta.tar.gz"
 tar zcf "${OUTPUT_TAR_GZ}" -C output .
 
 RETVAL=0

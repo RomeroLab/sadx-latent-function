@@ -22,7 +22,12 @@ tidy:
 
 
 inputs.tar.gz: *.pdb *.xml *.params options_*.txt create_variant_xml.sh
-		tar zcf inputs.tar.gz *.pdb *.xml *.params options_*.txt create_variant_xml.sh
+		cp prepare_parents/1VH.pdb .
+		cp prepare_parents/2L.pdb .
+		cp prepare_parents/3VRL.pdb .
+		tar zcf inputs.tar.gz \
+				*.pdb *.xml *.params options_*.txt create_variant_xml.sh
+		rm -f 1VH.pdb 2L.pdb 3VRL.pdb
 
 test_gs: inputs.tar.gz
 		./ligand_dock.sh 0  SadA_NSLeu_Corrected_3701_best_structure_0044.pdb "X1A" 10
@@ -49,11 +54,13 @@ submit_andres: inputs.tar.gz
 		ligand_dock.sub
 
 submit_screening_test: inputs.tar.gz
+	cp prepare_parents/1VH.pdb .
 	condor_submit \
-		START_STRUCT=prepare_parents/1VH.pdb \
+		START_STRUCT=1VH.pdb \
 		VARIANT_LIST_FILE=screening_data/test_1VH.txt \
 		NSTRUCT=10 \
 		ligand_dock.sub
+	rm 1VH.pdb
 
 submit_screening_data: inputs.tar.gz
 	condor_submit \
