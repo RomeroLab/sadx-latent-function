@@ -48,5 +48,29 @@ submit_andres: inputs.tar.gz
 		NSTRUCT=40 \
 		ligand_dock.sub
 
+submit_screening_test: inputs.tar.gz
+	condor_submit \
+		START_STRUCT=prepare_parents/1VH.pdb \
+		VARIANT_LIST_FILE=screening_data/test_1VH.txt \
+		NSTRUCT=10 \
+		ligand_dock.sub
+
+submit_screening_data: inputs.tar.gz
+	condor_submit \
+		START_STRUCT=prepare_parents/1VH.pdb \
+		VARIANT_LIST_FILE=screening_data/ordinal_Oct22_sequences_variants_for_1VH.txt  \
+		NSTRUCT=1000 \
+		ligand_dock.sub
+	condor_submit \
+		START_STRUCT=prepare_parents/2L.pdb \
+		VARIANT_LIST_FILE=screening_data/ordinal_Oct22_sequences_variants_for_2L.txt \
+		NSTRUCT=1000 \
+		ligand_dock.sub
+	condor_submit \
+		START_STRUCT= prepare_parents/3VRL.pdb \
+		VARIANT_LIST_FILE=screening_data/ordinal_Oct22_sequences_variants_for_3VRL.txt \
+		NSTRUCT=1000 \
+		ligand_dock.sub
+
 
 

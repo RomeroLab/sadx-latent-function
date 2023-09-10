@@ -80,12 +80,6 @@ chmod +x ${ROSETTA_SCRIPTS_BIN}
 #fi
 #chmod +x ${ROSETTA_RELAX_BIN}
 
-echo "Creating Variant XML file"
-# create the variant file to mutate
-chmod +x create_variant_xml.sh
-./create_variant_xml.sh "$VARIANT" "$CHAIN" > "${WORKING_DIR}"/SadA_mutate.xml
-reportError $? "Create Variant XML script failed"
-
 echo "Making working directories"
 # Now let's move to the working directory
 cd ${WORKING_DIR}
@@ -101,6 +95,13 @@ if [ -z "$NUM_STRUCTS" ]; then
     echo "Error: Number of structs $NUM_STRUCTS not specified"
     exit 1
 fi
+
+echo "Creating Variant XML file"
+# create the variant file to mutate
+chmod +x create_variant_xml.sh
+./create_variant_xml.sh "$VARIANT" "$CHAIN" > SadA_mutate.xml
+reportError $? "Create Variant XML script failed"
+
 
 echo "Copying relaxed structure and scores to output directory"
 OUTPUT_YAML=output/info.yaml
