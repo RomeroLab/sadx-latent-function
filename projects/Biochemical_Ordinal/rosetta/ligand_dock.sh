@@ -42,6 +42,30 @@ GROUP_SERVER_NAME="biocas"
 
 #CHTC_CLEANUP=
 
+
+if ! [ -x "$(command -v mkdir)" ]; then
+  echo 'Error: mkdir is not installed.' 
+  sleep 600s
+  exit $ERROR_SMALL_TAR_GZ
+fi
+if ! [ -x "$(command -v tar)" ]; then
+  echo 'Error: tar is not installed.' 
+  sleep 600s
+  exit $ERROR_SMALL_TAR_GZ
+fi
+if ! [ -x "$(command -v cp)" ]; then
+  echo 'Error: cp is not installed.' 
+  sleep 600s
+  exit $ERROR_SMALL_TAR_GZ
+fi
+if ! [ -x "$(command -v rm)" ]; then
+  echo 'Error: rm is not installed.' 
+  sleep 600s
+  exit $ERROR_SMALL_TAR_GZ
+fi
+
+
+
 mkdir -p ${WORKING_DIR}
 
 if [[ $(uname -n)  == ${GROUP_SERVER_NAME}* ]] ; 
@@ -62,6 +86,21 @@ else
   rm -f db.tar.gz.part*
 
 fi
+
+if ! [ -d ${DATABASE_PATH} ]; then
+  echo 'Database path does not exist' 
+  sleep 600s
+  exit $ERROR_SMALL_TAR_GZ
+fi
+
+if ! [ -d ${DATABASE_PATH}/chemical ]; then
+  echo 'Chemical subdirectory of Database path does not exist' 
+  sleep 600s
+  exit $ERROR_SMALL_TAR_GZ
+fi
+
+
+
 
 #copy all input files to working directory
 tar -zxf inputs.tar.gz --directory ${WORKING_DIR}
