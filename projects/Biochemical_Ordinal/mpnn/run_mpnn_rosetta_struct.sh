@@ -6,6 +6,8 @@ output_dir="outputs"
 
 mkdir -p $output_dir
 
+rm -f $output_dir/score_only/*.npz
+
 
 mpnn_path="./ProteinMPNN"
 
@@ -22,9 +24,13 @@ python ${mpnn_path}/protein_mpnn_run.py \
 	--pdb_path $path_to_PDB \
 	--pdb_path_chains "$chains_to_design" \
         --out_folder $output_dir \
-	--num_seq_per_target 5 \
+	--num_seq_per_target 10 \
         --sampling_temp "0.1" \
 	--score_only 1 \
         --seed 13 \
-        --batch_size 1
+        --batch_size 1 | tee $output_dir/mpnn_rosetta_struct_output.txt
+
+grep "Score for" $output_dir/mpnn_rosetta_struct_output.txt \
+	| awk '{print $3 ",", $7, $9}' | sed 's/,$//' \
+	> $output_dir/mpnn_rosetta_struct_output_parsed.txt
 
