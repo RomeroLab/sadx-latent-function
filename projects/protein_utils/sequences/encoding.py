@@ -107,9 +107,6 @@ class NumAlphabetEncoder:
         return np.array([self.alpha_to_int_dict.get(a, replace_unknown_char_int)
                                 for a in s], dtype=np.uint8)
 
-
-
-
     def np_to_string(self, arr):
         """ Convert string to numpy array using encoder
             >>> na = NumAlphabetEncoder(alphabet="ACTG")
