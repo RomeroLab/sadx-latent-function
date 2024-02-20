@@ -94,6 +94,22 @@ class NumAlphabetEncoder:
         """
         return np.array([self.alpha_to_int_dict[a] for a in s], dtype=np.uint8)
 
+    def safe_string_to_np(self, s, replace_unknown_char_with="-"):
+        """ Convert string to numpy array using encoder
+            >>> na = NumAlphabetEncoder(alphabet="ACTG-")
+            >>> na.safe_string_to_np("GGCXACTCA")
+            array([3, 3, 1, 4, 0, 1, 2, 1, 0], dtype=uint8)
+        """
+        if replace_unknown_char_with not in self.alpha_to_int_dict:
+            raise ValueError("Replacement character not in alphabet."
+                    f" Got : {replace_unknown_char_with}")
+        replace_unknown_char_int = self.alpha_to_int_dict[replace_unknown_char_with]
+        return np.array([self.alpha_to_int_dict.get(a, replace_unknown_char_int)
+                                for a in s], dtype=np.uint8)
+
+
+
+
     def np_to_string(self, arr):
         """ Convert string to numpy array using encoder
             >>> na = NumAlphabetEncoder(alphabet="ACTG")
