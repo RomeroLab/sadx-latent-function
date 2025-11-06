@@ -4,3 +4,4 @@ esm/wandb
 # macOS system files
 .DS_Store
 **/.DS_Store
+.idea
