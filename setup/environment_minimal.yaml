@@ -1,0 +1,20 @@
+name: sadA
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - biopython
+  - python=3.9
+  - pandas
+  - numpy
+  - matplotlib
+  - scikit-learn
+  - tqdm
+  - conda-forge::seaborn
+  - torchvision
+  - pytorch::pytorch
+  - torchaudio
+  - tabulate
+  - torchmetrics
+  - lightning
+  - jupyter
