@@ -1,0 +1,11 @@
+.bash_history
+.lesshst
+.viminfo
+output
+test.out.txt
+test.sto
+uniref100_small.fasta
+MAACR_dom_AHR.fasta
+MAACR_dom_ATR.fasta
+test_sfetch_ids.fasta.gz
+hmmer_MAACR_scored_seqs.ids.txt
