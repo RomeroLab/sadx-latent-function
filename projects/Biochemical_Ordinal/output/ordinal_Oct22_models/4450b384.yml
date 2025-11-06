@@ -1,9 +1,0 @@
-design_matrix:
-  dca: false
-  encoding: one-hot
-  intercept: true
-  multilibrary: false
-model_name: SklearnRidgeClassifier
-model_params: {}
-target: binary
-uuid: 4450b384
