@@ -1,0 +1,21 @@
+dataset_params:
+  test_name: test
+  train_name: train
+  val_name: val_cv1
+design_matrix:
+  dca: false
+  encoding: esmft
+  intercept: false
+  multilibrary: true
+model_name: ESMFT
+model_params:
+  lambda_dca: 0.0
+  lambda_h: 0.0
+target: multiclass
+training_params:
+  batch_size: 0
+  learning_rate: 0.001
+  num_epochs: 60
+  num_workers: 4
+  weight_decay: 0
+uuid: esmft

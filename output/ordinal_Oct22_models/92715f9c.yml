@@ -1,0 +1,21 @@
+dataset_params:
+  test_name: test
+  train_name: all
+  val_name: val_cv1
+design_matrix:
+  dca: true
+  encoding: one-hot
+  intercept: false
+  multilibrary: true
+model_name: MLPLightning
+model_params:
+  lambda_dca: 1.0e-08
+  lambda_h: 0.0001
+target: multiclass
+training_params:
+  batch_size: 32
+  learning_rate: 0.0003
+  num_epochs: 25
+  num_workers: 4
+  weight_decay: 1.0e-06
+uuid: 92715f9c
