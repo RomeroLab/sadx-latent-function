@@ -1,0 +1,29 @@
+models:
+  - label: "MLP-A"
+    uuid: "35804fd8"
+  - label: "MLP-B"
+    uuid: "140d9f93"
+  - label: "MLP-C"
+    uuid: "5a7103a1"
+  - label: "MLP"
+    uuid: "8071c33a"
+  - label: "Linear"
+    uuid: "9a10c5e1"
+  - label: "Linear (no intercept)"
+    uuid: "6d97d935"
+  - label: "Ridge"
+    uuid: "890b899b"
+  - label: "Ridge (no intercept)"
+    uuid: "07df498c"
+
+baselines:
+  - label: "Always Dead"
+    value: 0
+  - label: "Always Low"
+    value: 1
+
+paths:
+  data_csv: "output/ordinal_Oct22_sequences_with_dca_score.csv"
+  test_indices: "output/ordinal_Oct22_sequences_with_dca_score.test.txt"
+  models_dir: "output/ordinal_Oct22_models"
+  output_base_dir: "output/model_evals_analysis"

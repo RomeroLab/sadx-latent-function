@@ -53,22 +53,22 @@ Activity labels were assigned relative to each parent library, meaning the thres
 
 All models draw from the same set of CV splits defined in the dataset. The full dataset is split into train (85%) and test (15%). The train split is further divided into 5 CV folds, each consisting of a train_cv subset (~70% of total) and a val_cv subset (~15% of total).
 
-Sklearn and PyTorch models use these splits differently. Sklearn models (`LogisticRegressionCV`, `RidgeClassifierCV`) internally iterate over all 5 folds to select the best regularization hyperparameter, then refit on the full train split. PyTorch models only use a single fold (val_cv1) for monitoring validation loss during training, with no automatic hyperparameter selection across folds. Additionally, the final PyTorch model (6eeae50e) trains on `all` (the entire dataset including the test set), while sklearn models always train on the `train` split only.
+Sklearn and PyTorch models use these splits differently but draw from the **same predefined folds**. The dataset object implements sklearn's CV splitter interface (`split()` and `get_n_splits()`), so when passed as `cv=ds` to `LogisticRegressionCV`/`RidgeClassifierCV`, sklearn internally iterates over the same 5 folds to select the best regularization hyperparameter, then refits on the full train split. PyTorch models only use a single fold (val_cv1) for monitoring validation loss during training, with no automatic hyperparameter selection across folds. Additionally, the final PyTorch model (6eeae50e) trains on `all` (the entire dataset including the test set), while sklearn models always train on the `train` split only.
 
 ## MLPLightning (CORAL Neural Network)
 
 All MLPLightning models use the `LightningMLP` code path, which wraps a `BaseCoralModule`. Note that λ_h and λ_dca are recorded in the config but **not used** in the `LightningMLP` training loop — regularization is provided only by dropout and optimizer weight decay. Hidden layer sizes (100, 50), dropout (0.2), and batch size (32) are constant across all runs.
 
-| UUID | Train Set | Val Set | Test Set | Target | Epochs | Learning Rate | Weight Decay | DCA | Multilibrary |
-|------|-----------|---------|----------|--------|--------|---------------|--------------|-----|--------------|
-| 35804fd8 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | no | no |
-| 140d9f93 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | yes | no |
-| 5a7103a1 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | yes | yes |
-| 8071c33a | train_cv1 | val_cv1 | test | multiclass | 400 | 3e-4 | 1e-6 | yes | yes |
-| 32cc250e | all | val_cv1 | test | multiclass | 1 | 3e-4 | 1e-6 | yes | yes |
-| 7b976172 | all | val_cv1 | test | multiclass | 5 | 3e-4 | 1e-6 | yes | yes |
-| 92715f9c | all | val_cv1 | test | multiclass | 25 | 3e-4 | 1e-6 | yes | yes |
-| **6eeae50e** | **all** | **val_cv1** | **test** | **multiclass** | **400** | **3e-4** | **1e-6** | **yes** | **yes** |
+| Label           | UUID | Train Set | Val Set | Test Set | Target | Epochs | Learning Rate | Weight Decay | DCA | Multilibrary |
+|-----------------|------|-----------|---------|----------|--------|--------|---------------|--------------|-----|--------------|
+| MLP-A           | 35804fd8 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | no | no |
+| MLP-B           | 140d9f93 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | yes | no |
+| MLP-C           | 5a7103a1 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | yes | yes |
+| MLP             | 8071c33a | train_cv1 | val_cv1 | test | multiclass | 400 | 3e-4 | 1e-6 | yes | yes |
+| MLP (epochs 1)  | 32cc250e | all | val_cv1 | test | multiclass | 1 | 3e-4 | 1e-6 | yes | yes |
+| MLP (epochs 5)  | 7b976172 | all | val_cv1 | test | multiclass | 5 | 3e-4 | 1e-6 | yes | yes |
+| MLP (epochs 25) | 92715f9c | all | val_cv1 | test | multiclass | 25 | 3e-4 | 1e-6 | yes | yes |
+| **MLP**         | **6eeae50e** | **all** | **val_cv1** | **test** | **multiclass** | **400** | **3e-4** | **1e-6** | **yes** | **yes** |
 
 All MLPLightning runs produce loss curves (`.losses.png`), predictions (`.preds.txt`), and probabilities (`.probs.txt`).
 
@@ -76,15 +76,15 @@ All MLPLightning runs produce loss curves (`.losses.png`), predictions (`.preds.
 
 Sklearn models are run via `model_sklearn_Oct22.py`. They do not produce loss curves.
 
-| UUID | Model | Target | Train Set | CV | Test Set | Intercept | DCA | Multilibrary |
-|------|-------|--------|-----------|-----|----------|-----------|-----|--------------|
-| 6d97d935 | LogisticRegression | multiclass | train | 5-fold | test | no | no | no |
-| 9a10c5e1 | LogisticRegression | multiclass | train | 5-fold | test | yes | no | no |
-| ae68d863 | LogisticRegression | binary | train | 5-fold | test | no | no | no |
-| cfeb8a05 | LogisticRegression | binary | train | 5-fold | test | yes | no | no |
-| 07df498c | RidgeClassifier | multiclass | train | 5-fold | test | no | no | no |
-| 890b899b | RidgeClassifier | multiclass | train | 5-fold | test | yes | no | no |
-| 049830f8 | RidgeClassifier | binary | train | 5-fold | test | no | no | no |
-| 4450b384 | RidgeClassifier | binary | train | 5-fold | test | yes | no | no |
+| Label | UUID | Model | Target | Train Set | Internal CV (same 5 folds as above) | Test Set | Intercept | DCA | Multilibrary |
+|-------|------|-------|--------|-----------|--------------------------------------|----------|-----------|-----|--------------|
+| Linear (no intercept) | 6d97d935 | LogisticRegression | multiclass | train | 5-fold | test | no | no | no |
+| Linear | 9a10c5e1 | LogisticRegression | multiclass | train | 5-fold | test | yes | no | no |
+| Linear-bin (no intercept) | ae68d863 | LogisticRegression | binary | train | 5-fold | test | no | no | no |
+| Linear-bin | cfeb8a05 | LogisticRegression | binary | train | 5-fold | test | yes | no | no |
+| Ridge (no intercept) | 07df498c | RidgeClassifier | multiclass | train | 5-fold | test | no | no | no |
+| Ridge | 890b899b | RidgeClassifier | multiclass | train | 5-fold | test | yes | no | no |
+| Ridge-bin (no intercept) | 049830f8 | RidgeClassifier | binary | train | 5-fold | test | no | no | no |
+| Ridge-bin | 4450b384 | RidgeClassifier | binary | train | 5-fold | test | yes | no | no |
 
 All sklearn models are trained on the train split and evaluated on the test split. Sklearn uses all 5 CV folds internally for hyperparameter selection (see Cross Validation section above). The sklearn configs do not contain `dataset_params` as the train/test split is hardcoded in the script. They produce predictions (`.preds.txt`) and probabilities (`.probs.txt`) but no loss curves.
