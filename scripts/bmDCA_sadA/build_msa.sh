@@ -25,12 +25,12 @@ jackhmmer -A ${sto_filename} \
         -u -o ${afa_filename} afa ${sto_filename}
 
 python3 \
-        ~/VAEs/source/make_dataset/jackhmmer_aligned_msa_filter.py \
+        jackhmmer_aligned_msa_filter.py \
         -i ${afa_filename} \
         -q ${fasta_filename} \
         -o ${clean_filename}
 
-python3 ~/VAEs/source/reweighting_tools.py \
+python3 reweighting_tools.py \
         -i ${clean_filename} \
         -o ${weights_filename}
 
