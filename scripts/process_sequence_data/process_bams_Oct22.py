@@ -15,11 +15,23 @@ import seaborn as sns
 
 
 # the aligned bams are here (after processing with pbmm2)
-samples_file=pathlib.Path("../data/2D/sample_info.csv")
-data_dir = pathlib.Path(f"../data/scratch/Oct22_2D")
+samples_file=pathlib.Path("../data/scratch/r64120_20221013_213137/3_C01/00Samples")
+data_dir = pathlib.Path(f"../data/scratch/Oct22")
+
+# This is SadX without the MBP part (the OG wild-type)
+SAD_WT_DNA = Bio.SeqIO.read("../data/SadA D157G.fasta", format="fasta").seq
+SAD_WT_AA = SAD_WT_DNA.translate()
 
 # Parents in each round (DNA sequences)
-PARENT_2D_DNA = Bio.SeqIO.read("../data/2D/2D.fasta", format="fasta").seq
+PARENT_1VH_DNA = Bio.SeqIO.read("../data/1-VH.fasta", format="fasta").seq
+PARENT_2L_DNA = Bio.SeqIO.read("../data/2-L.fasta", format="fasta").seq
+PARENT_3VRL_DNA = Bio.SeqIO.read("../data/3-VRL.fasta", format="fasta").seq
+
+parent_d = {
+        "1VH":PARENT_1VH_DNA,
+        "2L":PARENT_2L_DNA,
+        "3VRL":PARENT_3VRL_DNA
+        }
 
 # where we expect the parent DNA sequences to align to each read
 # 
@@ -49,11 +61,26 @@ def shorten_seq(s, wt):
     return ret
     
 
+num_samples_placed_d = {
+        "1VH_H":4,
+        "1VH_P":2,
+        "1VH_L":349,
+        "1VH_N":454,
+        "2L_H":29,
+        "2L_P":52,
+        "2L_L":532,
+        "2L_N":287,
+        "3VRL_H":81,
+        "3VRL_P":222,
+        "3VRL_L":266,
+        "3VRL_N":330 
+}
+
 if __name__ == "__main__":
     TESTING = False
 
-    output_dir = pathlib.Path("../data/scratch/Oct22_2D")
-    samples = pd.read_csv(samples_file)
+    output_dir = pathlib.Path("../data/scratch/Oct22")
+    samples = pd.read_csv(samples_file, sep="\t", skiprows=1)
 
     # write out sample counts to this file
     samples_counts = output_dir / "Samples.csv"
@@ -63,15 +90,14 @@ if __name__ == "__main__":
               file=fh_out)
  
 
-    for b_idx, bin_name in enumerate(samples.bin_name):
-        barcode = bin_name
-        bio_sample = samples.iloc[b_idx].category
-
+    for b_idx, barcode in enumerate(samples.Barcode):
         bamfile = data_dir / f"{barcode}.bam"
 
-        print(f"Processing : {bamfile}, {bin_name}")
+        bio_sample = samples.Bio_Sample[b_idx]
+        parent = bio_sample[:bio_sample.find("_")]
+        print(f"Processing : {bamfile}, {bio_sample} {parent}")
 
-        wt_dna = PARENT_2D_DNA
+        wt_dna = parent_d[parent]
         wt = wt_dna.translate()
 
         keep_seqs = []
@@ -134,7 +160,7 @@ if __name__ == "__main__":
                     columns=["ss_dna", "dna_dist", "ss_aa", "aa_dist",
                              "ref_dist"])     
         keep_seqs.to_csv(output_dir / f"{barcode}.tsv", sep="\t", index=False)
-        num_samples_placed = samples.iloc[b_idx].num_samples
+        num_samples_placed = num_samples_placed_d[bio_sample]
         with open(samples_counts, "a") as fh_out:
             print(f"{barcode},{bio_sample},{num_samples_placed},"
                   f"{i},{len(keep_seqs)},{align_filter_counter},"
