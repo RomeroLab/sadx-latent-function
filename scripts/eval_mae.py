@@ -1,12 +1,12 @@
 """
-Evaluate models on the test set using Mean Absolute Error (MAE).
+Evaluate models on the test set using MAE, Accuracy, and AUC-OVO.
 
 Reads model configurations directly from their yaml files rather than
-hardcoding values. Produces a two-panel figure: a summary table and
-a bar chart of MAE performance.
+hardcoding values. Produces a four-panel figure: a summary table,
+and bar charts for MAE, Accuracy, and AUC (One-vs-One).
 
 Usage:
-    python eval_mae.py eval_config.yml
+    python eval_metrics.py eval_config.yml
 """
 
 import sys
@@ -20,11 +20,12 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import yaml
+from sklearn.metrics import accuracy_score, mean_absolute_error, roc_auc_score
 
 
 def setup_logging(output_dir):
     """Configure logging to both terminal and file."""
-    logger = logging.getLogger("eval_mae")
+    logger = logging.getLogger("eval_metrics")
     logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter("%(asctime)s — %(message)s",
@@ -34,7 +35,7 @@ def setup_logging(output_dir):
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
-    log_file = output_dir / "eval_mae.log"
+    log_file = output_dir / "eval_metrics.log"
     file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -67,15 +68,35 @@ def load_predictions(models_dir, uuid):
     return preds.astype(int)
 
 
+def load_probabilities(models_dir, uuid):
+    """Load probability matrix from a probs.txt file.
+
+    Returns an (n_samples, n_classes) array.
+    """
+    probs_file = pathlib.Path(models_dir) / f"{uuid}.probs.txt"
+    probs = np.loadtxt(probs_file)
+    return probs
+
+
+def load_roc_labels(data_csv, roc_indices_file):
+    """Load true labels for the ROC/AUC subset.
+
+    If a separate roc_indices file is specified in the config, use it;
+    otherwise this is identical to load_true_labels.
+    """
+    df = pd.read_csv(data_csv)
+    category_map = {'N': 0, 'L': 1, 'P': 2, 'H': 3}
+    df["category_num"] = df["category"].map(category_map)
+    roc_indices = np.loadtxt(roc_indices_file, dtype=int)
+    y_roc = df.iloc[roc_indices]["category_num"].to_numpy()
+    return y_roc
+
+
 def load_model_yaml(models_dir, uuid):
     """Load a model's yaml config file."""
     yml_file = pathlib.Path(models_dir) / f"{uuid}.yml"
     with open(yml_file, "r") as f:
         return yaml.safe_load(f)
-
-
-def compute_mae(y_true, y_pred):
-    return np.mean(np.abs(y_true - y_pred))
 
 
 def bool_to_yesno(val):
@@ -121,6 +142,75 @@ def parse_model_properties(model_yaml, display_names):
     return props
 
 
+def get_color(label):
+    """Assign a bar color based on model label."""
+    if label.startswith("Always"):
+        return "#BDC3C7"
+    elif label == "MLP":
+        return "#2471A3"
+    elif label.startswith("MLP"):
+        return "#5DADE2"
+    elif label.startswith("Linear"):
+        return "#DC7633"
+    elif label.startswith("Ridge"):
+        return "#27AE60"
+    return "#95A5A6"
+
+
+def draw_bar_chart(ax, labels, values, selected_labels, *,
+                   xlabel, title, fmt=".4f", higher_is_better=False):
+    """Draw a horizontal bar chart on the given axes.
+
+    Parameters
+    ----------
+    higher_is_better : bool
+        If True the chart subtitle says "(higher is better)" and bars are
+        sorted descending; otherwise "(lower is better)" and ascending.
+    """
+    # sort
+    paired = list(zip(labels, values))
+    paired.sort(key=lambda x: x[1], reverse=higher_is_better)
+    labels_sorted = [p[0] for p in paired]
+    values_sorted = [p[1] for p in paired]
+
+    colors = [get_color(l) for l in labels_sorted]
+
+    bars = ax.barh(range(len(labels_sorted)), values_sorted,
+                   color=colors, edgecolor="#2C3E50", linewidth=0.8,
+                   height=0.7)
+    ax.set_yticks(range(len(labels_sorted)))
+    ax.set_yticklabels(labels_sorted, fontsize=18)
+    ax.set_xlabel(xlabel, fontsize=20)
+
+    direction = "higher is better" if higher_is_better else "lower is better"
+    ax.set_title(f"{title} ({direction})",
+                 fontsize=22, fontweight="bold", pad=25)
+    ax.tick_params(axis='x', labelsize=16)
+    ax.invert_yaxis()
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    # highlight selected models
+    for i, label in enumerate(labels_sorted):
+        if label in selected_labels:
+            bars[i].set_linewidth(2.5)
+            bars[i].set_edgecolor("#1A5276")
+
+    # value annotations
+    max_val = max(values_sorted) if values_sorted else 1
+    ax.set_xlim(0, max_val * 1.25)
+
+    for i, (bar, val) in enumerate(zip(bars, values_sorted)):
+        label = labels_sorted[i]
+        val_text = f"{val:{fmt}}"
+        if label in selected_labels:
+            val_text = f"{val:{fmt}}  (selected)"
+        ax.text(bar.get_width() + max_val * 0.015,
+                bar.get_y() + bar.get_height() / 2,
+                val_text, va="center", fontsize=16,
+                fontweight="bold" if label in selected_labels else "normal")
+
+
 def main(config_file):
     with open(config_file, "r") as f:
         config = yaml.safe_load(f)
@@ -156,20 +246,35 @@ def main(config_file):
         y_pred = load_predictions(paths["models_dir"], uuid)
         assert len(y_pred) == n_test, \
             f"{label}: expected {n_test} predictions, got {len(y_pred)}"
-        mae = compute_mae(y_true, y_pred)
+
+        mae = mean_absolute_error(y_true, y_pred)
+        acc = accuracy_score(y_true, y_pred)
+
+        probs = load_probabilities(paths["models_dir"], uuid)
+        # handle shape: if stored as (n_classes, n_samples), transpose
+        if probs.ndim == 2 and probs.shape[0] != n_test and probs.shape[1] == n_test:
+            probs = probs.T
+        auc_ovo = roc_auc_score(y_true, probs,
+                                multi_class='ovo')
 
         model_yaml = load_model_yaml(paths["models_dir"], uuid)
         props = parse_model_properties(model_yaml, display_names)
 
         results.append({
             "label": label, "uuid": uuid,
-            "mae": mae, "selected": selected,
+            "mae": mae, "accuracy": acc,
+            "auc_ovo": auc_ovo,
+            "selected": selected,
         })
         model_props_list.append({
-            "label": label, "selected": selected, **props, "mae": mae,
+            "label": label, "selected": selected, **props,
+            "mae": mae, "accuracy": acc,
+            "auc_ovo": auc_ovo,
         })
 
-        logger.info(f"{label:30s} (uuid={uuid}): MAE = {mae:.4f}")
+        logger.info(f"{label:30s} (uuid={uuid}): MAE = {mae:.4f}, "
+                     f"Accuracy = {acc:.4f}, "
+                     f"AUC-OVO = {auc_ovo:.4f}")
         logger.info(f"  type={props['type']}, dca={props['dca']}, "
                      f"library_bias={props['library_bias']}, "
                      f"epochs={props['epochs']}, lr={props['lr']}, wd={props['wd']}")
@@ -179,33 +284,43 @@ def main(config_file):
         label = baseline["label"]
         value = baseline["value"]
         y_pred = np.full(n_test, value)
-        mae = compute_mae(y_true, y_pred)
+
+        mae = mean_absolute_error(y_true, y_pred)
+        acc = accuracy_score(y_true, y_pred)
+
         results.append({
             "label": label, "uuid": "baseline",
-            "mae": mae, "selected": False,
+            "mae": mae, "accuracy": acc,
+            "auc_ovo": np.nan,
+            "selected": False,
         })
         model_props_list.append({
             "label": label, "selected": False,
             "type": "Baseline", "dca": "\u2014", "library_bias": "\u2014",
             "intercept": "\u2014", "epochs": "\u2014", "lr": "\u2014",
-            "wd": "\u2014", "mae": mae,
+            "wd": "\u2014", "mae": mae, "accuracy": acc,
+            "auc_ovo": np.nan,
         })
-        logger.info(f"{label:30s} (constant={value}): MAE = {mae:.4f}")
-
-    # sort by MAE (lowest first)
-    results.sort(key=lambda x: x["mae"])
+        logger.info(f"{label:30s} (constant={value}): MAE = {mae:.4f}, "
+                     f"Accuracy = {acc:.4f}")
 
     # save raw values as csv
     results_df = pd.DataFrame(model_props_list)
-    results_csv = output_dir / "mae_results.csv"
+    results_csv = output_dir / "metrics_results.csv"
     results_df.to_csv(results_csv, index=False)
     logger.info(f"Raw results saved to {results_csv}")
 
     # ---- FIGURE ----
-    labels_sorted = [r["label"] for r in results]
-    maes_sorted = [r["mae"] for r in results]
+    all_labels = [r["label"] for r in results]
+    all_maes = [r["mae"] for r in results]
+    all_accs = [r["accuracy"] for r in results]
+    selected_labels = {r["label"] for r in results if r["selected"]}
 
-    # font setup - use DejaVu Serif as fallback if Times not available
+    # AUC metrics — exclude baselines (no probability output)
+    auc_labels = [r["label"] for r in results if not np.isnan(r["auc_ovo"])]
+    auc_ovo_vals = [r["auc_ovo"] for r in results if not np.isnan(r["auc_ovo"])]
+
+    # font setup
     plt.rcParams.update({
         "font.family": "serif",
         "font.serif": ["Times New Roman", "DejaVu Serif"],
@@ -213,10 +328,12 @@ def main(config_file):
         "mathtext.fontset": "dejavuserif",
     })
 
-    fig = plt.figure(figsize=(20, 7))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.4, 1], wspace=0.15)
+    fig = plt.figure(figsize=(34, 9))
+    gs = fig.add_gridspec(1, 4, width_ratios=[1.2, 1, 1, 1], wspace=0.30)
     ax_table = fig.add_subplot(gs[0])
-    ax_bar = fig.add_subplot(gs[1])
+    ax_mae = fig.add_subplot(gs[1])
+    ax_acc = fig.add_subplot(gs[2])
+    ax_auc_ovo = fig.add_subplot(gs[3])
 
     # --- LEFT PANEL: model summary table ---
     ax_table.axis("off")
@@ -252,7 +369,7 @@ def main(config_file):
         loc="center",
     )
     table.auto_set_font_size(False)
-    table.set_fontsize(11)
+    table.set_fontsize(13)
     table.scale(1.0, 1.8)
     table.auto_set_column_width(col=list(range(len(table_headers))))
 
@@ -260,7 +377,7 @@ def main(config_file):
     for j in range(len(table_headers)):
         cell = table[0, j]
         cell.set_facecolor("#2C3E50")
-        cell.set_text_props(color="white", fontweight="bold", fontsize=10)
+        cell.set_text_props(color="white", fontweight="bold", fontsize=12)
         cell.set_edgecolor("#1A252F")
         cell.set_height(0.12)
 
@@ -271,73 +388,39 @@ def main(config_file):
             cell.set_edgecolor("#D5D8DC")
             if row_selected[i]:
                 cell.set_facecolor("#85C1E9")
-                cell.set_text_props(fontweight="bold", fontsize=11)
+                cell.set_text_props(fontweight="bold", fontsize=13)
             elif row_is_baseline[i]:
                 cell.set_facecolor("#E8E8E8")
-                cell.set_text_props(fontsize=11, color="#2C3E50",
+                cell.set_text_props(fontsize=13, color="#2C3E50",
                                     fontstyle="italic")
             else:
-                # alternate row shading
                 bg = "#FFFFFF" if i % 2 == 0 else "#F8F9F9"
                 cell.set_facecolor(bg)
-                cell.set_text_props(fontsize=11)
+                cell.set_text_props(fontsize=13)
 
-    ax_table.set_title("Model Configurations", fontsize=15,
-                       fontweight="bold", pad=25)
+    ax_table.set_title("Model Configurations", fontsize=22,
+                       fontweight="bold", pad=30)
 
-    # --- RIGHT PANEL: bar chart ---
-    def get_color(label):
-        if label.startswith("Always"):
-            return "#BDC3C7"
-        elif label == "MLP":
-            return "#2471A3"
-        elif label.startswith("MLP"):
-            return "#5DADE2"
-        elif label.startswith("Linear"):
-            return "#DC7633"
-        elif label.startswith("Ridge"):
-            return "#27AE60"
-        return "#95A5A6"
+    # --- MIDDLE PANEL: MAE bar chart ---
+    draw_bar_chart(ax_mae, all_labels, all_maes, selected_labels,
+                   xlabel="Mean Absolute Error",
+                   title="Test Set Mean Absolute Error",
+                   fmt=".4f", higher_is_better=False)
 
-    colors = [get_color(l) for l in labels_sorted]
+    # --- RIGHT PANEL: Accuracy bar chart ---
+    draw_bar_chart(ax_acc, all_labels, all_accs, selected_labels,
+                   xlabel="Accuracy",
+                   title="Test Set Accuracy",
+                   fmt=".4f", higher_is_better=True)
 
-    bars = ax_bar.barh(range(len(labels_sorted)), maes_sorted,
-                       color=colors, edgecolor="#2C3E50", linewidth=0.8,
-                       height=0.7)
-    ax_bar.set_yticks(range(len(labels_sorted)))
-    ax_bar.set_yticklabels(labels_sorted, fontsize=12)
-    ax_bar.set_xlabel("Mean Absolute Error (MAE)", fontsize=13)
-    ax_bar.set_title("Test Set Performance: Mean Absolute Error (lower is better)",
-                     fontsize=15, fontweight="bold", pad=25)
-    ax_bar.tick_params(axis='x', labelsize=11)
-    ax_bar.invert_yaxis()
-    ax_bar.spines["top"].set_visible(False)
-    ax_bar.spines["right"].set_visible(False)
+    # --- PANEL 4: AUC One-vs-One ---
+    draw_bar_chart(ax_auc_ovo, auc_labels, auc_ovo_vals, selected_labels,
+                   xlabel="Area Under the Receiver Operator Curve\n(One-vs-One Multiclass Average)",
+                   title="Test Set Area Under the \nReceiver Operator Curve",
+                   fmt=".4f", higher_is_better=True)
 
-    # highlight selected model
-    selected_labels = {m["label"] for m in config["models"]
-                       if m.get("selected", False)}
-    for i, label in enumerate(labels_sorted):
-        if label in selected_labels:
-            bars[i].set_linewidth(2.5)
-            bars[i].set_edgecolor("#1A5276")
-
-    # add MAE values with enough room
-    max_mae = max(maes_sorted)
-    ax_bar.set_xlim(0, max_mae * 1.2)
-
-    for i, (bar, mae) in enumerate(zip(bars, maes_sorted)):
-        label = labels_sorted[i]
-        mae_text = f"{mae:.4f}"
-        if label in selected_labels:
-            mae_text = f"{mae:.4f}  (selected)"
-        ax_bar.text(bar.get_width() + max_mae * 0.015,
-                    bar.get_y() + bar.get_height() / 2,
-                    mae_text, va="center", fontsize=11,
-                    fontweight="bold" if label in selected_labels else "normal")
-
-    figure_path = output_dir / "mae_comparison.png"
-    plt.savefig(figure_path, dpi=150, bbox_inches="tight",
+    figure_path = output_dir / "metrics_comparison.png"
+    plt.savefig(figure_path, dpi=300, bbox_inches="tight",
                 facecolor="white", pad_inches=0.3)
     logger.info(f"Figure saved to {figure_path}")
     plt.close()
@@ -347,6 +430,6 @@ def main(config_file):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python eval_mae.py eval_config.yml")
+        print("Usage: python eval_metrics.py eval_config.yml")
         sys.exit(1)
     main(sys.argv[1])
