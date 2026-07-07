@@ -1,0 +1,193 @@
+>|> 20221120 16:00:37.502 -|- INFO -|- AlignSettings -|- 0x7fdf7a149780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:00:37.503 -|- INFO -|- CheckPositionalArgs -|- 0x7fdf7a149780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1036T--bcAd1036T.bam
+>|> 20221120 16:00:37.503 -|- INFO -|- CheckPositionalArgs -|- 0x7fdf7a149780|| -|- REF  input file: ../data/1-VH.fasta
+>|> 20221120 16:00:37.504 -|- WARN -|- CheckPositionalArgs -|- 0x7fdf7a149780|| -|- Warning: Overwriting existing output file: ../data/scratch/Oct22/bcAd1036T.bam
+>|> 20221120 16:00:37.504 -|- INFO -|- Index -|- 0x7fdf7a149780|| -|- Start reading/building index
+>|> 20221120 16:00:37.508 -|- INFO -|- Index -|- 0x7fdf7a149780|| -|- Finished reading/building index
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Mapped Reads: 126446
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Alignments: 127802
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Mapped Bases: 104542130
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Mean Gap-Compressed Sequence Identity: 99.694%
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Max Mapped Read Length: 972
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Mean Mapped Read Length: 818.001
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Index Build/Read Time: 4ms 84us 
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Alignment Time: 4s 602ms 
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Run Time: 4s 633ms 
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- CPU Time: 40s 169ms 
+>|> 20221120 16:00:42.136 -|- INFO -|- Runner -|- 0x7fdf7a149780|| -|- Peak RSS: 0.051 GB
+>|> 20221120 16:00:42.149 -|- INFO -|- AlignSettings -|- 0x7f53f6e61780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:00:42.149 -|- INFO -|- CheckPositionalArgs -|- 0x7f53f6e61780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1037T--bcAd1037T.bam
+>|> 20221120 16:00:42.149 -|- INFO -|- CheckPositionalArgs -|- 0x7f53f6e61780|| -|- REF  input file: ../data/1-VH.fasta
+>|> 20221120 16:00:42.150 -|- INFO -|- Index -|- 0x7f53f6e61780|| -|- Start reading/building index
+>|> 20221120 16:00:42.153 -|- INFO -|- Index -|- 0x7f53f6e61780|| -|- Finished reading/building index
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Mapped Reads: 86878
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Alignments: 91299
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Mapped Bases: 73701426
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Mean Gap-Compressed Sequence Identity: 99.3828%
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Max Mapped Read Length: 1158
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Mean Mapped Read Length: 807.253
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Index Build/Read Time: 3ms 226us 
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Alignment Time: 3s 424ms 
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Run Time: 3s 446ms 
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- CPU Time: 30s 526ms 
+>|> 20221120 16:00:45.595 -|- INFO -|- Runner -|- 0x7f53f6e61780|| -|- Peak RSS: 0.069 GB
+>|> 20221120 16:00:45.607 -|- INFO -|- AlignSettings -|- 0x7fd839b8e780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:00:45.608 -|- INFO -|- CheckPositionalArgs -|- 0x7fd839b8e780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1039T--bcAd1039T.bam
+>|> 20221120 16:00:45.608 -|- INFO -|- CheckPositionalArgs -|- 0x7fd839b8e780|| -|- REF  input file: ../data/1-VH.fasta
+>|> 20221120 16:00:45.608 -|- INFO -|- Index -|- 0x7fd839b8e780|| -|- Start reading/building index
+>|> 20221120 16:00:45.612 -|- INFO -|- Index -|- 0x7fd839b8e780|| -|- Finished reading/building index
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Mapped Reads: 157946
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Alignments: 159288
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Mapped Bases: 129905877
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Mean Gap-Compressed Sequence Identity: 99.4716%
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Max Mapped Read Length: 1100
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Mean Mapped Read Length: 815.541
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Index Build/Read Time: 3ms 794us 
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Alignment Time: 5s 636ms 
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Run Time: 5s 654ms 
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- CPU Time: 49s 791ms 
+>|> 20221120 16:00:51.262 -|- INFO -|- Runner -|- 0x7fd839b8e780|| -|- Peak RSS: 0.048 GB
+>|> 20221120 16:00:51.276 -|- INFO -|- AlignSettings -|- 0x7f95bf47a780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:00:51.276 -|- INFO -|- CheckPositionalArgs -|- 0x7f95bf47a780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1040T--bcAd1040T.bam
+>|> 20221120 16:00:51.276 -|- INFO -|- CheckPositionalArgs -|- 0x7f95bf47a780|| -|- REF  input file: ../data/1-VH.fasta
+>|> 20221120 16:00:51.277 -|- INFO -|- Index -|- 0x7f95bf47a780|| -|- Start reading/building index
+>|> 20221120 16:00:51.281 -|- INFO -|- Index -|- 0x7f95bf47a780|| -|- Finished reading/building index
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Mapped Reads: 115503
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Alignments: 117799
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Mapped Bases: 94337576
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Mean Gap-Compressed Sequence Identity: 99.3272%
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Max Mapped Read Length: 1098
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Mean Mapped Read Length: 800.835
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Index Build/Read Time: 3ms 423us 
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Alignment Time: 4s 219ms 
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Run Time: 4s 245ms 
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- CPU Time: 37s 312ms 
+>|> 20221120 16:00:55.521 -|- INFO -|- Runner -|- 0x7f95bf47a780|| -|- Peak RSS: 0.069 GB
+>|> 20221120 16:00:55.537 -|- INFO -|- AlignSettings -|- 0x7f3246be0780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:00:55.537 -|- INFO -|- CheckPositionalArgs -|- 0x7f3246be0780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1043T--bcAd1043T.bam
+>|> 20221120 16:00:55.537 -|- INFO -|- CheckPositionalArgs -|- 0x7f3246be0780|| -|- REF  input file: ../data/2-L.fasta
+>|> 20221120 16:00:55.538 -|- INFO -|- Index -|- 0x7f3246be0780|| -|- Start reading/building index
+>|> 20221120 16:00:55.543 -|- INFO -|- Index -|- 0x7f3246be0780|| -|- Finished reading/building index
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Mapped Reads: 88325
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Alignments: 89972
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Mapped Bases: 72547620
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Mean Gap-Compressed Sequence Identity: 99.6294%
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Max Mapped Read Length: 1109
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Mean Mapped Read Length: 806.336
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Index Build/Read Time: 5ms 88us 
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Alignment Time: 3s 296ms 
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Run Time: 3s 317ms 
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- CPU Time: 28s 885ms 
+>|> 20221120 16:00:58.854 -|- INFO -|- Runner -|- 0x7f3246be0780|| -|- Peak RSS: 0.052 GB
+>|> 20221120 16:00:58.868 -|- INFO -|- AlignSettings -|- 0x7fa2198e0780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:00:58.868 -|- INFO -|- CheckPositionalArgs -|- 0x7fa2198e0780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1044T--bcAd1044T.bam
+>|> 20221120 16:00:58.868 -|- INFO -|- CheckPositionalArgs -|- 0x7fa2198e0780|| -|- REF  input file: ../data/2-L.fasta
+>|> 20221120 16:00:58.869 -|- INFO -|- Index -|- 0x7fa2198e0780|| -|- Start reading/building index
+>|> 20221120 16:00:58.873 -|- INFO -|- Index -|- 0x7fa2198e0780|| -|- Finished reading/building index
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Mapped Reads: 32478
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Alignments: 33223
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Mapped Bases: 26671888
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Mean Gap-Compressed Sequence Identity: 99.6164%
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Max Mapped Read Length: 950
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Mean Mapped Read Length: 802.814
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Index Build/Read Time: 3ms 500us 
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Alignment Time: 1s 303ms 
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Run Time: 1s 326ms 
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- CPU Time: 11s 430ms 
+>|> 20221120 16:01:00.194 -|- INFO -|- Runner -|- 0x7fa2198e0780|| -|- Peak RSS: 0.046 GB
+>|> 20221120 16:01:00.206 -|- INFO -|- AlignSettings -|- 0x7f3798f71780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:01:00.206 -|- INFO -|- CheckPositionalArgs -|- 0x7f3798f71780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1045T--bcAd1045T.bam
+>|> 20221120 16:01:00.206 -|- INFO -|- CheckPositionalArgs -|- 0x7f3798f71780|| -|- REF  input file: ../data/2-L.fasta
+>|> 20221120 16:01:00.207 -|- INFO -|- Index -|- 0x7f3798f71780|| -|- Start reading/building index
+>|> 20221120 16:01:00.210 -|- INFO -|- Index -|- 0x7f3798f71780|| -|- Finished reading/building index
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Mapped Reads: 169361
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Alignments: 170156
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Mapped Bases: 138784015
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Mean Gap-Compressed Sequence Identity: 99.4239%
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Max Mapped Read Length: 968
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Mean Mapped Read Length: 815.628
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Index Build/Read Time: 3ms 539us 
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Alignment Time: 6s 140ms 
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Run Time: 6s 166ms 
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- CPU Time: 54s 201ms 
+>|> 20221120 16:01:06.372 -|- INFO -|- Runner -|- 0x7f3798f71780|| -|- Peak RSS: 0.051 GB
+>|> 20221120 16:01:06.390 -|- INFO -|- AlignSettings -|- 0x7f1d12532780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:01:06.390 -|- INFO -|- CheckPositionalArgs -|- 0x7f1d12532780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1046T--bcAd1046T.bam
+>|> 20221120 16:01:06.390 -|- INFO -|- CheckPositionalArgs -|- 0x7f1d12532780|| -|- REF  input file: ../data/2-L.fasta
+>|> 20221120 16:01:06.392 -|- INFO -|- Index -|- 0x7f1d12532780|| -|- Start reading/building index
+>|> 20221120 16:01:06.396 -|- INFO -|- Index -|- 0x7f1d12532780|| -|- Finished reading/building index
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Mapped Reads: 142393
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Alignments: 143676
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Mapped Bases: 117329710
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Mean Gap-Compressed Sequence Identity: 99.2979%
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Max Mapped Read Length: 1001
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Mean Mapped Read Length: 816.627
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Index Build/Read Time: 3ms 750us 
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Alignment Time: 5s 235ms 
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Run Time: 5s 257ms 
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- CPU Time: 46s 204ms 
+>|> 20221120 16:01:11.647 -|- INFO -|- Runner -|- 0x7f1d12532780|| -|- Peak RSS: 0.059 GB
+>|> 20221120 16:01:11.663 -|- INFO -|- AlignSettings -|- 0x7f9b6f9a4780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:01:11.663 -|- INFO -|- CheckPositionalArgs -|- 0x7f9b6f9a4780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1047T--bcAd1047T.bam
+>|> 20221120 16:01:11.663 -|- INFO -|- CheckPositionalArgs -|- 0x7f9b6f9a4780|| -|- REF  input file: ../data/3-VRL.fasta
+>|> 20221120 16:01:11.665 -|- INFO -|- Index -|- 0x7f9b6f9a4780|| -|- Start reading/building index
+>|> 20221120 16:01:11.670 -|- INFO -|- Index -|- 0x7f9b6f9a4780|| -|- Finished reading/building index
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Mapped Reads: 86191
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Alignments: 87754
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Mapped Bases: 71127187
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Mean Gap-Compressed Sequence Identity: 99.4269%
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Max Mapped Read Length: 1097
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Mean Mapped Read Length: 810.529
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Index Build/Read Time: 5ms 94us 
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Alignment Time: 3s 162ms 
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Run Time: 3s 184ms 
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- CPU Time: 28s 96ms 
+>|> 20221120 16:01:14.847 -|- INFO -|- Runner -|- 0x7f9b6f9a4780|| -|- Peak RSS: 0.056 GB
+>|> 20221120 16:01:14.858 -|- INFO -|- AlignSettings -|- 0x7f758ccff780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:01:14.859 -|- INFO -|- CheckPositionalArgs -|- 0x7f758ccff780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1048T--bcAd1048T.bam
+>|> 20221120 16:01:14.859 -|- INFO -|- CheckPositionalArgs -|- 0x7f758ccff780|| -|- REF  input file: ../data/3-VRL.fasta
+>|> 20221120 16:01:14.860 -|- INFO -|- Index -|- 0x7f758ccff780|| -|- Start reading/building index
+>|> 20221120 16:01:14.863 -|- INFO -|- Index -|- 0x7f758ccff780|| -|- Finished reading/building index
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Mapped Reads: 68960
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Alignments: 71202
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Mapped Bases: 57084417
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Mean Gap-Compressed Sequence Identity: 99.3341%
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Max Mapped Read Length: 973
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Mean Mapped Read Length: 801.725
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Index Build/Read Time: 2ms 963us 
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Alignment Time: 2s 667ms 
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Run Time: 2s 687ms 
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- CPU Time: 23s 670ms 
+>|> 20221120 16:01:17.546 -|- INFO -|- Runner -|- 0x7f758ccff780|| -|- Peak RSS: 0.077 GB
+>|> 20221120 16:01:17.564 -|- INFO -|- AlignSettings -|- 0x7fc4b3cbc780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:01:17.564 -|- INFO -|- CheckPositionalArgs -|- 0x7fc4b3cbc780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1049T--bcAd1049T.bam
+>|> 20221120 16:01:17.564 -|- INFO -|- CheckPositionalArgs -|- 0x7fc4b3cbc780|| -|- REF  input file: ../data/3-VRL.fasta
+>|> 20221120 16:01:17.566 -|- INFO -|- Index -|- 0x7fc4b3cbc780|| -|- Start reading/building index
+>|> 20221120 16:01:17.569 -|- INFO -|- Index -|- 0x7fc4b3cbc780|| -|- Finished reading/building index
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Mapped Reads: 73292
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Alignments: 75649
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Mapped Bases: 59845460
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Mean Gap-Compressed Sequence Identity: 99.2847%
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Max Mapped Read Length: 948
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Mean Mapped Read Length: 791.094
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Index Build/Read Time: 3ms 706us 
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Alignment Time: 2s 983ms 
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Run Time: 3s 6ms 
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- CPU Time: 26s 379ms 
+>|> 20221120 16:01:20.570 -|- INFO -|- Runner -|- 0x7fc4b3cbc780|| -|- Peak RSS: 0.084 GB
+>|> 20221120 16:01:20.587 -|- INFO -|- AlignSettings -|- 0x7fac167b7780|| -|- Using 8 threads for alignments.
+>|> 20221120 16:01:20.587 -|- INFO -|- CheckPositionalArgs -|- 0x7fac167b7780|| -|- READ input file: ../data/scratch/r64120_20221013_213137/3_C01/demux/m64120_221016_144219.demux.bcAd1050T--bcAd1050T.bam
+>|> 20221120 16:01:20.587 -|- INFO -|- CheckPositionalArgs -|- 0x7fac167b7780|| -|- REF  input file: ../data/3-VRL.fasta
+>|> 20221120 16:01:20.588 -|- INFO -|- Index -|- 0x7fac167b7780|| -|- Start reading/building index
+>|> 20221120 16:01:20.591 -|- INFO -|- Index -|- 0x7fac167b7780|| -|- Finished reading/building index
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Mapped Reads: 137588
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Alignments: 138989
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Mapped Bases: 111867734
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Mean Gap-Compressed Sequence Identity: 99.2618%
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Max Mapped Read Length: 1074
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Mean Mapped Read Length: 804.868
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Index Build/Read Time: 3ms 133us 
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Alignment Time: 4s 995ms 
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Run Time: 5s 19ms 
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- CPU Time: 44s 58ms 
+>|> 20221120 16:01:25.606 -|- INFO -|- Runner -|- 0x7fac167b7780|| -|- Peak RSS: 0.063 GB
