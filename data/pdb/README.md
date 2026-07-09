@@ -1,6 +1,3 @@
-
-
-
 # SMILES String Extraction from PDB Structures
 
 Workflow for extracting SMILES strings from ligands in the SadA Rosetta model using PyMOL and Open Babel.
@@ -11,10 +8,17 @@ Workflow for extracting SMILES strings from ligands in the SadA Rosetta model us
 
 Two ligands were extracted from `SadA_rosetta_2024_3_6_p.pdb`:
 
-| Ligand | Name | SMILES |
-|--------|------|--------|
+| Component | Name | Identifier |
+|-----------|------|------------|
+| **Protein** | SadA (PDB: 3VRL) | See sequence below |
 | **NEU** | N-Succinyl-L-leucine | `C([C@H](NC(=O)CCC(=O)O)C(=O)O)C(C)C` |
 | **AKG** | α-Ketoglutarate | `C(=O)(C(=O)CCC(=O)O)O` |
+
+### Protein Sequence
+
+```
+MQHTYPAQLMRFGTAARAEHMTIAAAIHALDADEADAVVMDIVPDGERDAWWDDEGFSSSPFTKNAHHAGVVATSVTLGQLQREQGDKLVSKAAEYFGIACRVNDGLRTTRFVRLFSDALDAKPLTIGHDYEVEFLLATRRVYEPFEAPFNLAPHCGDVSYGRDTVNWPLKHSFPRQLGGFLTIQGADNDAGMVMWDNRPESRAALDEMHAEYRETGAIAALERAAKIMLKPRPGQLTLFQSKNLHAIERCTSTRRTMGLLLIHTEDGWRMFD
+```
 
 ---
 
