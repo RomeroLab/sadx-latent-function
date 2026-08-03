@@ -38,6 +38,12 @@ Output directory: `output/model_evals_analysis/dca_<timestamp>/`
 - `dca_score_summary.csv` — summary statistics (count, mean, median, std, min, max) per parent and category
 - `plot_dca_boxplots.log` — full log
 
+
+### Selected Mutations in Training Set 
+
+[plot_top10_table.py](scripts/plot_top10_table.py)
+
+
 ## Setup 
 
 ## Running Inference 

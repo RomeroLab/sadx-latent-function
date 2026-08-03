@@ -258,7 +258,6 @@ def get_top_n(df, n=TOP_N):
     return [(rank, int(row["feature"][1:-1]), row["feature"][-1])
             for rank, (_, row) in enumerate(top.iterrows(), start=1)]
 
-
 def build_matrix(mut_dict, wildtype_seq):
     """20 x num_positions matrix.  WT cells -> NaN.
     Raises AssertionError if any non-WT mutation is missing from the TSV."""
