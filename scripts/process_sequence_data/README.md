@@ -1,5 +1,7 @@
 ## Preprocessing: PacBio Sequencing → Training Data
 
+STILL NEEDS TO BE REVIEWED, ALREADY SEEING ERRORS. 
+
 The training data for the CORAL model comes from three rounds of directed evolution on SadX. Each round produced a library of ~900 variants made by error-prone PCR (epPCR):
 
 | Library | Parent | Variants placed | Bins (H / P / L / N) |

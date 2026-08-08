@@ -64,16 +64,3 @@ The rest is reletively constant.
 * ESM finetuning 
 * Protein MPNN predictions (have many other predictors in METL paper)
 * AlphaFold Predictions (on Database now)
-
-
-## CCM todo
-- CCM project [1-2 days] 
-  - Finally get data from other lysate mutants 
-  - Get weights for the predictions (1)
-  - Figure out how to run DCA [1.5 hours] 
-  - Figure out how inference is done one those variants (2) [
-  - Find out how DCA predictions were done and then run DCA predictions on new tested variants 
-  - Preprocess dms data 
-  - Run inference on variants 
-  - How did he make the prioritization file. I think Sameer will just have to be the one who answers that unless it’s literally just the rankings . 
-  - Does Sameer want to include any sequencing stuff from oct 2022. Currently removed . He will have to add back in.

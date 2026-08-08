@@ -1,0 +1,10 @@
+label,selected,type,dca,library_bias,intercept,epochs,lr,wd,mae,accuracy,auc_ovo
+MLP,True,CORAL MLP,Yes,Yes,—,50,1e-02,1e-04,0.5175879396984925,0.507537688442211,0.688019983317013
+MLP (no library bias),False,CORAL MLP,Yes,No,—,50,1e-02,1e-04,0.6331658291457286,0.4472361809045226,0.5795571754977696
+"MLP (no library bias, 
+ no evolutionary density)",False,CORAL MLP,No,No,—,50,1e-02,1e-04,0.6381909547738693,0.4221105527638191,0.5592826768940631
+Linear,False,Logistic Regression,No,No,Yes,—,—,—,0.5778894472361809,0.5477386934673367,0.6888459725093389
+"Linear with
+Regularizer",False,Ridge Classifier,No,No,Yes,—,—,—,0.5778894472361809,0.5276381909547738,0.6552613063504152
+Always Dead,False,Baseline,—,—,—,—,—,—,0.864321608040201,0.32663316582914576,
+Always Low,False,Baseline,—,—,—,—,—,—,0.5175879396984925,0.507537688442211,
