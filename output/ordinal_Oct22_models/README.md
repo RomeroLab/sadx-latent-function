@@ -67,7 +67,7 @@ All MLPLightning models use the `LightningMLP` code path, which wraps a `BaseCor
 | MLP (epochs 1)  | 32cc250e | all | val_cv1 | test | multiclass | 1 | 3e-4 | 1e-6 | yes | yes |
 | MLP (epochs 5)  | 7b976172 | all | val_cv1 | test | multiclass | 5 | 3e-4 | 1e-6 | yes | yes |
 | MLP (epochs 25) | 92715f9c | all | val_cv1 | test | multiclass | 25 | 3e-4 | 1e-6 | yes | yes |
-| **MLP**         | **6eeae50e** | **all** | **val_cv1** | **test** | **multiclass** | **400** | **3e-4** | **1e-6** | **yes** | **yes** |
+| **MLP-final**         | **6eeae50e** | **all** | **val_cv1** | **test** | **multiclass** | **400** | **3e-4** | **1e-6** | **yes** | **yes** |
 
 All MLPLightning runs produce loss curves (`.losses.png`), predictions (`.preds.txt`), and probabilities (`.probs.txt`).
 
