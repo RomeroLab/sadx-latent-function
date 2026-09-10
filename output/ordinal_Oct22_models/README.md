@@ -63,8 +63,7 @@ All MLPLightning models use the `LightningMLP` code path, which wraps a `BaseCor
 |-----------------|------|-----------|---------|----------|--------|--------|---------------|--------------|-----|--------------|
 | MLP-A           | 35804fd8 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | no | no |
 | MLP-B           | 140d9f93 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | yes | no |
-| MLP-C           | 5a7103a1 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | yes | yes |
-| MLP             | 8071c33a | train_cv1 | val_cv1 | test | multiclass | 400 | 3e-4 | 1e-6 | yes | yes |
+| MLP          | 5a7103a1 | train | val_cv1 | test | multiclass | 50 | 0.01 | 1e-4 | yes | yes |
 | MLP (epochs 1)  | 32cc250e | all | val_cv1 | test | multiclass | 1 | 3e-4 | 1e-6 | yes | yes |
 | MLP (epochs 5)  | 7b976172 | all | val_cv1 | test | multiclass | 5 | 3e-4 | 1e-6 | yes | yes |
 | MLP (epochs 25) | 92715f9c | all | val_cv1 | test | multiclass | 25 | 3e-4 | 1e-6 | yes | yes |
