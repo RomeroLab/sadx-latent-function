@@ -1,0 +1,9 @@
+parent                   1VH    2L  3VRL   All
+Model                                         
+Full model             0.272 0.265 0.256 0.322
+No DCA                 0.263 0.272 0.281 0.317
+No library bias        0.274 0.264 0.263 0.269
+Sequence only          0.267 0.271 0.270 0.282
+DCA only               0.250 0.250 0.243 0.309
+Library-prior baseline 0.250 0.250 0.250 0.293
+Always-Low baseline    0.250 0.250 0.250 0.250

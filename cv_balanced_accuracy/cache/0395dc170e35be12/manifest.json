@@ -1,0 +1,28 @@
+{
+  "seeds": [
+    100,
+    101,
+    102
+  ],
+  "folds": 5,
+  "split_seed": 20260912,
+  "epochs": 400,
+  "learning_rate": 0.0003,
+  "weight_decay": 1e-06,
+  "batch_size": 32,
+  "hidden": [
+    100,
+    50
+  ],
+  "dropout": 0.2,
+  "data_sha256": "ef6ec992a767fbffa51b02dba8fc5578c46d240f8d611da1fef42dad3753235b",
+  "config_sha256": "e93417abe32cb31519f8fcfb72ba435dbdc6164601a3048906a547d64caceb43",
+  "model_sha256": "0b0ad86c2874a39871b75c506e71a1fba61d2e38e7d363476c489234d848bcfb",
+  "runner_sha256": "472b31d7c7e971cf9fa24aa320d9f73f4e3f64c78a16def5e510dfc00b6828c3",
+  "numpy": "1.26.4",
+  "pandas": "2.1.0",
+  "sklearn": "1.7.0",
+  "torch": "2.14.0",
+  "python": "3.10.19",
+  "platform": "macOS-14.6.1-arm64-arm-64bit"
+}
