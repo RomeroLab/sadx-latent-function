@@ -19,7 +19,7 @@ The project uses screening data from three rounds of directed evolution on SadX 
 
 ## 1. Sequence Preprocessing
 
-The [`scripts/process_sequence_figures_generation/README.md`](scripts/process_sequence_figures_generation/README.md) readme describes how to go from the raw reads to the full sequence-to-activity dataset after going through a series of quality filters.
+The [`scripts/process_sequence_generation/README.md`](scripts/process_sequence_generation/README.md) readme describes how to go from the raw reads to the full sequence-to-activity dataset after going through a series of quality filters.
 
 Raw sequences can be downloaded from the SRA (PacBio circular consensus sequencing reads have been deposited in the NCBI Sequence Read Archive under accession [PRJNA1505729](https://www.ncbi.nlm.nih.gov/sra/PRJNA1505729)).
 

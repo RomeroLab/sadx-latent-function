@@ -55,14 +55,15 @@ TOP_N = 10
 #   "parents"  : list  — (optional) parent libraries to search for
 #                         DMS observations.  Omit or None → search all.
 
-CUSTOM_MUTATIONS = [
-    {"mutation": "F152L", "origin": "2L",   "parents": ["1VH"]},
-    {"mutation": "I38V",  "origin": "3VRL",   "parents": ["1VH", "2L"]},
-    {"mutation": "Q233R", "origin": "3VRL",   "parents": ["1VH", "2L"]},
-    {"mutation": "F261L", "origin": "3VRL",   "parents": ["1VH", "2L"]},
-    {"mutation": "V38I",  "origin": "4IC",  "parents": ["3VRL"]},
-    {"mutation": "R48C",  "origin": "4IC",  "parents": ["1VH", "2L", "3VRL"]},
-]
+CUSTOM_MUTATIONS  = None
+# CUSTOM_MUTATIONS = [
+#     {"mutation": "F152L", "origin": "2L",   "parents": ["1VH"]},
+#     {"mutation": "I38V",  "origin": "3VRL",   "parents": ["1VH", "2L"]},
+#     {"mutation": "Q233R", "origin": "3VRL",   "parents": ["1VH", "2L"]},
+#     {"mutation": "F261L", "origin": "3VRL",   "parents": ["1VH", "2L"]},
+#     {"mutation": "V38I",  "origin": "4IC",  "parents": ["3VRL"]},
+#     {"mutation": "R48C",  "origin": "4IC",  "parents": ["1VH", "2L", "3VRL"]},
+# ]
 
 # CUSTOM_MUTATIONS= None
 ALL_PARENTS = ["1VH", "2L", "3VRL"]

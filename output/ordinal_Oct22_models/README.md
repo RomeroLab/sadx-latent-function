@@ -54,6 +54,30 @@ python model_predict_pytorch_Oct22.py
 ```
 >Note: this only works for `6eeae50e` model configuration. 
 
+## Analysis in Paper (Final Model: 6eeae50e)
+
+### Selected Mutations Table
+
+Generates a table of the selected mutations present in the training set.
+
+```bash
+cd scripts/
+python plot_top10_table.py
+```
+
+Output: `output/singles_train_top_N/top10_mutations_table.png`
+
+
+### Single-Mutant Inference Heatmap
+
+Generates a heatmap of predicted activity for all possible single amino acid substitutions on the 3-VRL parent.
+
+```bash
+cd scripts/
+python singles_inference_heatmap.py
+```
+
+Output: `output/singles_inference_heatmap/Hbin_probs_heatmap.png`
 ## Benchmarking 
 The remainder of this repository documents the tests that were run in addition to the final MLP model. Although the model was motivated by literature review, some light testing of different hyperparameters was done and compared to different baselines.
 
