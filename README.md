@@ -53,4 +53,4 @@ The model was trained on the full dataset for 400 epochs with learning rate 3e-4
 
 ## 4. Retrospective Feature Importance
 
-A retrospective ablation study over model features (DCA, multi-library bias) is documented in [`cv_balanced_accuracy/README.md`](cv_balanced_accuracy/README.md). This analysis uses cross-validated balanced accuracy to explore the contribution of each feature to the final model's performance.
+A retrospective ablation study using Codex over model features (DCA, multi-library bias) is documented in [`cv_balanced_accuracy/README.md`](cv_balanced_accuracy/README.md). This analysis uses cross-validated balanced accuracy to explore the contribution of each feature to the final model's performance.
