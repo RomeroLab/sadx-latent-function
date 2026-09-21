@@ -1,8 +1,8 @@
-# SadX Latent Sequence Function Paper
+# SadX Latent Sequence Function
 
-Open-source implementation for generating and prioritizing SadX enzyme variants using the CORAL loss function. This repository provides the code and data needed to regenerate the results described in the SadX paper.
+Open-source implementation for generating and prioritizing SadX enzyme variants using typically discarded data from directed evolution libraries. This repository provides the code and data needed to regenerate the results described in the SadX paper.
 
-> **Note:** This library was built specifically for SadX and is not optimized for use with other proteins.
+> **Note:** This repository only reproduces the results from the SadX latent sequence function paper and is not optimized for any other protein. 
 
 ## Overview
 
