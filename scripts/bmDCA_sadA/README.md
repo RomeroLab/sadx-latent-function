@@ -136,7 +136,20 @@ This outputs the learned parameters as NumPy arrays.
 
 where L is the protein length and q = 21 (20 amino acids + gap).
 
+
+
+
+### DCA figures
+
+**DCA Score Box Plots** — Faceted box plots showing bmDCA density score distributions across activity categories, with Spearman correlation per parent library.
+
+**MSA Visualization** — Outputs to `output/msa_visualization/`.
+
+
 ## File Descriptions
+
+
+
 
 ### MSA generation
 

@@ -1,66 +1,56 @@
-# SadX Combinatorial Library
+# SadX Latent Sequence Function Paper
 
-This repository provides an open-source implementation for generating and prioritizing SadX enzyme variants using the CORAL loss function. Its main purpose is to document the training process of the variants described in the SadX paper.
-Please note that this library is not optimized for use with other proteins.
+Open-source implementation for generating and prioritizing SadX enzyme variants using the CORAL loss function. This repository provides the code and data needed to regenerate the results described in the SadX paper.
 
-test
-## Training a Model with CORAL Loss for SadX 
+> **Note:** This library was built specifically for SadX and is not optimized for use with other proteins.
 
+## Overview
 
-## Generating Paper Figures
- 
-All figure scripts output to timestamped directories under `output/model_evals_analysis/` so that each run is preserved with its config, log, raw data, and figure.
- 
-### Model Comparison (MAE Bar Chart + Configuration Table)
- 
-Compares all models on the held-out test set using Mean Absolute Error, alongside a table summarizing each model's configuration (read directly from the yaml files). Includes two constant baselines (Always Dead, Always Low).
- 
-```bash
-python eval_mae.py eval_config.yml
-```
- 
-Output directory: `output/model_evals_analysis/model_evals_<timestamp>/`
-- `mae_comparison.png` — two-panel figure: configuration table (left) and MAE bar chart (right)
-- `mae_results.csv` — raw MAE values and model properties
-- `eval_config.yml` — copy of the config used
-- `eval_mae.log` — full log
- 
-### DCA Score Box Plots
- 
-Faceted box plots showing the distribution of bmDCA density scores across activity categories (Dead, Low, Parent, High) for each parent library. Spearman correlation between DCA score and ordinal category is shown in each subplot title.
- 
-```bash
-python plot_dca_boxplots.py output/ordinal_Oct22_sequences_with_dca_score.csv
-```
- 
-Output directory: `output/model_evals_analysis/dca_<timestamp>/`
-- `dca_score_boxplots.png` — faceted box plot (one panel per parent library)
-- `dca_score_summary.csv` — summary statistics (count, mean, median, std, min, max) per parent and category
-- `plot_dca_boxplots.log` — full log
+The project uses screening data from three rounds of directed evolution on SadX (libraries 1-VH, 2-L, 3-VRL) — data that is typically discarded after each round. Variants were sequenced on PacBio CCS, screened in lysate for azidation activity, binned into four ordinal activity categories (High, Parent-like, Low, Dead), and processed into a training set of 1,326 variants. An MLP trained with CORAL loss on this data was then used to recommend new single-mutant variants on top of the 3-VRL parent. The repository is organized around four reproducible components:
 
+| # | Component | What it does |
+|---|-----------|-------------|
+| 1 | [Sequence Preprocessing](#1-sequence-preprocessing) | PacBio CCS → [1,326 filtered variants](output/ordinal_Oct22_sequences_with_dca_score.csv) ([preprocessing README](scripts/process_sequence_figures_generation/README.md)) |
+| 2 | [DCA Scoring](#2-dca-scoring) | Generates the MSA and computes bmDCA co-evolutionary density scores for each 1,326 variants ([DCA README](scripts/bmDCA_sadA/README.md)) |
+| 3 | [Model Training](#3-model-training) | Trains CORAL MLP for ordinal activity prediction using the [final model configuration](output/ordinal_Oct22_models/saved_models/6eeae50e.yml) ([model README](output/ordinal_Oct22_models/README.md)) |
+| 4 | [Retrospective Feature Importance](#4-retrospective-feature-importance) | Ablation over DCA and multi-library features using Codex ([ablation README](cv_balanced_accuracy/README.md)) |
 
-### Selected Mutations in Training Set 
+---
 
-[plot_top10_table.py](scripts/plot_top10_table.py)
+## 1. Sequence Preprocessing
 
+The [`scripts/process_sequence_figures_generation/README.md`](scripts/process_sequence_figures_generation/README.md) readme describes how to go from the raw reads to the full sequence-to-activity dataset after going through a series of quality filters.
 
-## Setup 
+Raw sequences can be downloaded from the SRA (PacBio circular consensus sequencing reads have been deposited in the NCBI Sequence Read Archive under accession [PRJNA1505729](https://www.ncbi.nlm.nih.gov/sra/PRJNA1505729)).
 
-## Running Inference 
+Intermediate versions of the data — demultiplexed, quality-filtered reads from each processing step — are saved in the repository. This allows one to run the downstream analysis without having to reprocess from raw reads.
 
-(predictions from trained models)
+The final dataset is here: `output/ordinal_Oct22_sequences_with_dca_score.csv`
 
+---
 
-## Log 
+## 2. DCA Scoring
 
-1) Migrated the whoe repository from sameerd to here. Added in relevant files for training on SadX to `output` file.
-The rest is reletively constant. 
+Generating the multiple sequence alignment (MSA) and bmDCA co-evolutionary density scores used as an additional input feature for the CORAL model. See [`scripts/bmDCA_sadA/README.md`](scripts/bmDCA_sadA/README.md) for details on MSA construction and DCA score computation.
 
-2) Downloaded and untarrred directory from romero drive. So that MSA files and updates to python files are documented. 
+> **Note:** The DCA scores for the training set are provided pre-computed in `output/ordinal_Oct22_sequences_with_dca_score.csv`. The model can be trained using these pre-computed scores without re-running bmDCA.
 
-3) Archived (updated November 6,2025),  to access these files again look to `sameerd`
-* Rosetta Runs with RosettaLigand 
-* Attic of Marks Rosetta Runs 
-* ESM finetuning 
-* Protein MPNN predictions (have many other predictors in METL paper)
-* AlphaFold Predictions (on Database now)
+---
+
+## 3. Model Training
+
+How to run the final model including the model configuration, predictions, and outputs are documented in [`output/ordinal_Oct22_models/README.md`](output/ordinal_Oct22_models/README.md).
+
+The final model is a two-hidden-layer MLP (100 → 50 units, dropout 0.2) trained with CORAL loss for ordinal classification into four activity categories. Architecture decisions were motivated by literature review:
+
+- **CORAL loss** for ordinal regression (respects the ordered relationship between N < L < P < H)
+- **Multi-library bias terms** (library-specific intercepts in the output layer, accounting for different activity thresholds across the three parent libraries)
+- **bmDCA feature** (co-evolutionary density score appended to the one-hot encoding)
+
+The model was trained on the full dataset for 400 epochs with learning rate 3e-4 and weight decay 1e-6.
+
+---
+
+## 4. Retrospective Feature Importance
+
+A retrospective ablation study over model features (DCA, multi-library bias) is documented in [`cv_balanced_accuracy/README.md`](cv_balanced_accuracy/README.md). This analysis uses cross-validated balanced accuracy to explore the contribution of each feature to the final model's performance.
