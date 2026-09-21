@@ -12,6 +12,14 @@ import matplotlib.pyplot as plt
 import logomaker
 from Bio import SeqIO
 
+matplotlib.rcParams["figure.facecolor"] = "white"
+matplotlib.rcParams["axes.facecolor"]   = "white"
+matplotlib.rcParams["svg.fonttype"]     = "none"
+matplotlib.rcParams["font.family"]      = "sans-serif"
+matplotlib.rcParams["font.sans-serif"]  = ["Helvetica", "Arial", "DejaVu Sans"]
+
+
+
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 MSA_PATH = SCRIPT_DIR / ".." / "data" / "msa" / "sadA_full_clean.fasta"
 OUTPUT_DIR = SCRIPT_DIR / ".." / "output" / "msa_visualization"
@@ -38,8 +46,8 @@ AA_COLOR_SCHEME = {
 }
 
 plt.rcParams.update({
-    "font.family": "serif",
-    "font.serif": ["Times New Roman", "DejaVu Serif"],
+    # "font.family": "serif",
+    # "font.serif": ["Times New Roman", "DejaVu Serif"],
     "font.size": 18,
     "figure.facecolor": "white",
     "axes.facecolor": "white",
