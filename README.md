@@ -10,7 +10,7 @@ The project uses screening data from three rounds of directed evolution on SadX 
 
 | # | Component | What it does |
 |---|-----------|-------------|
-| 1 | [Sequence Preprocessing](#1-sequence-preprocessing) | PacBio CCS → [1,326 filtered variants](output/ordinal_Oct22_sequences_with_dca_score.csv) ([preprocessing README](scripts/process_sequence_figures_generation/README.md)) |
+| 1 | [Sequence Preprocessing](#1-sequence-preprocessing) | PacBio CCS → [1,326 filtered variants](output/ordinal_Oct22_sequences_with_dca_score.csv) ([preprocessing README](scripts/process_sequence_generation/README.md)) |
 | 2 | [DCA Scoring](#2-dca-scoring) | Generates the MSA and computes bmDCA co-evolutionary density scores for each 1,326 variants ([DCA README](scripts/bmDCA_sadA/README.md)) |
 | 3 | [Model Training](#3-model-training) | Trains CORAL MLP for ordinal activity prediction using the [final model configuration](output/ordinal_Oct22_models/saved_models/6eeae50e.yml) ([model README](output/ordinal_Oct22_models/README.md)) |
 | 4 | [Retrospective Feature Importance](#4-retrospective-feature-importance) | Ablation over DCA and multi-library features using Codex ([ablation README](cv_balanced_accuracy/README.md)) |
