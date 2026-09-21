@@ -1,10 +1,43 @@
-# Ordinal Oct22 Models
+# CORAL Models
 
-This directory contains model configurations, predictions, and probability outputs for ordinal regression models trained on the Oct22 dataset. The final model selected for single mutant recommendations was **6eeae50e**.
+This directory contains model configurations, predictions, and probability outputs for ordinal regression models trained on the lysate dataset. The final model selected for single-mutant recommendations was **6eeae50e**.
+
+## Environment Setup
+
+Create the conda environment from the setup file:
+
+```bash
+conda env create -f setup/environment_minimal.yaml
+conda activate sadA
+```
+
+## Training the Final Model
+
+Inside of `scripts/`, run the following command to train the final model:
+
+```bash
+python model_pytorch_Oct22.py \
+    --input ../output/ordinal_Oct22_sequences_with_dca_score.csv \
+    --train_name all \
+    --test_name test \
+    --num_epochs 400 \
+    --lambda_h 0.0001 \
+    --learning_rate 0.0003 \
+    --weight_decay 1.0e-06 \
+    --target multiclass \
+    --dca \
+    --save_model \
+    --lambda_dca 1.0e-08 \
+    --num_workers 4 \
+    --output_dir ../output/ordinal_Oct22_models \
+    --multilibrary
+```
+
+These are the same parameters as the final model. The configuration is saved at `output/ordinal_Oct22_models/saved_models/6eeae50e.yml` and the final model checkpoint is at `output/ordinal_Oct22_models/saved_models/6eeae50e.ckpt`.
 
 ## Output Files
 
-Each model produces some or all of the following files:
+Each model produces all of the following files:
 
 - `{uuid}.yml` — model configuration
 - `{uuid}.probs.txt` — predicted class probabilities
@@ -12,7 +45,22 @@ Each model produces some or all of the following files:
 - `{uuid}.losses.png` — training/validation loss curves (PyTorch models only)
 - `{uuid}.ckpt` — saved model checkpoint (PyTorch models, if requested)
 
-## Definitions
+## Predict Singles
+
+Run this script from `scripts/` to run inference on the final MLP model and get the predicted probability that each single-mutant variant falls in the High bin:
+
+```bash
+python model_predict_pytorch_Oct22.py
+```
+>Note: this only works for `6eeae50e` model configuration. 
+
+## Benchmarking 
+The remainder of this repository documents the tests that were run in addition to the final MLP model. Although the model was motivated by literature review, some light testing of different hyperparameters was done and compared to different baselines.
+
+For comparison of model performance on the held-out test set across different baselines, see: `scripts/nb_benchmark_models_Oct22.ipynb`
+
+Note this is different from the retrospective feature importance study described in the paper. See `cv_balanced_accuracy/README.md` for that.
+
 
 ### Dataset Splits
 
