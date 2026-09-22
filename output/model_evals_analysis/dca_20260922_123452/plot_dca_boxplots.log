@@ -1,0 +1,11 @@
+2026-09-22 12:34:52 — Output directory: output/model_evals_analysis/dca_20260922_123452
+2026-09-22 12:34:52 — Data file: output/ordinal_Oct22_sequences_with_dca_score.csv
+2026-09-22 12:34:52 — Loaded 1326 sequences
+2026-09-22 12:34:52 — Parents: ['1VH', '2L', '3VRL']
+2026-09-22 12:34:52 — Categories: ['H', 'P', 'L', 'N']
+2026-09-22 12:34:52 —   1VH: {'L': 253, 'N': 157, 'H': 3, 'P': 2}
+2026-09-22 12:34:52 —   2L: {'L': 314, 'N': 128, 'P': 20, 'H': 12}
+2026-09-22 12:34:52 —   3VRL: {'N': 161, 'L': 132, 'P': 113, 'H': 31}
+2026-09-22 12:34:52 — Figure saved to output/model_evals_analysis/dca_20260922_123452/dca_score_boxplots.png
+2026-09-22 12:34:52 — Summary statistics saved to output/model_evals_analysis/dca_20260922_123452/dca_score_summary.csv
+2026-09-22 12:34:52 — Done

@@ -95,6 +95,27 @@ This notebook reads the 12 per-barcode TSVs from step 2, then applies four addit
 | `parent` | Library: `1VH`, `2L`, or `3VRL` |
 | `category` | Activity bin: `H`, `P`, `L`, or `N` |
 
+
+### Step 4: 
+
+```angular2html
+seqs = pd.read_csv("../data/sequences_Oct22.tsv", sep="\t")
+seqs_no_dups = seqs.drop_duplicates(["parent", "category", "ss_aa"], keep='first')
+parent_seqs = seqs_no_dups[seqs_no_dups.ss_aa == "*0*"].groupby("parent").head(1)
+parent_seqs.category = "P"
+final_seqs = pd.concat([seqs_no_dups[seqs_no_dups.ss_aa != "*0*" ], parent_seqs])
+final_seqs["response"] = final_seqs.category.map({"H":3, "P":2, "L":1, "N":0})
+
+# map the shortened sequences to full sequences
+final_seqs["sequence_aa"] = final_seqs[["ss_aa", "parent"]].apply(lambda x: 
+                                    utils.expand_mut_str_list_to_seq(
+                                        x['ss_aa'], parent_seqs[x['parent']], 
+                                        split_mut_char=",", offset=1), axis=1)
+
+final_seqs["sequence_aa_trim"] = final_seqs.sequence_aa.str.slice(1, -1)
+
+```
+
 ### Known data quality issues
 
 - **Parent contamination across bins.** The parent sequence (`*0*`) appears in bins where it should not be (e.g., it is the 4th-ranked sequence in 1VH-High with 11,321 reads and the top sequence in 2L-High with 6,378 reads). This is likely due to sample carryover during library preparation or demultiplexing errors.
