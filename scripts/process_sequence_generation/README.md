@@ -52,7 +52,7 @@ For each of the 12 barcoded BAM files, this script aligns the CCS reads to the a
 The pre-computed bam files from Step-1 are located in [data/Oct22](../../data/Oct22). 
 
 In the script [`scripts/process_bams_Oct22.py`](../process_bams_Oct22.py), you will need to replace:
-`../data/scratch/Oct22` with `../data/Oct22`.
+`../data/scratch/Oct22` with `../data/Oct22` for both input and output variables.
 
 **Script:** `scripts/process_bams_Oct22.py`
 
@@ -137,13 +137,6 @@ final_seqs["sequence_aa_trim"] = final_seqs.sequence_aa.str.slice(1, -1)
      .to_csv("../output/ordinal_Oct22_sequences_without_dca_score.csv", index=False))
 
 ```
-
-#### Known data quality issues
-
-- **Parent contamination across bins.** The parent sequence (`*0*`) appears in bins where it should not be (e.g., it is the 4th-ranked sequence in 1VH-High with 11,321 reads and the top sequence in 2L-High with 6,378 reads). This is likely due to sample carryover during library preparation or demultiplexing errors.
-- **Early stop codons in high-activity bins.** Some sequences in the 3-VRL High bin contained premature stop codons before filtering. Since truncated proteins should not be functional, this suggests barcode misassignment or chimeric reads in that bin.
-- **1-VH library anomalies.** The 1VH library shows unusual per-position mutation frequency distributions and a very high read-count cutoff was needed (10,000) for the H and P bins, suggesting its library preparation may have been less uniform than 2L or 3VRL.
-
 
 ### Part 5: Figures in Manuscript
 
