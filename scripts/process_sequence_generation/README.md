@@ -3,7 +3,7 @@
 
 Intermediate versions of the data — demultiplexed, quality-filtered reads from each processing step — are saved in the repository. This allows one to run the downstream analysis without having to reprocess from raw reads.
 
-**We recommend skipping to Step 3. Steps 1 and 2 handle quality filtering of raw PacBio reads and may be difficult to reproduce. Step 3 involves visualization of the final dataset and uses pre-computed results from Step 2 that are already saved in this repository.**
+**We recommend skipping to Step 3. Steps 1 and 2 handle quality filtering of raw PacBio reads, and a likely difficult computational tasks. Step 3 involves visualization of the final dataset with interpretable quality filters and uses pre-computed results from Step 2 that are already saved in this repository.**
 
 All scripts are run from the `scripts/` directory.
 
@@ -46,7 +46,14 @@ For each of the 12 barcoded BAM files, this script aligns the CCS reads to the a
 
 **Output:** 12 aligned BAM files in `data/scratch/Oct22/`, one per barcode. Each read now carries alignment coordinates describing how it maps to the parent sequence, encoded as a CIGAR string.
 
-### Step 2: Filter reads and extract mutations (skip recommended)
+### Step 2: Filter reads and extract mutations (skip recommendeded)
+
+The pre-computed bam files from Step-1 are located in [data/Oct22](../../data/Oct22). 
+
+In the script [`scripts/process_bams_Oct22.py`](../process_bams_Oct22.py), you will need to replace:
+`../data/scratch/Oct22` with `../data/Oct22`.
+
+
 
 **Script:** `scripts/process_bams_Oct22.py`
 
@@ -104,7 +111,7 @@ However, that noteboook contains lots of excess code for computing the DCA score
 ) and datasets which have since been discarded. It also calls code which is outside of this directory. 
 To just generate the final 1,326 variants simply run the below commands in a python script. 
 
-This code remove all parent amino acid duplicates across rounds, and replaces them with three parent sequences, which are placed in the parent bin, 1 per each library. 
+This code removes all parent amino acid duplicates across rounds, and replaces them with three parent sequences, which are placed in the parent bin, 1 per each library. 
 
 >Note: this produces the final dataset `ordinal_Oct22_sequences_without_dca_score.csv`. The key here is **without_dca**. If you wish to add your own DCA scores look to [DCA score README.md](../../scripts/bmDCA_sadA/README.md). 
 > The recommendation however simply to use the pre-generated dataset [output/ordinal_Oct22_sequences_without_dca_score.csv](../../output/ordinal_Oct22_sequences_without_dca_score.csv). 
