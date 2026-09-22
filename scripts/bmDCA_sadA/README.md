@@ -25,7 +25,7 @@ conda activate sadA
 
 ### Installing HMMER
 
-> Only install HMMER and do Part 1: MSA Generation if you wish to recurate the Multiple sequence alignment. Given the computational difficulty in doing this (downloading a large database and new software) it is recommended to use the already pre-saved [MSA](../../data/msa/sadA_full_clean.fasta).
+> Only install HMMER and do Part 1: MSA Generation if you wish to recurate the Multiple sequence alignment. Given the computational difficulty in doing this (downloading a large database and new software) it is recommended to use the already pre-computed [MSA](../../data/msa/sadA_full_clean.fasta).
 
 ```bash
 wget http://eddylab.org/software/hmmer/hmmer-3.4.tar.gz
@@ -105,18 +105,18 @@ Optional flags: `-t 0.8` (identity threshold, default 0.8), `-d cuda:0` (device,
 
 Intermediate files (`*.sto`, `*.out.txt`, `*.afa`) can be deleted after the pipeline completes.
 
-> The precomputed versions of the [MSA](../../data/msa/sadA_full_clean.weights.npy) and [weights](../../data/msa/sadA_full_clean.weights.npy). 
+> Recommended to use the precomputed versions of the [MSA](../../data/msa/sadA_full_clean.fasta) and [weights](../../data/msa/sadA_full_clean.weights.npy). 
 
 
 ## Part 2: Direct Coupling Analysis (bmDCA)
 
 Fit a Potts model to the filtered MSA using Boltzmann machine learning. This learns two sets of parameters: **fields** h(i, a) capturing the independent preference for amino acid *a* at position *i*, and **couplings** J(i, j, a, b) capturing the pairwise interaction between amino acid *a* at position *i* and amino acid *b* at position *j*.
 
-> Steps 5-6 of this were run via the [`run.sh`](run.sh) script. But as stated above the below commands do not contain hardcoded paths as this file does. 
+> Steps 5-6 of this were run via the [`run.sh`](run.sh) script. But as stated above the below commands do not contain hardcoded paths and are intended to run on your local machine. 
 
 ### Step 5: Run bmDCA
 
-> There is no saved version of the DCA parameters. Only two options are to compute them below, or use the precomputed [DCA scores](../../output/ordinal_Oct22_sequences_with_dca_score.csv).
+> Note: Sadly, there is no saved version of the DCA parameters. The only two options are to compute them below, or use the precomputed [DCA scores](../../output/ordinal_Oct22_sequences_with_dca_score.csv).
 
 ```bash
 mkdir -p run
@@ -166,7 +166,7 @@ where L is the protein length and q = 21 (20 amino acids + gap).
 
 Scores were computed in  [`nb_natural_seqs_pssm_dca.ipynb`](../nb_natural_seqs_pssm_dca.ipynb). Look to section `check correlation with 1-VH, 2-L, 3-VRL libraries`. 
 However, that noteboook contains lots of excess code for sequence processing and datasets which have since been discarded. It also calls code which is outside of this directory. 
-To just generate the scores from the learned parameters simply run the below commands in a python script. 
+To just generate the dca scores from the learned parameters simply run the below commands in a python script. 
 
 ```
 
