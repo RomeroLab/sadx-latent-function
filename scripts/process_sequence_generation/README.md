@@ -3,13 +3,13 @@
 
 Intermediate versions of the data — demultiplexed, quality-filtered reads from each processing step — are saved in the repository. This allows one to run the downstream analysis without having to reprocess from raw reads.
 
-**We recommend skipping to Step 3. Steps 1 and 2 handle quality filtering of raw PacBio reads, and a likely difficult computational tasks. Step 3 involves visualization of the final dataset with interpretable quality filters and uses pre-computed results from Step 2 that are already saved in this repository.**
+**We recommend skipping to Step 3. Steps 1 and 2 handle quality filtering of raw PacBio reads. Step 3 involves visualization of the final dataset with interpretable quality filters and uses pre-computed results from Step 2.**
 
 All scripts are run from the `scripts/` directory.
 
 ### Step 1: Align reads to parent references (skip recommended)
 
-> We recommend starting from Step 3, as Steps 1 and 2 require downloading and processing large raw sequencing files and have not been retested end-to-end. If you wish to reproduce these steps and encounter missing data or other issues, please contact a corresponding author on the manuscript.
+> We recommend starting from Step 3, as Steps 1 and 2 require downloading and processing large raw sequencing files and have not been retested end-to-end. 
 
 Raw sequences can be downloaded from the SRA (PacBio circular consensus sequencing reads have been deposited in the NCBI Sequence Read Archive under accession [PRJNA1505729](https://www.ncbi.nlm.nih.gov/sra/PRJNA1505729)).
 
@@ -32,6 +32,7 @@ data/
 
 The `demux/` directory contains the output of PacBio's `lima` demultiplexer, which sorts the pooled sequencing run back into 12 separate BAM files (one per barcode) based on the short synthetic DNA tags ligated to each library×bin group before pooling. The `00Samples` file maps each barcode to its sample name (e.g., `bc2055` → `1VH_H`).
 
+> Note: The file 00Samples was lost, as such we regenerated it using the following [script](../regenerate_00Samples.py) using `data/Oct22/Samples.csv`.
 
 **Script:** [`scripts/align_pacbio_reads_Oct22.sh`](../align_pacbio_reads_Oct22.sh)
 
@@ -52,8 +53,6 @@ The pre-computed bam files from Step-1 are located in [data/Oct22](../../data/Oc
 
 In the script [`scripts/process_bams_Oct22.py`](../process_bams_Oct22.py), you will need to replace:
 `../data/scratch/Oct22` with `../data/Oct22`.
-
-
 
 **Script:** `scripts/process_bams_Oct22.py`
 
