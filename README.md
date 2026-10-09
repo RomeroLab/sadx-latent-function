@@ -54,3 +54,9 @@ The model was trained on the full dataset for 400 epochs with learning rate 3e-4
 ## 4. Retrospective Feature Importance
 
 A retrospective ablation study using Codex over model features (DCA, multi-library bias) is documented in [`cv_balanced_accuracy/README.md`](cv_balanced_accuracy/README.md). This analysis uses cross-validated balanced accuracy to explore the contribution of each feature to the final model's performance.
+
+## Citation
+[Extracting Latent Sequence-Function Information from Directed Evolution to Design Improved C-H Azidases](https://doi.org/10.26434/chemrxiv.15009755/v1)  
+Ayantika Ghosh<sup>#</sup>, Sameer D'Costa<sup>#</sup>, Christian A. Gomez<sup>#</sup>, Bryce Johnson, Prajwal Prabhu, Anthony Gitter<sup>+</sup>, Philip A. Romero<sup>+</sup>, and Jared C. Lewis<sup>+</sup>.  
+*ChemRxiv*, 2026.  
+<sup>#+</sup> denote equal contribution.
